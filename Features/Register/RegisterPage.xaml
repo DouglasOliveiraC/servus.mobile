@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Register.RegisterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Register"
+    x:DataType="local:RegisterViewModel"
+    BackgroundColor="#FFFFFF"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28,52,28,28" Spacing="0">
+
+            <!-- Back -->
+            <Label
+                Text="← Voltar"
+                TextColor="#6B7680"
+                FontSize="13"
+                Margin="0,0,0,24">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+
+            <!-- Brand -->
+            <VerticalStackLayout Spacing="2" Margin="0,0,0,32">
+                <Label Text="Criar conta" FontSize="24" FontAttributes="Bold" TextColor="#22282C" />
+                <Label Text="Preencha seus dados para começar" FontSize="13" TextColor="#6B7680" />
+            </VerticalStackLayout>
+
+            <!-- Form -->
+            <VerticalStackLayout Spacing="14">
+
+                <sf:SfTextInputLayout Hint="Nome completo" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                    <Entry
+                        Text="{Binding Name}"
+                        ReturnType="Next" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding NameError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding NameError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                    <Entry
+                        Text="{Binding Email}"
+                        Keyboard="Email"
+                        ReturnType="Next" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding EmailError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                    <Entry
+                        Text="{Binding Password}"
+                        IsPassword="True"
+                        ReturnType="Next" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding PasswordError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding PasswordError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <sf:SfTextInputLayout Hint="Confirmar senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                    <Entry
+                        Text="{Binding ConfirmPassword}"
+                        IsPassword="True"
+                        ReturnType="Done" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding ConfirmPasswordError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding ConfirmPasswordError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <Label
+                    Text="{Binding ServerError}"
+                    TextColor="#B5453F"
+                    FontSize="12.5"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding ServerError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="0,4,0,0" />
+
+                <buttons:SfButton
+                    Text="Criar conta"
+                    Background="#3D6E68"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    Command="{Binding RegisterCommand}"
+                    Margin="0,10,0,0" />
+
+                <ActivityIndicator
+                    IsRunning="{Binding IsBusy}"
+                    IsVisible="{Binding IsBusy}"
+                    Color="#3D6E68"
+                    Margin="0,8,0,0" />
+
+                <Label
+                    FontSize="13"
+                    HorizontalOptions="Center"
+                    Margin="0,20,0,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Label.GestureRecognizers>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Já tem conta? " TextColor="#6B7680" />
+                            <Span Text="Entrar" TextColor="#3D6E68" FontAttributes="Bold" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

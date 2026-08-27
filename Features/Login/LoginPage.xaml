@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Login.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Login"
+    x:DataType="local:LoginViewModel"
+    BackgroundColor="#FFFFFF"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28,0" Spacing="0" VerticalOptions="Center">
+
+            <!-- Brand -->
+            <VerticalStackLayout Spacing="16" Margin="0,0,0,40">
+                <Border
+                    WidthRequest="52"
+                    HeightRequest="52"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="Transparent"
+                    BackgroundColor="#3D6E68"
+                    HorizontalOptions="Start">
+                    <Label
+                        Text="S"
+                        TextColor="White"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Servus" FontSize="24" FontAttributes="Bold" TextColor="#22282C" />
+                    <Label Text="Gestão de escalas e plantões" FontSize="13" TextColor="#6B7680" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Form -->
+            <VerticalStackLayout Spacing="14">
+
+                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                    <Entry
+                        Text="{Binding Email}"
+                        Keyboard="Email"
+                        ReturnType="Next" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding EmailError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                    <Entry
+                        Text="{Binding Password}"
+                        IsPassword="True"
+                        ReturnType="Done" />
+                </sf:SfTextInputLayout>
+                <Label
+                    Text="{Binding PasswordError}"
+                    TextColor="#B5453F"
+                    FontSize="11.5"
+                    IsVisible="{Binding PasswordError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,-8,0,0" />
+
+                <Label
+                    Text="Esqueci minha senha"
+                    TextColor="#3D6E68"
+                    FontSize="12.5"
+                    FontAttributes="Bold"
+                    HorizontalOptions="End"
+                    Margin="0,0,4,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+
+                <Label
+                    Text="{Binding ServerError}"
+                    TextColor="#B5453F"
+                    FontSize="12.5"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding ServerError, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="0,4,0,0" />
+
+                <buttons:SfButton
+                    Text="Entrar"
+                    Background="#3D6E68"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    Command="{Binding LoginCommand}"
+                    Margin="0,10,0,0" />
+
+                <ActivityIndicator
+                    IsRunning="{Binding IsBusy}"
+                    IsVisible="{Binding IsBusy}"
+                    Color="#3D6E68"
+                    Margin="0,8,0,0" />
+
+                <Grid ColumnDefinitions="*,Auto,*" Margin="0,16,0,0" VerticalOptions="Center">
+                    <BoxView Grid.Column="0" HeightRequest="1" Color="#E3E6E5" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="ou" TextColor="#8A9199" FontSize="12" Margin="10,0" />
+                    <BoxView Grid.Column="2" HeightRequest="1" Color="#E3E6E5" VerticalOptions="Center" />
+                </Grid>
+
+                <buttons:SfButton
+                    Text="Entrar com Google"
+                    ImageSource="google_icon.svg"
+                    Background="#F5F6F5"
+                    TextColor="#22282C"
+                    StrokeThickness="0"
+                    CornerRadius="9"
+                    HeightRequest="48"
+                    FontAttributes="None"
+                    Command="{Binding ContinueWithGoogleCommand}"
+                    Margin="0,14,0,0" />
+
+                <Label
+                    FontSize="13"
+                    HorizontalOptions="Center"
+                    Margin="0,20,0,0">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToRegisterCommand}" />
+                    </Label.GestureRecognizers>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Ainda não tem conta? " TextColor="#6B7680" />
+                            <Span Text="Criar conta" TextColor="#3D6E68" FontAttributes="Bold" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

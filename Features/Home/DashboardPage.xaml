@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Home.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Home"
+    x:DataType="local:DashboardViewModel"
+    BackgroundColor="#F4F5F6"
+    Shell.NavBarIsVisible="False">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,52,20,28" Spacing="18">
+
+                <!-- Header -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Olá!" FontSize="22" FontAttributes="Bold" TextColor="#22282C" />
+                        <Label Text="{Binding UserEmail}" FontSize="12.5" TextColor="#6B7680" />
+                    </VerticalStackLayout>
+                    <Label
+                        Grid.Column="1"
+                        Text="Sair"
+                        TextColor="#B5453F"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+
+                <!-- Stat cards -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Border Grid.Column="0" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
+                            <Label Text="Escalas" FontSize="11.5" TextColor="#6B7680" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding SubrosterCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
+                            <Label Text="Subescalas" FontSize="11.5" TextColor="#6B7680" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding MyUpcomingDutyCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
+                            <Label Text="Meus plantões (14d)" FontSize="11.5" TextColor="#6B7680" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Error state -->
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="#FBEAE9"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar seus dados agora. Puxe para atualizar."
+                        TextColor="#B5453F"
+                        FontSize="13" />
+                </Border>
+
+                <!-- Empty state -->
+                <Border
+                    IsVisible="{Binding RosterCount, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Você ainda não participa de nenhuma escala." FontSize="14" FontAttributes="Bold" TextColor="#22282C" />
+                        <Label Text="Peça um código de convite ao administrador da sua unidade." FontSize="12.5" TextColor="#6B7680" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Rosters -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <Label Text="Minhas escalas" FontSize="15" FontAttributes="Bold" TextColor="#22282C" />
+
+                    <CollectionView ItemsSource="{Binding Rosters}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:RosterSummary">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="#22282C" />
+                                            <Label FontSize="12" TextColor="#6B7680">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding SubrosterCount}" />
+                                                        <Span Text=" subescala(s) · " />
+                                                        <Span Text="{Binding UpcomingAssignmentCount}" />
+                                                        <Span Text=" plantão(ões) em 14 dias" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="›"
+                                            FontSize="20"
+                                            TextColor="#6B7680"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Upcoming duties -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding UpcomingDuties.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <Label Text="Próximos plantões" FontSize="15" FontAttributes="Bold" TextColor="#22282C" />
+
+                    <CollectionView ItemsSource="{Binding UpcomingDuties}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:UpcomingDuty">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12">
+                                        <Border
+                                            Grid.Column="0"
+                                            StrokeShape="RoundRectangle 10"
+                                            Stroke="Transparent"
+                                            BackgroundColor="#EAF0EF"
+                                            HeightRequest="56"
+                                            WidthRequest="56">
+                                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                                                <Label
+                                                    Text="{Binding Date, StringFormat='{0:dd}'}"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
+                                                    TextColor="#3D6E68"
+                                                    HorizontalTextAlignment="Center" />
+                                                <Label
+                                                    Text="{Binding Date, StringFormat='{0:MMM}'}"
+                                                    FontSize="10.5"
+                                                    TextColor="#3D6E68"
+                                                    HorizontalTextAlignment="Center" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label FontSize="14" FontAttributes="Bold" TextColor="#22282C">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding SubrosterName}" />
+                                                        <Span Text=" · " TextColor="#6B7680" />
+                                                        <Span Text="{Binding RosterName}" TextColor="#6B7680" FontAttributes="None" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                            <Label
+                                                Text="{Binding MemberNames, Converter={StaticResource StringJoinConverter}}"
+                                                FontSize="12.5"
+                                                TextColor="#6B7680"
+                                                LineBreakMode="TailTruncation" />
+                                        </VerticalStackLayout>
+                                        <Border
+                                            Grid.Column="2"
+                                            IsVisible="{Binding IsMine}"
+                                            StrokeShape="RoundRectangle 8"
+                                            Stroke="Transparent"
+                                            BackgroundColor="#3D6E68"
+                                            Padding="8,4"
+                                            VerticalOptions="Center">
+                                            <Label Text="Eu" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>
