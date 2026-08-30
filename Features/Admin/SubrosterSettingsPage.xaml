@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Admin.SubrosterSettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    x:DataType="local:SubrosterSettingsViewModel"
+    Title="Configurações"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="22">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar as configurações agora."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <!-- Dados gerais -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Dados gerais" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                                <Entry Text="{Binding Name}" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Intervalo mínimo (dias)" ContainerType="Outlined">
+                                <Entry Text="{Binding MinIntervalDays}" Keyboard="Numeric" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Dias de respiro após retorno" ContainerType="Outlined">
+                                <Entry Text="{Binding MinDaysAfterReturnBeforeEligible}" Keyboard="Numeric" />
+                            </sf:SfTextInputLayout>
+                            <Label
+                                Text="Quantos dias após o fim do período fora o membro fica de fora da escala antes de voltar a ser elegível. Se a vez dele já tiver passado nesse meio tempo, ele é priorizado assim que esse respiro terminar."
+                                FontSize="11"
+                                TextColor="{StaticResource Neutral600}" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="Requer aprovação do admin" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding RequiresAdminApproval}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Quartos de serviço -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Quartos de serviço" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                        <VerticalStackLayout Spacing="14">
+                            <Label
+                                Text="{Binding WorkdayShiftSize, StringFormat='Total de vagas: {0} em dias úteis'}"
+                                FontSize="12.5"
+                                TextColor="{StaticResource Neutral600}" />
+                            <Label
+                                Text="{Binding RestDayShiftSize, StringFormat='{0} em folgas/feriados'}"
+                                FontSize="12.5"
+                                TextColor="{StaticResource Neutral600}" />
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Início do dia de serviço" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                <TimePicker Time="{Binding ServiceDayStartTime}" Format="HH:mm" />
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                                    <Label Text="Preencher do turno mais cedo para o mais tarde" FontSize="13.5" TextColor="{StaticResource Neutral900}" />
+                                    <Label Text="Desligado: o primeiro da fila pega o turno mais tarde do dia." FontSize="11" TextColor="{StaticResource Neutral600}" />
+                                </VerticalStackLayout>
+                                <Switch Grid.Column="1" IsToggled="{Binding FillShiftsEarliestFirst}" VerticalOptions="Center" />
+                            </Grid>
+
+                            <BoxView HeightRequest="1" Color="{StaticResource Neutral200}" Margin="0,4" />
+
+                            <CollectionView ItemsSource="{Binding Shifts}">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="local:ServiceShiftEditRow">
+                                        <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource Neutral100}" Padding="12">
+                                            <VerticalStackLayout Spacing="8">
+                                                <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="8">
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="1">
+                                                        <Label Text="Início" FontSize="10.5" TextColor="{StaticResource Neutral600}" />
+                                                        <TimePicker Time="{Binding StartTime}" Format="HH:mm" FontSize="13" />
+                                                    </VerticalStackLayout>
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="1">
+                                                        <Label Text="Fim" FontSize="10.5" TextColor="{StaticResource Neutral600}" />
+                                                        <TimePicker Time="{Binding EndTime}" Format="HH:mm" FontSize="13" />
+                                                    </VerticalStackLayout>
+                                                    <Label
+                                                        Grid.Column="2"
+                                                        Text="Remover"
+                                                        FontSize="11.5"
+                                                        TextColor="{StaticResource Danger}"
+                                                        VerticalOptions="Center">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterSettingsViewModel}}, Path=RemoveShiftCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                                    <sf:SfTextInputLayout Grid.Column="0" Hint="Vagas (dia útil)" ContainerType="Outlined">
+                                                        <Entry Text="{Binding WorkdayCapacity}" Keyboard="Numeric" FontSize="13" />
+                                                    </sf:SfTextInputLayout>
+                                                    <sf:SfTextInputLayout Grid.Column="1" Hint="Vagas (folga)" ContainerType="Outlined">
+                                                        <Entry Text="{Binding RestDayCapacity}" Keyboard="Numeric" FontSize="13" />
+                                                    </sf:SfTextInputLayout>
+                                                </Grid>
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <buttons:SfButton
+                                Text="+ Adicionar quarto de serviço"
+                                Background="{StaticResource Neutral100}"
+                                TextColor="{StaticResource Neutral900}"
+                                CornerRadius="8"
+                                HeightRequest="40"
+                                FontSize="12.5"
+                                Command="{Binding AddShiftCommand}" />
+
+                            <buttons:SfButton
+                                Text="Salvar"
+                                Background="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                CornerRadius="9"
+                                HeightRequest="44"
+                                FontAttributes="Bold"
+                                Command="{Binding SaveCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Zona de risco -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Excluir escala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource DangerBorder}" BackgroundColor="{StaticResource DangerSurface}" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                Text="Excluir esta escala remove permanentemente seus membros, acessos e histórico de plantões associados."
+                                FontSize="12.5"
+                                TextColor="{StaticResource DangerStrong}" />
+                            <buttons:SfButton
+                                Text="Excluir escala"
+                                Background="{StaticResource Danger}"
+                                TextColor="White"
+                                CornerRadius="9"
+                                HeightRequest="44"
+                                FontAttributes="Bold"
+                                Command="{Binding DeleteSubrosterCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

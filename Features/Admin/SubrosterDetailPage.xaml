@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Admin.SubrosterDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    xmlns:controls="clr-namespace:Servus.Mobile.Controls"
+    x:DataType="local:SubrosterDetailViewModel"
+    Title="{Binding SubrosterName}"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Configurações" Command="{Binding OpenSettingsCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="22">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar os dados da escala agora."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <!-- Membros -->
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                            <Label Text="Fila desta escala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Label Text="A ordem abaixo define quem é escalado primeiro." FontSize="11" TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                        <buttons:SfButton
+                            Grid.Column="1"
+                            Text="Adicionar"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="36"
+                            FontSize="12.5"
+                            Command="{Binding ToggleAddMemberFormCommand}" />
+                    </Grid>
+
+                    <Border
+                        IsVisible="{Binding IsAddMemberFormVisible}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <sf:SfTextInputLayout Hint="Posição" ContainerType="Outlined">
+                                <Entry Text="{Binding NewMemberPosition}" Keyboard="Numeric" />
+                            </sf:SfTextInputLayout>
+                            <controls:MemberSearchPicker
+                                Hint="Buscar membro"
+                                SearchText="{Binding MemberSearchText}"
+                                Results="{Binding MemberSearchResults}"
+                                SelectCommand="{Binding AddMemberCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        IsVisible="{Binding Members.Count, Converter={StaticResource IntIsZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="16">
+                        <Label Text="Nenhum membro nesta escala." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                    </Border>
+
+                    <CollectionView ItemsSource="{Binding Members}" IsVisible="{Binding Members.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:SubrosterMemberRow">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem
+                                                Text="Remover"
+                                                BackgroundColor="{StaticResource Danger}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterDetailViewModel}}, Path=RemoveMemberCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" Padding="8,4" Margin="0,0,10,0">
+                                                <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                            </Border>
+                                            <Label Grid.Column="1" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Gerar plantões -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Gerar plantões" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Label Text="De" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                    <DatePicker Date="{Binding GenerateFrom}" Format="dd/MM/yyyy" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Até" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                    <DatePicker Date="{Binding GenerateTo}" Format="dd/MM/yyyy" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <buttons:SfButton
+                                Text="Gerar plantões"
+                                Background="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                CornerRadius="9"
+                                HeightRequest="44"
+                                FontAttributes="Bold"
+                                Command="{Binding GenerateScheduleCommand}" />
+                            <Label
+                                Text="{Binding GenerateResultMessage}"
+                                IsVisible="{Binding GenerateResultMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                                FontSize="12.5"
+                                TextColor="{StaticResource BrandPrimary}" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <buttons:SfButton
+                                    Grid.Column="0"
+                                    Text="Ver quadro completo"
+                                    Background="{StaticResource Neutral100}"
+                                    TextColor="{StaticResource Neutral900}"
+                                    CornerRadius="8"
+                                    HeightRequest="40"
+                                    FontSize="12.5"
+                                    Command="{Binding ViewScheduleCommand}" />
+                                <buttons:SfButton
+                                    Grid.Column="1"
+                                    Text="Histórico de trocas"
+                                    Background="{StaticResource Neutral100}"
+                                    TextColor="{StaticResource Neutral900}"
+                                    CornerRadius="8"
+                                    HeightRequest="40"
+                                    FontSize="12.5"
+                                    Command="{Binding ViewSwapHistoryCommand}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Contagem de plantões -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Contagem de plantões" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Border
+                        IsVisible="{Binding DutyCounts.Count, Converter={StaticResource IntIsZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="16">
+                        <Label Text="Sem dados de plantões ainda." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                    </Border>
+                    <CollectionView ItemsSource="{Binding DutyCounts}" IsVisible="{Binding DutyCounts.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:MemberDutyCountDto">
+                                <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding AssignmentCount}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Acessos -->
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Acessos de gestão" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                        <buttons:SfButton
+                            Grid.Column="1"
+                            Text="Conceder"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="36"
+                            FontSize="12.5"
+                            Command="{Binding ToggleGrantAccessFormCommand}" />
+                    </Grid>
+
+                    <Border
+                        IsVisible="{Binding IsGrantAccessFormVisible}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="Administrador completo" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                <Switch Grid.Column="1" IsToggled="{Binding NewAccessIsFullAdmin}" />
+                            </Grid>
+                            <controls:MemberSearchPicker
+                                Hint="Buscar membro"
+                                SearchText="{Binding AccessSearchText}"
+                                Results="{Binding AccessSearchResults}"
+                                SelectCommand="{Binding GrantAccessCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border
+                        IsVisible="{Binding Accesses.Count, Converter={StaticResource IntIsZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="16">
+                        <Label Text="Nenhum acesso concedido." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                    </Border>
+
+                    <CollectionView ItemsSource="{Binding Accesses}" IsVisible="{Binding Accesses.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="local:SubrosterAccessRow">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem
+                                                Text="Revogar"
+                                                BackgroundColor="{StaticResource Danger}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterDetailViewModel}}, Path=RevokeAccessCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="Admin completo"
+                                                IsVisible="{Binding IsFullAdmin}"
+                                                FontSize="11"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource BrandPrimary}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

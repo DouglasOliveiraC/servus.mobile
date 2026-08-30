@@ -14,6 +14,7 @@ public partial class RegisterPage : ContentPage
 
     private async void OnRegisterSucceeded(object? sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//MainPage");
+        await Shell.Current.DisplayAlert("Conta criada", "Sua conta foi criada. Entre com o e-mail e a senha que você acabou de definir.", "OK");
+        await Shell.Current.GoToAsync("..");
     }
 }

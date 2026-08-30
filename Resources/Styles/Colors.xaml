@@ -1,44 +1,64 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
-<ResourceDictionary 
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
-    <Color x:Key="Primary">#512BD4</Color>
-    <Color x:Key="PrimaryDark">#ac99ea</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#DFD8F7</Color>
-    <Color x:Key="SecondaryDarkText">#9880e5</Color>
-    <Color x:Key="Tertiary">#2B0B98</Color>
+    <!--
+    Design system do Servus. Paleta "Azul Naval" — trocada a partir do verde institucional
+    original por ser mais reconhecível como identidade institucional/hierárquica (farda,
+    plantão, corporação) sem perder sobriedade. Este arquivo centraliza os tokens usados
+    pelas 16 telas de feature.
+    -->
+
+    <!-- ===== Brand (azul naval) ===== -->
+    <Color x:Key="BrandPrimary">#1F3A5F</Color>
+    <Color x:Key="BrandPrimaryDark">#152943</Color>
+    <Color x:Key="BrandSurface">#E7ECF2</Color>
+    <Color x:Key="BrandSurfaceStrong">#C3D0DD</Color>
+    <Color x:Key="BrandBorder">#D9E1EA</Color>
+    <Color x:Key="BrandSurfaceSubtle">#F5F7FA</Color>
+    <Color x:Key="BrandOnPrimarySubtle">#C7D4E1</Color>
+    <Color x:Key="BrandOnPrimaryMuted">#5A7A9C</Color>
+
+    <!-- ===== Neutros (escala azulada usada para texto/superfícies) ===== -->
+    <Color x:Key="Neutral900">#22282C</Color>
+    <Color x:Key="Neutral700">#5A6B67</Color>
+    <Color x:Key="Neutral600">#6B7680</Color>
+    <Color x:Key="Neutral500">#8A9199</Color>
+    <Color x:Key="Neutral400">#8A9490</Color>
+    <Color x:Key="Neutral200">#E3E6E5</Color>
+    <Color x:Key="Neutral200Alt">#E6E9E8</Color>
+    <Color x:Key="Neutral100">#F4F5F6</Color>
+    <Color x:Key="Neutral100Alt">#F0F2F1</Color>
+    <Color x:Key="Neutral50">#FBFBFB</Color>
+    <Color x:Key="Neutral50Alt">#FCFDFC</Color>
+    <Color x:Key="Neutral50Alt2">#FAFBFA</Color>
+
+    <!-- ===== Estado: perigo / destrutivo ===== -->
+    <Color x:Key="Danger">#B5453F</Color>
+    <Color x:Key="DangerStrong">#8A3630</Color>
+    <Color x:Key="DangerSurface">#FBEAE9</Color>
+    <Color x:Key="DangerBorder">#F0CFCD</Color>
+
+    <!-- ===== Estado: alerta / pendente ===== -->
+    <Color x:Key="Warning">#8A6A1F</Color>
+    <Color x:Key="WarningSurface">#F3D9A6</Color>
+
+    <!-- ===== Estado: sucesso / positivo (independente do BrandPrimary) ===== -->
+    <Color x:Key="Success">#3D6E68</Color>
+    <Color x:Key="SuccessStrong">#2C534F</Color>
+
+    <!-- ===== Categórico (indicadores de carga/heatmap) ===== -->
+    <Color x:Key="AccentOrange">#D98C3B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#190649</Color>
     <Color x:Key="OffBlack">#1f1f1f</Color>
 
-    <Color x:Key="Gray100">#E1E1E1</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray400">#919191</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
-
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="{StaticResource BrandPrimary}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
-
-    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
-    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
-    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
 </ResourceDictionary>

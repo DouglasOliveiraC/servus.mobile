@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Members.MemberDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:inputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+    xmlns:expander="clr-namespace:Syncfusion.Maui.Expander;assembly=Syncfusion.Maui.Expander"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Members"
+    x:DataType="local:MemberDetailViewModel"
+    Title="{Binding Name}"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <Style x:Key="SectionCard" TargetType="Border">
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="Stroke" Value="Transparent" />
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style x:Key="SectionTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral900}" />
+        </Style>
+        <Style x:Key="SectionHint" TargetType="Label">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral600}" />
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="buttons:SfButton">
+            <Setter Property="Background" Value="{StaticResource BrandPrimary}" />
+            <Setter Property="TextColor" Value="White" />
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="HeightRequest" Value="44" />
+            <Setter Property="FontAttributes" Value="Bold" />
+        </Style>
+        <Style x:Key="SubtleButton" TargetType="buttons:SfButton">
+            <Setter Property="Background" Value="{StaticResource Neutral100Alt}" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral900}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="HeightRequest" Value="38" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
+    </ContentPage.Resources>
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="18,14,18,32" Spacing="14">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar os dados deste membro agora."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <!-- Cabeçalho -->
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" Padding="18">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding Name}" FontSize="21" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="{Binding MemberSince}" FontSize="11.5" TextColor="{StaticResource BrandOnPrimarySubtle}" />
+                        <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                            <Border
+                                IsVisible="{Binding IsLinkedToAccount}"
+                                StrokeShape="RoundRectangle 20"
+                                Stroke="Transparent"
+                                BackgroundColor="{StaticResource BrandOnPrimaryMuted}"
+                                Padding="10,4">
+                                <Label Text="Conta vinculada" FontSize="10.5" FontAttributes="Bold" TextColor="White" />
+                            </Border>
+                            <Border
+                                StrokeShape="RoundRectangle 20"
+                                Stroke="Transparent"
+                                BackgroundColor="{StaticResource BrandOnPrimaryMuted}"
+                                Padding="10,4">
+                                <Label Text="{Binding MembershipsSummary}" FontSize="10.5" TextColor="White" />
+                            </Border>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Dados pessoais -->
+                <expander:SfExpander IsExpanded="True" BackgroundColor="White" HeaderBackground="White">
+                    <expander:SfExpander.Header>
+                        <Grid Padding="16,14" ColumnDefinitions="*">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Dados pessoais" Style="{StaticResource SectionTitle}" />
+                                <Label Text="Nome, e-mail e telefone" Style="{StaticResource SectionHint}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </expander:SfExpander.Header>
+                    <expander:SfExpander.Content>
+                        <VerticalStackLayout Padding="16,0,16,16" Spacing="10">
+                            <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                                <Entry Text="{Binding Name}" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="E-mail (opcional)" ContainerType="Outlined">
+                                <Entry Text="{Binding Email}" Keyboard="Email" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Telefone (opcional)" ContainerType="Outlined">
+                                <Entry Text="{Binding Phone}" Keyboard="Telephone" />
+                            </sf:SfTextInputLayout>
+                            <buttons:SfButton
+                                Style="{StaticResource PrimaryButton}"
+                                Text="Salvar dados"
+                                Command="{Binding SaveCommand}" />
+                        </VerticalStackLayout>
+                    </expander:SfExpander.Content>
+                </expander:SfExpander>
+
+                <!-- Escalas -->
+                <Border Style="{StaticResource SectionCard}">
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Escalas deste membro" Style="{StaticResource SectionTitle}" />
+                            <Label
+                                Text="Cada escala é uma fila própria: a posição, o rodízio e as permissões valem só ali dentro."
+                                Style="{StaticResource SectionHint}" />
+                        </VerticalStackLayout>
+
+                        <Border
+                            IsVisible="{Binding Memberships.Count, Converter={StaticResource IntIsZeroConverter}}"
+                            StrokeShape="RoundRectangle 10"
+                            Stroke="{StaticResource Neutral200}"
+                            BackgroundColor="{StaticResource Neutral50Alt2}"
+                            Padding="14">
+                            <Label
+                                Text="Este membro ainda não está em nenhuma escala. Adicione-o a uma abaixo para que ele entre no rodízio de plantões."
+                                FontSize="12.5"
+                                TextColor="{StaticResource Neutral600}" />
+                        </Border>
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Memberships}" Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:MembershipRow">
+                                    <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200Alt}" BackgroundColor="{StaticResource Neutral50Alt}" Padding="14">
+                                        <VerticalStackLayout Spacing="10">
+
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                    <Label Text="{Binding RosterName}" FontSize="10.5" FontAttributes="Bold" TextColor="{StaticResource Neutral400}" />
+                                                    <Label Text="{Binding SubrosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                </VerticalStackLayout>
+                                                <Border
+                                                    Grid.Column="1"
+                                                    StrokeShape="RoundRectangle 20"
+                                                    Stroke="Transparent"
+                                                    BackgroundColor="{StaticResource BrandSurface}"
+                                                    Padding="12,6"
+                                                    VerticalOptions="Center">
+                                                    <Label Text="{Binding PositionLabel}" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                                </Border>
+                                            </Grid>
+
+                                            <Border
+                                                StrokeShape="RoundRectangle 20"
+                                                Stroke="Transparent"
+                                                BackgroundColor="{StaticResource Neutral100Alt}"
+                                                Padding="10,4"
+                                                HorizontalOptions="Start">
+                                                <Label Text="{Binding AccessLabel}" FontSize="10.5" TextColor="{StaticResource Neutral600}" />
+                                            </Border>
+
+                                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                                                <buttons:SfButton
+                                                    Grid.Row="0" Grid.Column="0"
+                                                    Style="{StaticResource SubtleButton}"
+                                                    Text="Mudar posição"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=ChangePositionCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                                <buttons:SfButton
+                                                    Grid.Row="0" Grid.Column="1"
+                                                    Style="{StaticResource SubtleButton}"
+                                                    Text="{Binding AccessActionLabel}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=ToggleAccessCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                                <buttons:SfButton
+                                                    Grid.Row="1" Grid.Column="0"
+                                                    Style="{StaticResource SubtleButton}"
+                                                    Text="Abrir escala"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=OpenSubrosterCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                                <buttons:SfButton
+                                                    Grid.Row="1" Grid.Column="1"
+                                                    Style="{StaticResource SubtleButton}"
+                                                    Background="{StaticResource DangerSurface}"
+                                                    TextColor="{StaticResource Danger}"
+                                                    Text="Sair da escala"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=RemoveMembershipCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Grid>
+
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <buttons:SfButton
+                            Style="{StaticResource SubtleButton}"
+                            HeightRequest="42"
+                            Text="+ Adicionar a uma escala"
+                            FontAttributes="Bold"
+                            Command="{Binding ToggleAddMembershipFormCommand}" />
+
+                        <Border
+                            IsVisible="{Binding IsAddMembershipFormVisible}"
+                            StrokeShape="RoundRectangle 12"
+                            Stroke="{StaticResource BrandBorder}"
+                            BackgroundColor="{StaticResource BrandSurfaceSubtle}"
+                            Padding="14">
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="Adicionar a uma escala" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                <Label
+                                    Text="Escolha primeiro a organização; as escalas em que o membro já está não aparecem na lista."
+                                    Style="{StaticResource SectionHint}" />
+
+                                <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
+                                    <inputs:SfComboBox
+                                        ItemsSource="{Binding Rosters}"
+                                        DisplayMemberPath="Name"
+                                        SelectedItem="{Binding SelectedRoster}" />
+                                </sf:SfTextInputLayout>
+
+                                <sf:SfTextInputLayout
+                                    Hint="Escala"
+                                    ContainerType="Outlined"
+                                    IsEnabled="{Binding SelectedRoster, Converter={StaticResource IsNotNullConverter}}">
+                                    <inputs:SfComboBox
+                                        ItemsSource="{Binding AvailableSubrosters}"
+                                        DisplayMemberPath="Name"
+                                        SelectedItem="{Binding SelectedSubroster}" />
+                                </sf:SfTextInputLayout>
+
+                                <sf:SfTextInputLayout
+                                    Hint="Posição na fila (vazio = fim da fila)"
+                                    ContainerType="Outlined">
+                                    <Entry Text="{Binding NewMembershipPosition}" Keyboard="Numeric" />
+                                </sf:SfTextInputLayout>
+
+                                <buttons:SfButton
+                                    Style="{StaticResource PrimaryButton}"
+                                    Text="Adicionar"
+                                    Command="{Binding AddMembershipCommand}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Ausências -->
+                <expander:SfExpander BackgroundColor="White" HeaderBackground="White">
+                    <expander:SfExpander.Header>
+                        <Grid Padding="16,14" ColumnDefinitions="*">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Ausências" Style="{StaticResource SectionTitle}" />
+                                <Label
+                                    Text="Períodos em que o membro não pode ser escalado em nenhuma escala"
+                                    Style="{StaticResource SectionHint}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </expander:SfExpander.Header>
+                    <expander:SfExpander.Content>
+                        <VerticalStackLayout Padding="16,0,16,16" Spacing="10">
+
+                            <Label
+                                IsVisible="{Binding Unavailabilities.Count, Converter={StaticResource IntIsZeroConverter}}"
+                                Text="Nenhuma ausência registrada."
+                                Style="{StaticResource SectionHint}" />
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Unavailabilities}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:UnavailabilityRow">
+                                        <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource Neutral200Alt}" BackgroundColor="{StaticResource Neutral50Alt}" Padding="12">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                                    <Label Text="{Binding Period}" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                    <Label Text="{Binding Status}" FontSize="11" TextColor="{StaticResource Neutral600}" />
+                                                </VerticalStackLayout>
+                                                <buttons:SfButton
+                                                    Grid.Column="1"
+                                                    Style="{StaticResource SubtleButton}"
+                                                    Background="{StaticResource DangerSurface}"
+                                                    TextColor="{StaticResource Danger}"
+                                                    WidthRequest="96"
+                                                    Text="Remover"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=RemoveUnavailabilityCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <buttons:SfButton
+                                Style="{StaticResource SubtleButton}"
+                                HeightRequest="42"
+                                Text="+ Registrar ausência"
+                                FontAttributes="Bold"
+                                Command="{Binding ToggleAddUnavailabilityFormCommand}" />
+
+                            <Border
+                                IsVisible="{Binding IsAddUnavailabilityFormVisible}"
+                                StrokeShape="RoundRectangle 12"
+                                Stroke="{StaticResource BrandBorder}"
+                                BackgroundColor="{StaticResource BrandSurfaceSubtle}"
+                                Padding="14">
+                                <VerticalStackLayout Spacing="10">
+                                    <sf:SfTextInputLayout Hint="Início" ContainerType="Outlined">
+                                        <DatePicker Date="{Binding UnavailabilityStart}" Format="dd/MM/yyyy" />
+                                    </sf:SfTextInputLayout>
+                                    <sf:SfTextInputLayout Hint="Fim" ContainerType="Outlined">
+                                        <DatePicker Date="{Binding UnavailabilityEnd}" Format="dd/MM/yyyy" />
+                                    </sf:SfTextInputLayout>
+                                    <buttons:SfButton
+                                        Style="{StaticResource PrimaryButton}"
+                                        Text="Registrar"
+                                        Command="{Binding AddUnavailabilityCommand}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </expander:SfExpander.Content>
+                </expander:SfExpander>
+
+                <!-- Código de vinculação -->
+                <expander:SfExpander BackgroundColor="White" HeaderBackground="White">
+                    <expander:SfExpander.Header>
+                        <Grid Padding="16,14" ColumnDefinitions="*">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Código de vinculação" Style="{StaticResource SectionTitle}" />
+                                <Label Text="Deixa a pessoa assumir este membro com a própria conta" Style="{StaticResource SectionHint}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </expander:SfExpander.Header>
+                    <expander:SfExpander.Content>
+                        <VerticalStackLayout Padding="16,0,16,16" Spacing="10">
+                            <Label
+                                Text="Ao usar o código, a pessoa passa a ver tudo que já foi registrado neste membro, incluindo o histórico de plantões."
+                                Style="{StaticResource SectionHint}" />
+                            <buttons:SfButton
+                                Style="{StaticResource SubtleButton}"
+                                HeightRequest="42"
+                                Text="Gerar código"
+                                Command="{Binding GenerateClaimCodeCommand}" />
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                IsVisible="{Binding GeneratedClaimCode, Converter={StaticResource StringNotEmptyConverter}}"
+                                ColumnSpacing="8">
+                                <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Stroke="{StaticResource Neutral200}" BackgroundColor="{StaticResource Neutral100}" Padding="10,8">
+                                    <Label Text="{Binding GeneratedClaimCode}" FontSize="13" FontFamily="OpenSansSemibold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                </Border>
+                                <buttons:SfButton
+                                    Grid.Column="1"
+                                    Style="{StaticResource PrimaryButton}"
+                                    HeightRequest="40"
+                                    WidthRequest="96"
+                                    FontSize="13"
+                                    Text="Copiar"
+                                    Command="{Binding CopyClaimCodeCommand}" />
+                            </Grid>
+
+                            <Label
+                                Text="{Binding ClaimCodeStatusMessage}"
+                                IsVisible="{Binding ClaimCodeStatusMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                                FontSize="11.5"
+                                TextColor="{StaticResource BrandPrimary}" />
+                        </VerticalStackLayout>
+                    </expander:SfExpander.Content>
+                </expander:SfExpander>
+
+                <!-- Zona de risco -->
+                <Border StrokeShape="RoundRectangle 14" Stroke="{StaticResource DangerBorder}" BackgroundColor="{StaticResource DangerSurface}" Padding="16">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Excluir membro" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                        <Label
+                            Text="Remove a pessoa de todas as escalas e apaga seu histórico de plantões. Não pode ser desfeito."
+                            FontSize="12"
+                            TextColor="{StaticResource DangerStrong}" />
+                        <buttons:SfButton
+                            Background="{StaticResource Danger}"
+                            TextColor="White"
+                            CornerRadius="9"
+                            HeightRequest="44"
+                            FontAttributes="Bold"
+                            Text="Excluir membro"
+                            Command="{Binding DeleteMemberCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

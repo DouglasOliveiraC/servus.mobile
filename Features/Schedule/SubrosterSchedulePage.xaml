@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Schedule.SubrosterSchedulePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Schedule"
+    xmlns:rosters="clr-namespace:Servus.Mobile.Services.Rosters"
+    x:DataType="local:SubrosterScheduleViewModel"
+    Title="Quadro de plantões"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
+
+                <Label Text="{Binding SubrosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label Text="Não foi possível carregar os plantões agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="De" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                            <DatePicker Date="{Binding FromDate}" Format="dd/MM/yyyy" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Até" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                            <DatePicker Date="{Binding ToDate}" Format="dd/MM/yyyy" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Border
+                    IsVisible="{Binding SummaryText, Converter={StaticResource StringNotEmptyConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource BrandSurface}"
+                    Padding="12">
+                    <Label Text="{Binding SummaryText}" FontSize="12.5" TextColor="{StaticResource BrandPrimary}" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding SelectionHint, Converter={StaticResource StringNotEmptyConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource WarningSurface}"
+                    Padding="12">
+                    <Label Text="{Binding SelectionHint}" FontSize="12.5" TextColor="{StaticResource Warning}" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding Days.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <Label Text="Nenhum plantão encontrado no período." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+
+                <CollectionView ItemsSource="{Binding Days}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="rosters:ScheduleDayDto">
+                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:dddd, dd/MM/yyyy}'}" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        <Border
+                                            Grid.Column="1"
+                                            IsVisible="{Binding IsRestDay}"
+                                            StrokeShape="RoundRectangle 8"
+                                            Stroke="Transparent"
+                                            BackgroundColor="{StaticResource BrandSurface}"
+                                            Padding="8,3">
+                                            <Label Text="Folga/feriado" TextColor="{StaticResource BrandPrimary}" FontSize="11" FontAttributes="Bold" />
+                                        </Border>
+                                    </Grid>
+
+                                    <CollectionView ItemsSource="{Binding Assignments}">
+                                        <CollectionView.ItemsLayout>
+                                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="rosters:ScheduleAssignmentDto">
+                                                <Grid ColumnDefinitions="*,Auto" Padding="0,2">
+                                                    <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                                    <Label
+                                                        Grid.Column="1"
+                                                        Text="Trocar"
+                                                        FontSize="12"
+                                                        FontAttributes="Bold"
+                                                        TextColor="{StaticResource BrandPrimary}"
+                                                        VerticalOptions="Center">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding SelectAssignmentCommand, Source={RelativeSource AncestorType={x:Type local:SubrosterScheduleViewModel}}}" CommandParameter="{Binding .}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

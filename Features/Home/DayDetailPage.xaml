@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Home.DayDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Home"
+    x:DataType="local:DayDetailViewModel"
+    Title="Plantões do dia"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
+
+                <Label Text="{Binding DateLabel}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label Text="Não foi possível carregar os plantões deste dia agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding Groups.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <Label Text="Nenhum plantão neste dia." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+
+                <CollectionView ItemsSource="{Binding Groups}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:DaySubrosterGroup">
+                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayDetailViewModel}}, Path=OpenEditCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="1">
+                                            <Label Text="{Binding SubrosterName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label Text="{Binding RosterName}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                        </VerticalStackLayout>
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="Editar"
+                                            FontSize="12.5"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource BrandPrimary}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+
+                                    <CollectionView ItemsSource="{Binding MemberNames}">
+                                        <CollectionView.ItemsLayout>
+                                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Label Text="{Binding .}" FontSize="13" TextColor="{StaticResource Neutral900}" Padding="0,2" />
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

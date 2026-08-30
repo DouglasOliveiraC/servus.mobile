@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Profile.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Profile"
+    x:DataType="local:ProfileViewModel"
+    Title="Perfil"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="18">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label Text="Não foi possível carregar seu perfil agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding Email}" FontSize="13" TextColor="{StaticResource Neutral600}" />
+                        <sf:SfTextInputLayout Hint="Nome de exibição" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                            <Entry Text="{Binding DisplayName}" />
+                        </sf:SfTextInputLayout>
+                        <Label
+                            Text="{Binding DisplayNameMessage}"
+                            FontSize="12"
+                            TextColor="{StaticResource BrandPrimary}"
+                            IsVisible="{Binding DisplayNameMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+                        <buttons:SfButton
+                            Text="Salvar"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="9"
+                            HeightRequest="42"
+                            Command="{Binding SaveDisplayNameCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Membro vinculado" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label
+                            Text="{Binding LinkedMemberName}"
+                            FontSize="13"
+                            TextColor="{StaticResource Neutral600}"
+                            IsVisible="{Binding LinkedMemberName, Converter={StaticResource StringNotEmptyConverter}}" />
+                        <Label
+                            Text="Nenhum membro vinculado — use um código de convite para entrar em uma organização."
+                            FontSize="12.5"
+                            TextColor="{StaticResource Neutral600}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding LinkedMemberName, Converter={StaticResource StringNotEmptyConverter}}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <VerticalStackLayout Spacing="10">
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Alterar e-mail" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="{Binding IsChangeEmailExpanded, Converter={StaticResource ChevronConverter}}"
+                                FontSize="16"
+                                TextColor="{StaticResource Neutral600}"
+                                VerticalOptions="Center" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleChangeEmailCommand}" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="10" IsVisible="{Binding IsChangeEmailExpanded}">
+                            <sf:SfTextInputLayout Hint="Novo e-mail" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                                <Entry Text="{Binding NewEmail}" Keyboard="Email" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Senha atual" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                                <Entry Text="{Binding EmailChangePassword}" IsPassword="True" />
+                            </sf:SfTextInputLayout>
+
+                            <Label
+                                Text="{Binding EmailChangeMessage}"
+                                FontSize="12"
+                                TextColor="{StaticResource BrandPrimary}"
+                                IsVisible="{Binding EmailChangeMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                            <buttons:SfButton
+                                Text="Enviar confirmação"
+                                Background="{StaticResource Neutral100}"
+                                TextColor="{StaticResource Neutral900}"
+                                CornerRadius="9"
+                                HeightRequest="42"
+                                Command="{Binding RequestEmailChangeCommand}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <VerticalStackLayout Spacing="10">
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Alterar senha" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="{Binding IsChangePasswordExpanded, Converter={StaticResource ChevronConverter}}"
+                                FontSize="16"
+                                TextColor="{StaticResource Neutral600}"
+                                VerticalOptions="Center" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleChangePasswordCommand}" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="10" IsVisible="{Binding IsChangePasswordExpanded}">
+                            <sf:SfTextInputLayout Hint="Senha atual" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                                <Entry Text="{Binding CurrentPassword}" IsPassword="True" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Nova senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                                <Entry Text="{Binding NewPassword}" IsPassword="True" />
+                            </sf:SfTextInputLayout>
+                            <sf:SfTextInputLayout Hint="Confirmar nova senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                                <Entry Text="{Binding ConfirmNewPassword}" IsPassword="True" />
+                            </sf:SfTextInputLayout>
+
+                            <Label
+                                Text="{Binding PasswordMessage}"
+                                FontSize="12"
+                                TextColor="{StaticResource BrandPrimary}"
+                                IsVisible="{Binding PasswordMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                            <buttons:SfButton
+                                Text="Salvar nova senha"
+                                Background="{StaticResource Neutral100}"
+                                TextColor="{StaticResource Neutral900}"
+                                CornerRadius="9"
+                                HeightRequest="42"
+                                Command="{Binding ChangePasswordCommand}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <buttons:SfButton
+                    Text="Sair"
+                    Background="{StaticResource DangerSurface}"
+                    TextColor="{StaticResource Danger}"
+                    CornerRadius="9"
+                    HeightRequest="44"
+                    FontAttributes="Bold"
+                    Command="{Binding LogoutCommand}" />
+
+                <!-- Zona de risco -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Excluir conta" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                    <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource DangerBorder}" BackgroundColor="{StaticResource DangerSurface}" Padding="16">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                Text="Excluir sua conta é permanente e não pode ser desfeito. Seu cadastro de membro em organizações não é apagado."
+                                FontSize="12.5"
+                                TextColor="{StaticResource DangerStrong}" />
+                            <buttons:SfButton
+                                Text="Excluir conta"
+                                Background="{StaticResource Danger}"
+                                TextColor="White"
+                                CornerRadius="9"
+                                HeightRequest="44"
+                                FontAttributes="Bold"
+                                Command="{Binding DeleteAccountCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

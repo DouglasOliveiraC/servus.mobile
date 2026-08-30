@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.JoinRoster.JoinRosterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.JoinRoster"
+    x:DataType="local:JoinRosterViewModel"
+    Title="Entrar em organização"
+    BackgroundColor="{StaticResource White}"
+    Shell.NavBarIsVisible="True">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28,40,28,0" Spacing="0">
+
+            <VerticalStackLayout Spacing="6" Margin="0,0,0,28">
+                <Label Text="Entrar em uma organização" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Label Text="Informe o código de convite recebido do administrador da sua unidade." FontSize="13" TextColor="{StaticResource Neutral600}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="14">
+                <sf:SfTextInputLayout Hint="Código de convite" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                    <Entry Text="{Binding Code}" ReturnType="Done" />
+                </sf:SfTextInputLayout>
+
+                <Label
+                    Text="{Binding ServerError}"
+                    TextColor="{StaticResource Danger}"
+                    FontSize="12.5"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding ServerError, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                <Label
+                    Text="{Binding SuccessMessage}"
+                    TextColor="{StaticResource BrandPrimary}"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    IsVisible="{Binding SuccessMessage, Converter={StaticResource StringNotEmptyConverter}}" />
+
+                <buttons:SfButton
+                    Text="Entrar"
+                    Background="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    Command="{Binding JoinCommand}"
+                    Margin="0,10,0,0" />
+
+                <ActivityIndicator
+                    IsRunning="{Binding IsBusy}"
+                    IsVisible="{Binding IsBusy}"
+                    Color="{StaticResource BrandPrimary}"
+                    Margin="0,8,0,0" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

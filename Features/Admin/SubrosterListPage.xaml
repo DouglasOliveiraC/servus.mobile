@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Admin.SubrosterListPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    x:DataType="local:SubrosterListViewModel"
+    Title="{Binding RosterName}"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="16">
+
+                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" Padding="14">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Escalas desta organização" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                        <Label
+                            Text="Cada escala é uma fila independente de plantões, com seus próprios membros, ordem e regras de rodízio."
+                            FontSize="11.5"
+                            TextColor="{StaticResource Neutral700}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <buttons:SfButton
+                    Text="+ Nova escala"
+                    Background="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="46"
+                    FontAttributes="Bold"
+                    Command="{Binding ToggleFormCommand}" />
+
+                <Border
+                    IsVisible="{Binding IsFormVisible}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <VerticalStackLayout Spacing="10">
+                        <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                            <Entry Text="{Binding NewName}" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="Intervalo mínimo (dias)" ContainerType="Outlined">
+                            <Entry Text="{Binding NewMinIntervalDays}" Keyboard="Numeric" />
+                        </sf:SfTextInputLayout>
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Início do dia de serviço" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                            <TimePicker Time="{Binding NewServiceDayStartTime}" Format="HH:mm" />
+                            <Label
+                                Text="Os turnos padrão (seis quartos de 4h) são gerados a partir deste horário — ajuste a quantidade e duração depois em Configurações."
+                                FontSize="11"
+                                TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                        <sf:SfTextInputLayout Hint="Dias de respiro após retorno" ContainerType="Outlined">
+                            <Entry Text="{Binding NewMinDaysAfterReturnBeforeEligible}" Keyboard="Numeric" />
+                        </sf:SfTextInputLayout>
+                        <Label
+                            Text="Quantos dias após o fim do período fora o membro fica de fora da escala antes de voltar a ser elegível. Se a vez dele já tiver passado nesse meio tempo, ele é priorizado assim que esse respiro terminar."
+                            FontSize="11"
+                            TextColor="{StaticResource Neutral600}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Requer aprovação do admin" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding NewRequiresAdminApproval}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Neutral200}" Margin="0,4" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Você entra na fila de plantões?" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                <Label Text="Gerenciar a escala não te coloca automaticamente na fila de plantões." FontSize="11" TextColor="{StaticResource Neutral600}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding NewCreatorIsMember}" VerticalOptions="Center" />
+                        </Grid>
+
+                        <buttons:SfButton
+                            Text="Criar"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="9"
+                            HeightRequest="44"
+                            FontAttributes="Bold"
+                            Command="{Binding CreateSubrosterCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar as escalas agora."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding Subrosters.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <Label Text="Nenhuma escala criada ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                </Border>
+
+                <CollectionView ItemsSource="{Binding Subrosters}" IsVisible="{Binding Subrosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:SubrosterDto">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem
+                                            Text="Excluir"
+                                            BackgroundColor="{StaticResource Danger}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterListViewModel}}, Path=DeleteSubrosterCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterListViewModel}}, Path=OpenSubrosterCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label FontSize="12" TextColor="{StaticResource Neutral600}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="Intervalo mín. " />
+                                                        <Span Text="{Binding MinIntervalDays}" />
+                                                        <Span Text="d · turno " />
+                                                        <Span Text="{Binding WorkdayShiftSize}" />
+                                                        <Span Text="/" />
+                                                        <Span Text="{Binding RestDayShiftSize}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="›"
+                                            FontSize="20"
+                                            TextColor="{StaticResource Neutral600}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

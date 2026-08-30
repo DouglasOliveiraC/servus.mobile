@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Swaps.SwapRequestsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Swaps"
+    xmlns:swaps="clr-namespace:Servus.Mobile.Services.SwapRequests"
+    x:DataType="local:SwapRequestsViewModel"
+    Title="Trocas de plantão"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:StatusBadgeColorConverter x:Key="StatusBadgeColorConverter" />
+            <local:IsPendingConverter x:Key="IsPendingConverter" />
+            <local:IsAcceptedConverter x:Key="IsAcceptedConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="18">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label Text="Não foi possível carregar suas trocas agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Aguardando sua resposta" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+
+                    <Border
+                        IsVisible="{Binding AwaitingMyResponse.Count, Converter={StaticResource IntIsZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="16">
+                        <Label Text="Nenhuma troca pendente de resposta." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                    </Border>
+
+                    <CollectionView ItemsSource="{Binding AwaitingMyResponse}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="swaps:SwapRequestDto">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="Solicitação de troca de plantão" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource WarningSurface}" Padding="8,3">
+                                                <Label Text="Pendente" TextColor="{StaticResource Warning}" FontSize="11" FontAttributes="Bold" />
+                                            </Border>
+                                        </Grid>
+                                        <Label FontSize="12" TextColor="{StaticResource Neutral600}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Expira em " />
+                                                    <Span Text="{Binding ExpiresAt, StringFormat='{0:dd/MM/yyyy HH:mm}'}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                            <buttons:SfButton
+                                                Grid.Column="0"
+                                                Text="Recusar"
+                                                Background="{StaticResource Neutral100}"
+                                                TextColor="{StaticResource Danger}"
+                                                CornerRadius="8"
+                                                HeightRequest="40"
+                                                Command="{Binding RejectCommand, Source={RelativeSource AncestorType={x:Type local:SwapRequestsViewModel}}}"
+                                                CommandParameter="{Binding .}" />
+                                            <buttons:SfButton
+                                                Grid.Column="1"
+                                                Text="Aceitar"
+                                                Background="{StaticResource BrandPrimary}"
+                                                TextColor="White"
+                                                CornerRadius="8"
+                                                HeightRequest="40"
+                                                Command="{Binding AcceptCommand, Source={RelativeSource AncestorType={x:Type local:SwapRequestsViewModel}}}"
+                                                CommandParameter="{Binding .}" />
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Solicitadas por mim" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+
+                    <Border
+                        IsVisible="{Binding RequestedByMe.Count, Converter={StaticResource IntIsZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="16">
+                        <Label Text="Você não tem solicitações de troca em andamento." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                    </Border>
+
+                    <CollectionView ItemsSource="{Binding RequestedByMe}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="swaps:SwapRequestDto">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="Troca solicitada" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{Binding Status, Converter={StaticResource StatusBadgeColorConverter}}" Padding="8,3">
+                                                <Label Text="{Binding Status}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                            </Border>
+                                        </Grid>
+                                        <buttons:SfButton
+                                            Text="Cancelar solicitação"
+                                            IsVisible="{Binding Status, Converter={StaticResource IsPendingConverter}}"
+                                            Background="{StaticResource Neutral100}"
+                                            TextColor="{StaticResource Danger}"
+                                            CornerRadius="8"
+                                            HeightRequest="40"
+                                            Command="{Binding CancelCommand, Source={RelativeSource AncestorType={x:Type local:SwapRequestsViewModel}}}"
+                                            CommandParameter="{Binding .}" />
+                                        <buttons:SfButton
+                                            Text="Aprovar"
+                                            IsVisible="{Binding Status, Converter={StaticResource IsAcceptedConverter}}"
+                                            Background="{StaticResource BrandPrimary}"
+                                            TextColor="White"
+                                            CornerRadius="8"
+                                            HeightRequest="40"
+                                            Command="{Binding ApproveCommand, Source={RelativeSource AncestorType={x:Type local:SwapRequestsViewModel}}}"
+                                            CommandParameter="{Binding .}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

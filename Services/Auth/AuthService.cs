@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Servus.Mobile.Services.Http;
 
 namespace Servus.Mobile.Services.Auth;
 
@@ -42,7 +41,7 @@ public class AuthService : IAuthService
             return AuthResult.Ok();
         }
 
-        var errorMessage = await ExtractErrorMessageAsync(response, cancellationToken);
+        var errorMessage = ExtractErrorMessage(response);
         return AuthResult.Fail(errorMessage);
     }
 
@@ -53,7 +52,7 @@ public class AuthService : IAuthService
         {
             response = await _httpClient.PostAsJsonAsync(
                 "api/auth/register",
-                new RegisterRequest(name, email, password),
+                new RegisterRequest(email, name, password),
                 cancellationToken);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -63,13 +62,8 @@ public class AuthService : IAuthService
 
         if (response.IsSuccessStatusCode)
         {
-            var body = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
-            if (body is null || string.IsNullOrWhiteSpace(body.Token))
-            {
-                return AuthResult.Fail("Resposta inválida do servidor.");
-            }
-
-            await _tokenStore.SaveTokenAsync(body.Token);
+            // Registro só cria a conta — não salva token nem autentica. O usuário é
+            // mandado de volta para o Login para entrar com a senha que acabou de criar.
             return AuthResult.Ok();
         }
 
@@ -78,7 +72,7 @@ public class AuthService : IAuthService
             return AuthResult.Fail("Cadastro ainda não está disponível nesta versão.");
         }
 
-        var errorMessage = await ExtractErrorMessageAsync(response, cancellationToken);
+        var errorMessage = ExtractErrorMessage(response);
         return AuthResult.Fail(errorMessage);
     }
 
@@ -102,27 +96,15 @@ public class AuthService : IAuthService
 
     public Task LogoutAsync() => _tokenStore.ClearAsync();
 
-    private static async Task<string> ExtractErrorMessageAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    // Nunca repassa problem.Errors/Title da API ao usuário: são mensagens de model validation
+    // do ASP.NET em inglês com nomes de campo crus (ex: "The DisplayName field is required."),
+    // então cada status conhecido mapeia para uma mensagem fixa em português.
+    private static string ExtractErrorMessage(HttpResponseMessage response) => response.StatusCode switch
     {
-        if (response.StatusCode == HttpStatusCode.TooManyRequests)
-        {
-            return "Muitas tentativas. Aguarde um momento antes de tentar novamente.";
-        }
-
-        var problem = await response.Content.ReadFromJsonAsync<ApiProblemDetails>(cancellationToken: cancellationToken);
-
-        if (problem?.Errors is { Count: > 0 })
-        {
-            return string.Join(" ", problem.Errors.SelectMany(e => e.Value));
-        }
-
-        if (!string.IsNullOrWhiteSpace(problem?.Title))
-        {
-            return response.StatusCode == HttpStatusCode.Unauthorized
-                ? "E-mail ou senha incorretos."
-                : problem.Title;
-        }
-
-        return "Não foi possível entrar. Tente novamente.";
-    }
+        HttpStatusCode.TooManyRequests => "Muitas tentativas. Aguarde um momento antes de tentar novamente.",
+        HttpStatusCode.Unauthorized => "E-mail ou senha incorretos.",
+        HttpStatusCode.BadRequest => "Verifique os dados informados e tente novamente.",
+        HttpStatusCode.Conflict => "Esse e-mail já está cadastrado.",
+        _ => "Não foi possível concluir. Tente novamente."
+    };
 }

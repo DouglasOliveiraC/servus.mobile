@@ -7,7 +7,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Register"
     x:DataType="local:RegisterViewModel"
-    BackgroundColor="#FFFFFF"
+    BackgroundColor="{StaticResource White}"
     Shell.NavBarIsVisible="False">
 
     <ScrollView>
@@ -16,7 +16,7 @@
             <!-- Back -->
             <Label
                 Text="← Voltar"
-                TextColor="#6B7680"
+                TextColor="{StaticResource Neutral600}"
                 FontSize="13"
                 Margin="0,0,0,24">
                 <Label.GestureRecognizers>
@@ -26,26 +26,26 @@
 
             <!-- Brand -->
             <VerticalStackLayout Spacing="2" Margin="0,0,0,32">
-                <Label Text="Criar conta" FontSize="24" FontAttributes="Bold" TextColor="#22282C" />
-                <Label Text="Preencha seus dados para começar" FontSize="13" TextColor="#6B7680" />
+                <Label Text="Criar conta" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Label Text="Preencha seus dados para começar" FontSize="13" TextColor="{StaticResource Neutral600}" />
             </VerticalStackLayout>
 
             <!-- Form -->
             <VerticalStackLayout Spacing="14">
 
-                <sf:SfTextInputLayout Hint="Nome completo" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                <sf:SfTextInputLayout Hint="Nome completo" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
                     <Entry
                         Text="{Binding Name}"
                         ReturnType="Next" />
                 </sf:SfTextInputLayout>
                 <Label
                     Text="{Binding NameError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding NameError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
-                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
                     <Entry
                         Text="{Binding Email}"
                         Keyboard="Email"
@@ -53,25 +53,41 @@
                 </sf:SfTextInputLayout>
                 <Label
                     Text="{Binding EmailError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
-                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
                     <Entry
                         Text="{Binding Password}"
                         IsPassword="True"
                         ReturnType="Next" />
                 </sf:SfTextInputLayout>
+
+                <!-- Indicador de força de senha: cada barra acende quando o score atinge seu threshold -->
+                <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="4" IsVisible="{Binding Password, Converter={StaticResource StringNotEmptyConverter}}" Margin="4,-6,4,0">
+                    <BoxView Grid.Column="0" HeightRequest="4" CornerRadius="2" Color="{Binding PasswordStrengthColor}" IsVisible="{Binding PasswordStrength, Converter={StaticResource IntAtLeastConverter}, ConverterParameter=1}" />
+                    <BoxView Grid.Column="1" HeightRequest="4" CornerRadius="2" Color="{Binding PasswordStrengthColor}" IsVisible="{Binding PasswordStrength, Converter={StaticResource IntAtLeastConverter}, ConverterParameter=2}" />
+                    <BoxView Grid.Column="2" HeightRequest="4" CornerRadius="2" Color="{Binding PasswordStrengthColor}" IsVisible="{Binding PasswordStrength, Converter={StaticResource IntAtLeastConverter}, ConverterParameter=3}" />
+                    <BoxView Grid.Column="3" HeightRequest="4" CornerRadius="2" Color="{Binding PasswordStrengthColor}" IsVisible="{Binding PasswordStrength, Converter={StaticResource IntAtLeastConverter}, ConverterParameter=4}" />
+                    <BoxView Grid.Column="4" HeightRequest="4" CornerRadius="2" Color="{Binding PasswordStrengthColor}" IsVisible="{Binding PasswordStrength, Converter={StaticResource IntAtLeastConverter}, ConverterParameter=5}" />
+                </Grid>
+                <Label
+                    Text="{Binding PasswordStrengthLabel}"
+                    TextColor="{Binding PasswordStrengthColor}"
+                    FontSize="11.5"
+                    FontAttributes="Bold"
+                    IsVisible="{Binding PasswordStrengthLabel, Converter={StaticResource StringNotEmptyConverter}}"
+                    Margin="4,2,0,0" />
                 <Label
                     Text="{Binding PasswordError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding PasswordError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
-                <sf:SfTextInputLayout Hint="Confirmar senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                <sf:SfTextInputLayout Hint="Confirmar senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
                     <Entry
                         Text="{Binding ConfirmPassword}"
                         IsPassword="True"
@@ -79,14 +95,14 @@
                 </sf:SfTextInputLayout>
                 <Label
                     Text="{Binding ConfirmPasswordError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding ConfirmPasswordError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
                 <Label
                     Text="{Binding ServerError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="12.5"
                     HorizontalTextAlignment="Center"
                     IsVisible="{Binding ServerError, Converter={StaticResource StringNotEmptyConverter}}"
@@ -94,7 +110,7 @@
 
                 <buttons:SfButton
                     Text="Criar conta"
-                    Background="#3D6E68"
+                    Background="{StaticResource BrandPrimary}"
                     TextColor="White"
                     CornerRadius="9"
                     HeightRequest="48"
@@ -105,7 +121,7 @@
                 <ActivityIndicator
                     IsRunning="{Binding IsBusy}"
                     IsVisible="{Binding IsBusy}"
-                    Color="#3D6E68"
+                    Color="{StaticResource BrandPrimary}"
                     Margin="0,8,0,0" />
 
                 <Label
@@ -117,8 +133,8 @@
                     </Label.GestureRecognizers>
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="Já tem conta? " TextColor="#6B7680" />
-                            <Span Text="Entrar" TextColor="#3D6E68" FontAttributes="Bold" />
+                            <Span Text="Já tem conta? " TextColor="{StaticResource Neutral600}" />
+                            <Span Text="Entrar" TextColor="{StaticResource BrandPrimary}" FontAttributes="Bold" />
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>

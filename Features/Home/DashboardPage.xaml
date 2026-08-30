@@ -4,25 +4,55 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Home"
     x:DataType="local:DashboardViewModel"
-    BackgroundColor="#F4F5F6"
+    BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="False">
 
-    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+    <RefreshView Command="{Binding LoadCommand}">
         <ScrollView>
             <VerticalStackLayout Padding="20,52,20,28" Spacing="18">
 
                 <!-- Header -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Grid.Column="0" Spacing="2">
-                        <Label Text="Olá!" FontSize="22" FontAttributes="Bold" TextColor="#22282C" />
-                        <Label Text="{Binding UserEmail}" FontSize="12.5" TextColor="#6B7680" />
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Border
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 20"
+                        Stroke="Transparent"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        WidthRequest="40"
+                        HeightRequest="40"
+                        Padding="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="{Binding UserInitial}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="Olá!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <ActivityIndicator
+                                Grid.Column="1"
+                                IsRunning="{Binding IsBusy}"
+                                IsVisible="{Binding IsBusy}"
+                                Color="{StaticResource BrandPrimary}"
+                                WidthRequest="18"
+                                HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+                        <Label Text="{Binding UserEmail}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
                     </VerticalStackLayout>
                     <Label
-                        Grid.Column="1"
+                        Grid.Column="2"
                         Text="Sair"
-                        TextColor="#B5453F"
+                        TextColor="{StaticResource Danger}"
                         FontSize="13"
                         FontAttributes="Bold"
                         VerticalOptions="Center">
@@ -36,20 +66,20 @@
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <Border Grid.Column="0" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
-                            <Label Text="Escalas" FontSize="11.5" TextColor="#6B7680" />
+                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                            <Label Text="Organizações" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Column="1" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding SubrosterCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
-                            <Label Text="Subescalas" FontSize="11.5" TextColor="#6B7680" />
+                            <Label Text="{Binding SubrosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                            <Label Text="Escalas" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Column="2" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding MyUpcomingDutyCount}" FontSize="24" FontAttributes="Bold" TextColor="#3D6E68" />
-                            <Label Text="Meus plantões (14d)" FontSize="11.5" TextColor="#6B7680" />
+                            <Label Text="{Binding MyUpcomingDutyCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                            <Label Text="Meus plantões (14d)" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
@@ -59,11 +89,11 @@
                     IsVisible="{Binding HasError}"
                     StrokeShape="RoundRectangle 12"
                     Stroke="Transparent"
-                    BackgroundColor="#FBEAE9"
+                    BackgroundColor="{StaticResource DangerSurface}"
                     Padding="14">
                     <Label
                         Text="Não foi possível carregar seus dados agora. Puxe para atualizar."
-                        TextColor="#B5453F"
+                        TextColor="{StaticResource Danger}"
                         FontSize="13" />
                 </Border>
 
@@ -75,14 +105,239 @@
                     BackgroundColor="White"
                     Padding="18">
                     <VerticalStackLayout Spacing="4">
-                        <Label Text="Você ainda não participa de nenhuma escala." FontSize="14" FontAttributes="Bold" TextColor="#22282C" />
-                        <Label Text="Peça um código de convite ao administrador da sua unidade." FontSize="12.5" TextColor="#6B7680" />
+                        <Label Text="Você ainda não participa de nenhuma organização." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label Text="Peça um código de convite ao administrador da sua unidade." FontSize="12.5" TextColor="{StaticResource Neutral600}" />
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- Next duty -->
+                <Border
+                    IsVisible="{Binding NextDuty, Converter={StaticResource IsNotNullConverter}}"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource BrandPrimary}"
+                    Padding="16,14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label
+                                Text="{Binding NextDuty.Date, StringFormat='{0:dd}'}"
+                                FontSize="26"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="{Binding NextDuty.Date, StringFormat='{0:MMM}'}"
+                                FontSize="11.5"
+                                TextColor="{StaticResource BrandSurfaceStrong}"
+                                HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="Meu próximo plantão" FontSize="12" TextColor="{StaticResource BrandSurfaceStrong}" />
+                            <Label FontSize="15" FontAttributes="Bold" TextColor="White">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding NextDuty.SubrosterName}" />
+                                        <Span Text=" · " />
+                                        <Span Text="{Binding NextDuty.RosterName}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label FontSize="12.5" TextColor="{StaticResource BrandSurfaceStrong}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="em " />
+                                        <Span Text="{Binding NextDuty.DaysUntil}" FontAttributes="Bold" TextColor="White" />
+                                        <Span Text=" dia(s)" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- Swap trend card -->
+                <Border
+                    IsVisible="{Binding RosterCount, Converter={StaticResource IntIsNotZeroConverter}}"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16,14">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Trocas de plantão" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Label Grid.Column="1" FontSize="12.5" TextColor="{StaticResource Neutral600}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding SwapCountLastPeriod}" TextColor="{StaticResource BrandPrimary}" FontAttributes="Bold" />
+                                        <Span Text=" nas últimas 6 semanas" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Grid>
+                        <chart:SfCartesianChart HeightRequest="120" IsVisible="{Binding SwapTrend.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                            <chart:SfCartesianChart.XAxes>
+                                <chart:CategoryAxis ShowMajorGridLines="False">
+                                    <chart:CategoryAxis.LabelStyle>
+                                        <chart:ChartAxisLabelStyle TextColor="{StaticResource Neutral600}" FontSize="10" />
+                                    </chart:CategoryAxis.LabelStyle>
+                                </chart:CategoryAxis>
+                            </chart:SfCartesianChart.XAxes>
+                            <chart:SfCartesianChart.YAxes>
+                                <chart:NumericalAxis IsVisible="False" ShowMajorGridLines="False" />
+                            </chart:SfCartesianChart.YAxes>
+                            <chart:SfCartesianChart.Series>
+                                <chart:ColumnSeries
+                                    ItemsSource="{Binding SwapTrend}"
+                                    XBindingPath="PeriodLabel"
+                                    YBindingPath="Count"
+                                    Fill="{StaticResource BrandPrimary}"
+                                    CornerRadius="4,4,0,0"
+                                    ShowDataLabels="True">
+                                    <chart:ColumnSeries.DataLabelSettings>
+                                        <chart:CartesianDataLabelSettings>
+                                            <chart:CartesianDataLabelSettings.LabelStyle>
+                                                <chart:ChartDataLabelStyle TextColor="{StaticResource Neutral900}" FontSize="10.5" FontAttributes="Bold" />
+                                            </chart:CartesianDataLabelSettings.LabelStyle>
+                                        </chart:CartesianDataLabelSettings>
+                                    </chart:ColumnSeries.DataLabelSettings>
+                                </chart:ColumnSeries>
+                            </chart:SfCartesianChart.Series>
+                        </chart:SfCartesianChart>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Member load distribution -->
+                <Border
+                    IsVisible="{Binding MemberLoad.Count, Converter={StaticResource IntIsNotZeroConverter}}"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16,14">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Distribuição de plantões por pessoa" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <chart:SfCircularChart HeightRequest="220">
+                            <chart:SfCircularChart.Legend>
+                                <chart:ChartLegend Placement="Right">
+                                    <chart:ChartLegend.LabelStyle>
+                                        <chart:ChartLegendLabelStyle TextColor="{StaticResource Neutral600}" FontSize="11" />
+                                    </chart:ChartLegend.LabelStyle>
+                                </chart:ChartLegend>
+                            </chart:SfCircularChart.Legend>
+                            <chart:SfCircularChart.Series>
+                                <chart:DoughnutSeries
+                                    ItemsSource="{Binding MemberLoad}"
+                                    XBindingPath="MemberName"
+                                    YBindingPath="AssignmentCount"
+                                    PaletteBrushes="{x:Static local:DashboardPalette.Brushes}"
+                                    EnableTooltip="True"
+                                    InnerRadius="0.6" />
+                            </chart:SfCircularChart.Series>
+                        </chart:SfCircularChart>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Coverage heatmap -->
+                <Border
+                    IsVisible="{Binding CoverageDays.Count, Converter={StaticResource IntIsNotZeroConverter}}"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Cobertura dos próximos 14 dias" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        </Grid>
+                        <CollectionView ItemsSource="{Binding CoverageDays}">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="7" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="local:CoverageDayPoint">
+                                    <Border
+                                        StrokeShape="RoundRectangle 8"
+                                        Stroke="Transparent"
+                                        BackgroundColor="{Binding StatusColor}"
+                                        HeightRequest="42"
+                                        Padding="0">
+                                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                                            <Label
+                                                Text="{Binding WeekdayLabel}"
+                                                FontSize="8.5"
+                                                TextColor="White"
+                                                Opacity="0.85"
+                                                HorizontalTextAlignment="Center" />
+                                            <Label
+                                                Text="{Binding DayLabel}"
+                                                FontSize="13"
+                                                FontAttributes="Bold"
+                                                TextColor="White"
+                                                HorizontalTextAlignment="Center" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                            <BoxView Grid.Column="0" Color="{StaticResource BrandPrimary}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="Coberto" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                            <BoxView Grid.Column="2" Color="{StaticResource AccentOrange}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
+                            <Label Grid.Column="3" Text="Falta gente" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Quick actions -->
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Acesso rápido" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Trocas de plantão" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="SwapRequestsPage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                        <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Indisponibilidade" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="UnavailabilityPage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Perfil" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Entrar em organização" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="JoinRosterPage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Gerenciar organizações" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="RosterListPage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                        <Border Grid.Row="2" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                            <Label Text="Membros" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="MembersPage" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+
                 <!-- Rosters -->
                 <VerticalStackLayout Spacing="10" IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                    <Label Text="Minhas escalas" FontSize="15" FontAttributes="Bold" TextColor="#22282C" />
+                    <Label Text="Minhas organizações" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
 
                     <CollectionView ItemsSource="{Binding Rosters}">
                         <CollectionView.ItemsLayout>
@@ -93,12 +348,12 @@
                                 <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="#22282C" />
-                                            <Label FontSize="12" TextColor="#6B7680">
+                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label FontSize="12" TextColor="{StaticResource Neutral600}">
                                                 <Label.FormattedText>
                                                     <FormattedString>
                                                         <Span Text="{Binding SubrosterCount}" />
-                                                        <Span Text=" subescala(s) · " />
+                                                        <Span Text=" escala(s) · " />
                                                         <Span Text="{Binding UpcomingAssignmentCount}" />
                                                         <Span Text=" plantão(ões) em 14 dias" />
                                                     </FormattedString>
@@ -109,7 +364,7 @@
                                             Grid.Column="1"
                                             Text="›"
                                             FontSize="20"
-                                            TextColor="#6B7680"
+                                            TextColor="{StaticResource Neutral600}"
                                             VerticalOptions="Center" />
                                     </Grid>
                                 </Border>
@@ -118,23 +373,28 @@
                     </CollectionView>
                 </VerticalStackLayout>
 
-                <!-- Upcoming duties -->
-                <VerticalStackLayout Spacing="10" IsVisible="{Binding UpcomingDuties.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                    <Label Text="Próximos plantões" FontSize="15" FontAttributes="Bold" TextColor="#22282C" />
+                <!-- Upcoming duties, grouped by day -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding DailyDuties.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <Label Text="Próximos plantões" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
 
-                    <CollectionView ItemsSource="{Binding UpcomingDuties}">
+                    <CollectionView ItemsSource="{Binding VisibleDailyDuties}">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:UpcomingDuty">
+                            <DataTemplate x:DataType="local:DailyDutySummary">
                                 <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand}"
+                                            CommandParameter="{Binding Date}" />
+                                    </Border.GestureRecognizers>
                                     <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12">
                                         <Border
                                             Grid.Column="0"
                                             StrokeShape="RoundRectangle 10"
                                             Stroke="Transparent"
-                                            BackgroundColor="#EAF0EF"
+                                            BackgroundColor="{StaticResource BrandSurface}"
                                             HeightRequest="56"
                                             WidthRequest="56">
                                             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
@@ -142,37 +402,38 @@
                                                     Text="{Binding Date, StringFormat='{0:dd}'}"
                                                     FontSize="18"
                                                     FontAttributes="Bold"
-                                                    TextColor="#3D6E68"
+                                                    TextColor="{StaticResource BrandPrimary}"
                                                     HorizontalTextAlignment="Center" />
                                                 <Label
                                                     Text="{Binding Date, StringFormat='{0:MMM}'}"
                                                     FontSize="10.5"
-                                                    TextColor="#3D6E68"
+                                                    TextColor="{StaticResource BrandPrimary}"
                                                     HorizontalTextAlignment="Center" />
                                             </VerticalStackLayout>
                                         </Border>
                                         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                            <Label FontSize="14" FontAttributes="Bold" TextColor="#22282C">
+                                            <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}">
                                                 <Label.FormattedText>
                                                     <FormattedString>
-                                                        <Span Text="{Binding SubrosterName}" />
-                                                        <Span Text=" · " TextColor="#6B7680" />
-                                                        <Span Text="{Binding RosterName}" TextColor="#6B7680" FontAttributes="None" />
+                                                        <Span Text="{Binding TotalAssignments}" />
+                                                        <Span Text=" plantão(ões) em " />
+                                                        <Span Text="{Binding SubrosterCount}" />
+                                                        <Span Text=" escala(s)" />
                                                     </FormattedString>
                                                 </Label.FormattedText>
                                             </Label>
                                             <Label
-                                                Text="{Binding MemberNames, Converter={StaticResource StringJoinConverter}}"
+                                                Text="{Binding PreviewNames, Converter={StaticResource StringJoinConverter}}"
                                                 FontSize="12.5"
-                                                TextColor="#6B7680"
+                                                TextColor="{StaticResource Neutral600}"
                                                 LineBreakMode="TailTruncation" />
                                         </VerticalStackLayout>
                                         <Border
                                             Grid.Column="2"
-                                            IsVisible="{Binding IsMine}"
+                                            IsVisible="{Binding HasMine}"
                                             StrokeShape="RoundRectangle 8"
                                             Stroke="Transparent"
-                                            BackgroundColor="#3D6E68"
+                                            BackgroundColor="{StaticResource BrandPrimary}"
                                             Padding="8,4"
                                             VerticalOptions="Center">
                                             <Label Text="Eu" TextColor="White" FontSize="11" FontAttributes="Bold" />
@@ -182,6 +443,16 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
+
+                    <buttons:SfButton
+                        Text="Carregar mais"
+                        IsVisible="{Binding HasMoreDailyDuties}"
+                        Background="{StaticResource Neutral100}"
+                        TextColor="{StaticResource Neutral900}"
+                        CornerRadius="8"
+                        HeightRequest="40"
+                        FontSize="12.5"
+                        Command="{Binding ShowMoreDailyDutiesCommand}" />
                 </VerticalStackLayout>
 
             </VerticalStackLayout>

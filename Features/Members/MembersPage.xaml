@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Members.MembersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:inputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Members"
+    x:DataType="local:MembersViewModel"
+    Title="Membros"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="16">
+
+                <Label Text="Membros cadastrados aqui continuam no sistema mesmo que sejam removidos ou uma escala inteira seja excluída." FontSize="12" TextColor="{StaticResource Neutral600}" />
+
+                <buttons:SfButton
+                    Text="+ Novo membro"
+                    Background="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="46"
+                    FontAttributes="Bold"
+                    Command="{Binding ToggleFormCommand}" />
+
+                <Border
+                    IsVisible="{Binding IsFormVisible}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Novo membro" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                            <Entry Text="{Binding NewName}" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="E-mail (opcional)" ContainerType="Outlined">
+                            <Entry Text="{Binding NewEmail}" Keyboard="Email" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="Telefone (opcional)" ContainerType="Outlined">
+                            <Entry Text="{Binding NewPhone}" Keyboard="Telephone" />
+                        </sf:SfTextInputLayout>
+                        <Label
+                            Text="E-mail e telefone ajudam a identificar e contatar a pessoa para uma impersonação tardia, quando ela ainda não tem conta no sistema."
+                            FontSize="11"
+                            TextColor="{StaticResource Neutral600}" />
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Neutral200}" Margin="0,4" />
+
+                        <Label Text="Organização e escala" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label Text="Todo membro precisa já entrar em uma escala — não é possível cadastrar um membro solto." FontSize="11" TextColor="{StaticResource Neutral600}" />
+                        <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
+                            <inputs:SfComboBox ItemsSource="{Binding Rosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedRoster}" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="Escala" ContainerType="Outlined" IsEnabled="{Binding SelectedRoster, Converter={StaticResource IsNotNullConverter}}">
+                            <inputs:SfComboBox ItemsSource="{Binding Subrosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedSubroster}" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="Posição na fila" ContainerType="Outlined">
+                            <Entry Text="{Binding NewMemberPosition}" Keyboard="Numeric" />
+                        </sf:SfTextInputLayout>
+
+                        <buttons:SfButton
+                            Text="Salvar"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="9"
+                            HeightRequest="44"
+                            FontAttributes="Bold"
+                            Command="{Binding SaveMemberCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar os membros agora."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding GroupedMembers.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <Label Text="Nenhum membro cadastrado ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                </Border>
+
+                <CollectionView
+                    ItemsSource="{Binding GroupedMembers}"
+                    IsGrouped="True"
+                    IsVisible="{Binding GroupedMembers.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate x:DataType="local:SubrosterMemberGroup">
+                            <VerticalStackLayout Padding="2,14,2,4" Spacing="1">
+                                <Label Text="{Binding RosterName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                <Label Text="{Binding SubrosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:MemberGroupEntry">
+                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MembersViewModel}}, Path=OpenMemberCommand}"
+                                        CommandParameter="{Binding Member}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <Border
+                                        Grid.Column="0"
+                                        StrokeShape="RoundRectangle 8"
+                                        Stroke="Transparent"
+                                        BackgroundColor="{StaticResource BrandSurface}"
+                                        Padding="8,4"
+                                        VerticalOptions="Center">
+                                        <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Member.Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        <Label
+                                            Text="{Binding Member.Email}"
+                                            IsVisible="{Binding Member.Email, Converter={StaticResource StringNotEmptyConverter}}"
+                                            FontSize="12"
+                                            TextColor="{StaticResource Neutral600}" />
+                                        <Label
+                                            Text="Vinculado a uma conta"
+                                            IsVisible="{Binding Member.UserId, Converter={StaticResource IsNotNullConverter}}"
+                                            FontSize="11"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource BrandPrimary}" />
+                                    </VerticalStackLayout>
+                                    <Label
+                                        Grid.Column="2"
+                                        Text="›"
+                                        FontSize="20"
+                                        TextColor="{StaticResource Neutral600}"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

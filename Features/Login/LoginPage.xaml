@@ -7,7 +7,7 @@
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Login"
     x:DataType="local:LoginViewModel"
-    BackgroundColor="#FFFFFF"
+    BackgroundColor="{StaticResource White}"
     Shell.NavBarIsVisible="False">
 
     <ScrollView>
@@ -20,7 +20,7 @@
                     HeightRequest="52"
                     StrokeShape="RoundRectangle 14"
                     Stroke="Transparent"
-                    BackgroundColor="#3D6E68"
+                    BackgroundColor="{StaticResource BrandPrimary}"
                     HorizontalOptions="Start">
                     <Label
                         Text="S"
@@ -31,15 +31,15 @@
                         VerticalOptions="Center" />
                 </Border>
                 <VerticalStackLayout Spacing="2">
-                    <Label Text="Servus" FontSize="24" FontAttributes="Bold" TextColor="#22282C" />
-                    <Label Text="Gestão de escalas e plantões" FontSize="13" TextColor="#6B7680" />
+                    <Label Text="Servus" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Label Text="Gestão de escalas e plantões" FontSize="13" TextColor="{StaticResource Neutral600}" />
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
             <!-- Form -->
             <VerticalStackLayout Spacing="14">
 
-                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="#FBFBFB">
+                <sf:SfTextInputLayout Hint="E-mail" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
                     <Entry
                         Text="{Binding Email}"
                         Keyboard="Email"
@@ -47,12 +47,12 @@
                 </sf:SfTextInputLayout>
                 <Label
                     Text="{Binding EmailError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
-                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="#FBFBFB" EnablePasswordVisibilityToggle="True">
+                <sf:SfTextInputLayout Hint="Senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
                     <Entry
                         Text="{Binding Password}"
                         IsPassword="True"
@@ -60,14 +60,14 @@
                 </sf:SfTextInputLayout>
                 <Label
                     Text="{Binding PasswordError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="11.5"
                     IsVisible="{Binding PasswordError, Converter={StaticResource StringNotEmptyConverter}}"
                     Margin="4,-8,0,0" />
 
                 <Label
                     Text="Esqueci minha senha"
-                    TextColor="#3D6E68"
+                    TextColor="{StaticResource BrandPrimary}"
                     FontSize="12.5"
                     FontAttributes="Bold"
                     HorizontalOptions="End"
@@ -79,7 +79,7 @@
 
                 <Label
                     Text="{Binding ServerError}"
-                    TextColor="#B5453F"
+                    TextColor="{StaticResource Danger}"
                     FontSize="12.5"
                     HorizontalTextAlignment="Center"
                     IsVisible="{Binding ServerError, Converter={StaticResource StringNotEmptyConverter}}"
@@ -87,7 +87,7 @@
 
                 <buttons:SfButton
                     Text="Entrar"
-                    Background="#3D6E68"
+                    Background="{StaticResource BrandPrimary}"
                     TextColor="White"
                     CornerRadius="9"
                     HeightRequest="48"
@@ -98,20 +98,20 @@
                 <ActivityIndicator
                     IsRunning="{Binding IsBusy}"
                     IsVisible="{Binding IsBusy}"
-                    Color="#3D6E68"
+                    Color="{StaticResource BrandPrimary}"
                     Margin="0,8,0,0" />
 
                 <Grid ColumnDefinitions="*,Auto,*" Margin="0,16,0,0" VerticalOptions="Center">
-                    <BoxView Grid.Column="0" HeightRequest="1" Color="#E3E6E5" VerticalOptions="Center" />
-                    <Label Grid.Column="1" Text="ou" TextColor="#8A9199" FontSize="12" Margin="10,0" />
-                    <BoxView Grid.Column="2" HeightRequest="1" Color="#E3E6E5" VerticalOptions="Center" />
+                    <BoxView Grid.Column="0" HeightRequest="1" Color="{StaticResource Neutral200}" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="ou" TextColor="{StaticResource Neutral500}" FontSize="12" Margin="10,0" />
+                    <BoxView Grid.Column="2" HeightRequest="1" Color="{StaticResource Neutral200}" VerticalOptions="Center" />
                 </Grid>
 
                 <buttons:SfButton
                     Text="Entrar com Google"
                     ImageSource="google_icon.svg"
-                    Background="#F5F6F5"
-                    TextColor="#22282C"
+                    Background="{StaticResource Neutral100}"
+                    TextColor="{StaticResource Neutral900}"
                     StrokeThickness="0"
                     CornerRadius="9"
                     HeightRequest="48"
@@ -128,8 +128,8 @@
                     </Label.GestureRecognizers>
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="Ainda não tem conta? " TextColor="#6B7680" />
-                            <Span Text="Criar conta" TextColor="#3D6E68" FontAttributes="Bold" />
+                            <Span Text="Ainda não tem conta? " TextColor="{StaticResource Neutral600}" />
+                            <Span Text="Criar conta" TextColor="{StaticResource BrandPrimary}" FontAttributes="Bold" />
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>

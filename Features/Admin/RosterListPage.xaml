@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Admin.RosterListPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    x:DataType="local:RosterListViewModel"
+    Title="Minhas organizações"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="16">
+
+                <buttons:SfButton
+                    Text="+ Nova organização"
+                    Background="{StaticResource BrandPrimary}"
+                    TextColor="White"
+                    CornerRadius="9"
+                    HeightRequest="46"
+                    FontAttributes="Bold"
+                    Command="{Binding CreateRosterCommand}" />
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label
+                        Text="Não foi possível carregar suas organizações agora. Puxe para atualizar."
+                        TextColor="{StaticResource Danger}"
+                        FontSize="13" />
+                </Border>
+
+                <Border
+                    IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="18">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Nenhuma organização criada ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label Text="Uma organização agrupa suas escalas de plantão. Toque em &quot;Nova organização&quot; para começar." FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <CollectionView ItemsSource="{Binding Rosters}" IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:RosterDto">
+                            <SwipeView>
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem
+                                            Text="Dias especiais"
+                                            BackgroundColor="{StaticResource Neutral600}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=OpenCalendarOverridesCommand}"
+                                            CommandParameter="{Binding .}" />
+                                        <SwipeItem
+                                            Text="Renomear"
+                                            BackgroundColor="{StaticResource BrandPrimary}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=RenameRosterCommand}"
+                                            CommandParameter="{Binding .}" />
+                                        <SwipeItem
+                                            Text="Excluir"
+                                            BackgroundColor="{StaticResource Danger}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=DeleteRosterCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=OpenRosterCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label Text="{Binding CreatedAt, StringFormat='Criada em {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                                        </VerticalStackLayout>
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="›"
+                                            FontSize="20"
+                                            TextColor="{StaticResource Neutral600}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+
+</ContentPage>

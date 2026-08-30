@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Services.Auth;
 
+// Color/Colors: Microsoft.Maui.Graphics (via Microsoft.Maui.Controls global usings)
+
 namespace Servus.Mobile.Features.Register;
 
 public partial class RegisterViewModel : ObservableObject
@@ -50,7 +52,48 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     private bool isBusy;
 
+    [ObservableProperty]
+    private int passwordStrength;
+
+    [ObservableProperty]
+    private string passwordStrengthLabel = string.Empty;
+
+    [ObservableProperty]
+    private Color passwordStrengthColor = Colors.Transparent;
+
     public event EventHandler? RegisterSucceeded;
+
+    partial void OnPasswordChanged(string value) => UpdatePasswordStrength(value);
+
+    // Heurística simples de força (0-4): comprimento mínimo + presença de minúscula,
+    // maiúscula, dígito e símbolo. Cada critério atendido soma um ponto.
+    private void UpdatePasswordStrength(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            PasswordStrength = 0;
+            PasswordStrengthLabel = string.Empty;
+            PasswordStrengthColor = Colors.Transparent;
+            return;
+        }
+
+        var score = 0;
+        if (value.Length >= MinPasswordLength) score++;
+        if (value.Any(char.IsLower)) score++;
+        if (value.Any(char.IsUpper)) score++;
+        if (value.Any(char.IsDigit)) score++;
+        if (value.Any(c => !char.IsLetterOrDigit(c))) score++;
+
+        PasswordStrength = score;
+        (PasswordStrengthLabel, PasswordStrengthColor) = score switch
+        {
+            <= 1 => ("Muito fraca", Color.FromArgb("#B5453F")),
+            2 => ("Fraca", Color.FromArgb("#C97A3D")),
+            3 => ("Razoável", Color.FromArgb("#C9A63D")),
+            4 => ("Forte", Color.FromArgb("#5C9A63")),
+            _ => ("Muito forte", Color.FromArgb("#3D6E68")) // Success (verde, independente do BrandPrimary)
+        };
+    }
 
     [RelayCommand]
     private static Task GoBackAsync() => Shell.Current.GoToAsync("..");
@@ -68,7 +111,7 @@ public partial class RegisterViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            var result = await _authService.RegisterAsync(Name.Trim(), Email.Trim(), Password);
+            var result = await _authService.RegisterAsync(CapitalizeName(Name), Email.Trim(), Password);
             if (result.Success)
             {
                 RegisterSucceeded?.Invoke(this, EventArgs.Empty);
@@ -85,6 +128,23 @@ public partial class RegisterViewModel : ObservableObject
     }
 
     private bool CanRegister() => !IsBusy;
+
+    // "joão da silva" -> "João Da Silva": capitaliza cada palavra do nome antes de
+    // enviar, já que o app não impõe formatação enquanto a pessoa digita.
+    private static string CapitalizeName(string name)
+    {
+        var trimmed = name.Trim();
+        if (trimmed.Length == 0) return trimmed;
+
+        var words = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < words.Length; i++)
+        {
+            var word = words[i];
+            words[i] = char.ToUpperInvariant(word[0]) + word[1..].ToLowerInvariant();
+        }
+
+        return string.Join(' ', words);
+    }
 
     private bool Validate()
     {
