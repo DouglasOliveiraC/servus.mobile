@@ -27,55 +27,55 @@ public partial class ProfileViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string displayName = string.Empty;
+    public partial string DisplayName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? linkedMemberName;
+    public partial string? LinkedMemberName { get; set; }
 
     [ObservableProperty]
-    private string? displayNameMessage;
+    public partial string? DisplayNameMessage { get; set; }
 
     [ObservableProperty]
-    private string currentPassword = string.Empty;
+    public partial string CurrentPassword { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string newPassword = string.Empty;
+    public partial string NewPassword { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string confirmNewPassword = string.Empty;
+    public partial string ConfirmNewPassword { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? passwordMessage;
+    public partial string? PasswordMessage { get; set; }
 
     [ObservableProperty]
-    private bool passwordMessageIsError;
+    public partial bool PasswordMessageIsError { get; set; }
 
     [ObservableProperty]
-    private bool isChangePasswordExpanded;
+    public partial bool IsChangePasswordExpanded { get; set; }
 
     [ObservableProperty]
-    private bool isChangeEmailExpanded;
+    public partial bool IsChangeEmailExpanded { get; set; }
 
     [ObservableProperty]
-    private string newEmail = string.Empty;
+    public partial string NewEmail { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string emailChangePassword = string.Empty;
+    public partial string EmailChangePassword { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? emailChangeMessage;
+    public partial string? EmailChangeMessage { get; set; }
 
     [ObservableProperty]
-    private bool emailChangeMessageIsError;
+    public partial bool EmailChangeMessageIsError { get; set; }
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -155,6 +155,15 @@ public partial class ProfileViewModel : ObservableObject
         }
     }
 
+    // Espelha src/Servus.Domain/Rules/PasswordPolicy.cs — não há projeto compartilhável
+    // entre Mobile e backend, então qualquer mudança na regra precisa ser replicada
+    // nos dois lados (e também em passwordPolicy.ts no Web e em RegisterViewModel.cs).
+    private static bool IsPasswordComplex(string value) =>
+        value.Length >= 8
+        && value.Any(char.IsLower)
+        && value.Any(char.IsUpper)
+        && value.Any(char.IsDigit);
+
     [RelayCommand]
     private async Task ChangePasswordAsync()
     {
@@ -167,9 +176,9 @@ public partial class ProfileViewModel : ObservableObject
             return;
         }
 
-        if (NewPassword.Length < 8)
+        if (!IsPasswordComplex(NewPassword))
         {
-            PasswordMessage = "A nova senha deve ter ao menos 8 caracteres.";
+            PasswordMessage = "A nova senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula e número.";
             PasswordMessageIsError = true;
             return;
         }

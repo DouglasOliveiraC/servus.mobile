@@ -22,31 +22,31 @@ public partial class MembersViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private bool isFormVisible;
+    public partial bool IsFormVisible { get; set; }
 
     [ObservableProperty]
-    private string newName = string.Empty;
+    public partial string NewName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string newEmail = string.Empty;
+    public partial string NewEmail { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string newPhone = string.Empty;
+    public partial string NewPhone { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private OrganizationDto? selectedOrganization;
+    public partial OrganizationDto? SelectedOrganization { get; set; }
 
     [ObservableProperty]
-    private RosterDto? selectedRoster;
+    public partial RosterDto? SelectedRoster { get; set; }
 
     [ObservableProperty]
-    private string newMemberPosition = "1";
+    public partial string NewMemberPosition { get; set; } = "1";
 
     public ObservableCollection<MemberDto> AllMembers { get; } = [];
 

@@ -35,31 +35,31 @@ public partial class MemberDetailViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid memberId;
+    public partial Guid MemberId { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private string name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string phone = string.Empty;
+    public partial string Phone { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isLinkedToAccount;
+    public partial bool IsLinkedToAccount { get; set; }
 
     [ObservableProperty]
-    private string memberSince = string.Empty;
+    public partial string MemberSince { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string membershipsSummary = string.Empty;
+    public partial string MembershipsSummary { get; set; } = string.Empty;
 
     public ObservableCollection<MembershipRow> Memberships { get; } = [];
 
@@ -67,16 +67,16 @@ public partial class MemberDetailViewModel : ObservableObject
 
     // "Adicionar a uma escala" form
     [ObservableProperty]
-    private bool isAddMembershipFormVisible;
+    public partial bool IsAddMembershipFormVisible { get; set; }
 
     [ObservableProperty]
-    private OrganizationDto? selectedOrganization;
+    public partial OrganizationDto? SelectedOrganization { get; set; }
 
     [ObservableProperty]
-    private RosterDto? selectedRoster;
+    public partial RosterDto? SelectedRoster { get; set; }
 
     [ObservableProperty]
-    private string newMembershipPosition = string.Empty;
+    public partial string NewMembershipPosition { get; set; } = string.Empty;
 
     public ObservableCollection<OrganizationDto> Organizations { get; } = [];
 
@@ -84,23 +84,23 @@ public partial class MemberDetailViewModel : ObservableObject
 
     // Unavailability form
     [ObservableProperty]
-    private bool isAddUnavailabilityFormVisible;
+    public partial bool IsAddUnavailabilityFormVisible { get; set; }
 
     [ObservableProperty]
-    private DateTime unavailabilityStart = DateTime.Today;
+    public partial DateTime UnavailabilityStart { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private DateTime unavailabilityEnd = DateTime.Today.AddDays(7);
+    public partial DateTime UnavailabilityEnd { get; set; } = DateTime.Today.AddDays(7);
 
     // Claim code
     [ObservableProperty]
-    private bool isGeneratingClaimCode;
+    public partial bool IsGeneratingClaimCode { get; set; }
 
     [ObservableProperty]
-    private string? generatedClaimCode;
+    public partial string? GeneratedClaimCode { get; set; }
 
     [ObservableProperty]
-    private string claimCodeStatusMessage = string.Empty;
+    public partial string ClaimCodeStatusMessage { get; set; } = string.Empty;
 
     [RelayCommand]
     public async Task LoadAsync()

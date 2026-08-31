@@ -7,6 +7,7 @@ namespace Servus.Mobile.Features.Admin;
 
 [QueryProperty(nameof(OrganizationId), "organizationId")]
 [QueryProperty(nameof(OrganizationName), "organizationName")]
+[QueryProperty(nameof(IsOrganizationAdmin), "isOrganizationAdmin")]
 public partial class RosterListViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
@@ -17,37 +18,42 @@ public partial class RosterListViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid organizationId;
+    public partial Guid OrganizationId { get; set; }
 
     [ObservableProperty]
-    private string organizationName = string.Empty;
+    public partial string OrganizationName { get; set; } = string.Empty;
+
+    /// <summary>Only gates the "Nova escala" button's visibility — the API re-checks
+    /// CanManageOrganizationAsync on every write, so this is UX only, never the real gate.</summary>
+    [ObservableProperty]
+    public partial bool IsOrganizationAdmin { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private bool isFormVisible;
+    public partial bool IsFormVisible { get; set; }
 
     [ObservableProperty]
-    private string newName = string.Empty;
+    public partial string NewName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string newMinIntervalDays = "1";
+    public partial string NewMinIntervalDays { get; set; } = "1";
 
     [ObservableProperty]
-    private TimeSpan newServiceDayStartTime = new(8, 0, 0);
+    public partial TimeSpan NewServiceDayStartTime { get; set; } = new(8, 0, 0);
 
     [ObservableProperty]
-    private string newMinDaysAfterReturnBeforeEligible = "0";
+    public partial string NewMinDaysAfterReturnBeforeEligible { get; set; } = "0";
 
     [ObservableProperty]
-    private bool newRequiresAdminApproval;
+    public partial bool NewRequiresAdminApproval { get; set; }
 
     [ObservableProperty]
-    private bool newCreatorIsMember = true;
+    public partial bool NewCreatorIsMember { get; set; } = true;
 
     public ObservableCollection<RosterDto> Rosters { get; } = [];
 

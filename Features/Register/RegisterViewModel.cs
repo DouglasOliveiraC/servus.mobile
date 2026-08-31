@@ -23,43 +23,43 @@ public partial class RegisterViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private string name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string password = string.Empty;
+    public partial string Password { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string confirmPassword = string.Empty;
+    public partial string ConfirmPassword { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? nameError;
+    public partial string? NameError { get; set; }
 
     [ObservableProperty]
-    private string? emailError;
+    public partial string? EmailError { get; set; }
 
     [ObservableProperty]
-    private string? passwordError;
+    public partial string? PasswordError { get; set; }
 
     [ObservableProperty]
-    private string? confirmPasswordError;
+    public partial string? ConfirmPasswordError { get; set; }
 
     [ObservableProperty]
-    private string? serverError;
+    public partial string? ServerError { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private int passwordStrength;
+    public partial int PasswordStrength { get; set; }
 
     [ObservableProperty]
-    private string passwordStrengthLabel = string.Empty;
+    public partial string PasswordStrengthLabel { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private Color passwordStrengthColor = Colors.Transparent;
+    public partial Color PasswordStrengthColor { get; set; } = Colors.Transparent;
 
     public event EventHandler? RegisterSucceeded;
 
@@ -146,6 +146,15 @@ public partial class RegisterViewModel : ObservableObject
         return string.Join(' ', words);
     }
 
+    // Espelha src/Servus.Domain/Rules/PasswordPolicy.cs — não há projeto compartilhável
+    // entre Mobile e backend, então qualquer mudança na regra precisa ser replicada
+    // nos dois lados (e também em passwordPolicy.ts no Web).
+    private static bool IsPasswordComplex(string value) =>
+        value.Length >= MinPasswordLength
+        && value.Any(char.IsLower)
+        && value.Any(char.IsUpper)
+        && value.Any(char.IsDigit);
+
     private bool Validate()
     {
         NameError = string.IsNullOrWhiteSpace(Name)
@@ -160,8 +169,8 @@ public partial class RegisterViewModel : ObservableObject
 
         PasswordError = string.IsNullOrEmpty(Password)
             ? "Informe uma senha."
-            : Password.Length < MinPasswordLength
-                ? $"A senha deve ter pelo menos {MinPasswordLength} caracteres."
+            : !IsPasswordComplex(Password)
+                ? "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula e número."
                 : null;
 
         ConfirmPasswordError = string.IsNullOrEmpty(ConfirmPassword)

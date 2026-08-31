@@ -20,10 +20,10 @@ public partial class SwapRequestsViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     public ObservableCollection<SwapRequestDto> AwaitingMyResponse { get; } = [];
 

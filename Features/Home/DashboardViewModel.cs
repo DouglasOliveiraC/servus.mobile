@@ -32,41 +32,41 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private string? userEmail;
+    public partial string? UserEmail { get; set; }
 
     public string UserInitial => string.IsNullOrEmpty(UserEmail) ? "?" : UserEmail[..1].ToUpperInvariant();
 
     partial void OnUserEmailChanged(string? value) => OnPropertyChanged(nameof(UserInitial));
 
     [ObservableProperty]
-    private int organizationCount;
+    public partial int OrganizationCount { get; set; }
 
     [ObservableProperty]
-    private int rosterCount;
+    public partial int RosterCount { get; set; }
 
     [ObservableProperty]
-    private int upcomingDutyCount;
+    public partial int UpcomingDutyCount { get; set; }
 
     [ObservableProperty]
-    private int myUpcomingDutyCount;
+    public partial int MyUpcomingDutyCount { get; set; }
 
     [ObservableProperty]
-    private int swapCountLastPeriod;
+    public partial int SwapCountLastPeriod { get; set; }
 
     [ObservableProperty]
-    private NextDutyInfo? nextDuty;
+    public partial NextDutyInfo? NextDuty { get; set; }
 
     [ObservableProperty]
-    private bool isAdminOfAnyOrganization;
+    public partial bool IsAdminOfAnyOrganization { get; set; }
 
     [ObservableProperty]
-    private int visibleDailyDutyCount = InitialVisibleDays;
+    public partial int VisibleDailyDutyCount { get; set; } = InitialVisibleDays;
 
     public ObservableCollection<OrganizationSummary> Organizations { get; } = [];
 

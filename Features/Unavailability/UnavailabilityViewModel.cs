@@ -20,19 +20,19 @@ public partial class UnavailabilityViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private bool hasNoMember;
+    public partial bool HasNoMember { get; set; }
 
     [ObservableProperty]
-    private DateTime newStartDate = DateTime.Today;
+    public partial DateTime NewStartDate { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private DateTime newEndDate = DateTime.Today;
+    public partial DateTime NewEndDate { get; set; } = DateTime.Today;
 
     public ObservableCollection<MemberUnavailabilityDto> Periods { get; } = [];
 

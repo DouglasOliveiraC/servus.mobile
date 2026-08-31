@@ -16,25 +16,25 @@ public partial class CalendarOverridesViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid organizationId;
+    public partial Guid OrganizationId { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private DateTime rangeFrom = DateTime.Today;
+    public partial DateTime RangeFrom { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private DateTime rangeTo = DateTime.Today.AddDays(60);
+    public partial DateTime RangeTo { get; set; } = DateTime.Today.AddDays(60);
 
     [ObservableProperty]
-    private DateTime newDate = DateTime.Today;
+    public partial DateTime NewDate { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private bool newIsRestDay = true;
+    public partial bool NewIsRestDay { get; set; } = true;
 
     public ObservableCollection<CalendarDayOverrideDto> Overrides { get; } = [];
 

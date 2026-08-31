@@ -14,7 +14,8 @@ public record RosterDto(
     QueueDirection WorkdayQueueDirection,
     QueueDirection WeekendQueueDirection,
     IReadOnlyList<ServiceShiftDto> ServiceShifts,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    bool CanManage);
 
 public enum QueueDirection
 {

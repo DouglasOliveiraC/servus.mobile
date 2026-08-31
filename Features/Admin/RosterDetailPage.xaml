@@ -14,7 +14,7 @@
     Shell.NavBarIsVisible="True">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Configurações" Command="{Binding OpenSettingsCommand}" />
+        <ToolbarItem Text="Configurações" Command="{Binding OpenSettingsCommand}" IsEnabled="{Binding CanManage}" />
     </ContentPage.ToolbarItems>
 
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
@@ -43,6 +43,7 @@
                         <buttons:SfButton
                             Grid.Column="1"
                             Text="Adicionar"
+                            IsVisible="{Binding CanManage}"
                             Background="{StaticResource BrandPrimary}"
                             TextColor="White"
                             CornerRadius="8"
@@ -84,7 +85,7 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="local:RosterMemberRow">
-                                <SwipeView>
+                                <SwipeView IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage}">
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem
@@ -111,7 +112,7 @@
                 <!-- Gerar plantões -->
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Gerar plantões" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <Border IsVisible="{Binding CanManage}" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
                         <VerticalStackLayout Spacing="10">
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                 <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -136,6 +137,10 @@
                                 IsVisible="{Binding GenerateResultMessage, Converter={StaticResource StringNotEmptyConverter}}"
                                 FontSize="12.5"
                                 TextColor="{StaticResource BrandPrimary}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                        <VerticalStackLayout Spacing="10">
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                 <buttons:SfButton
                                     Grid.Column="0"
@@ -189,7 +194,7 @@
                 </VerticalStackLayout>
 
                 <!-- Acessos -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding CanManage}">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="Acessos de gestão" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
                         <buttons:SfButton

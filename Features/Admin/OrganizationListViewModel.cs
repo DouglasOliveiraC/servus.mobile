@@ -15,10 +15,10 @@ public partial class OrganizationListViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     public ObservableCollection<OrganizationDto> Organizations { get; } = [];
 
@@ -108,7 +108,8 @@ public partial class OrganizationListViewModel : ObservableObject
         await Shell.Current.GoToAsync(nameof(RosterListPage), new Dictionary<string, object>
         {
             ["organizationId"] = organization.Id,
-            ["organizationName"] = organization.Name
+            ["organizationName"] = organization.Name,
+            ["isOrganizationAdmin"] = organization.IsAdmin
         });
     }
 

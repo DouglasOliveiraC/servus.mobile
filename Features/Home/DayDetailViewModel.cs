@@ -27,19 +27,19 @@ public partial class DayDetailViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private string dateText = string.Empty;
+    public partial string DateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private DateOnly date;
+    public partial DateOnly Date { get; set; }
 
     [ObservableProperty]
-    private string dateLabel = string.Empty;
+    public partial string DateLabel { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     public ObservableCollection<DayRosterGroup> Groups { get; } = [];
 

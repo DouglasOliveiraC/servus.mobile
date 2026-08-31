@@ -54,7 +54,7 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="orgModels:OrganizationDto">
-                            <SwipeView>
+                            <SwipeView IsEnabled="{Binding IsAdmin}">
                                 <SwipeView.RightItems>
                                     <SwipeItems>
                                         <SwipeItem

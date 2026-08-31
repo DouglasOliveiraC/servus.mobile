@@ -28,6 +28,7 @@
 
                 <buttons:SfButton
                     Text="+ Nova escala"
+                    IsVisible="{Binding IsOrganizationAdmin}"
                     Background="{StaticResource BrandPrimary}"
                     TextColor="White"
                     CornerRadius="9"
@@ -116,7 +117,7 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="rosterModels:RosterDto">
-                            <SwipeView>
+                            <SwipeView IsEnabled="{Binding CanManage}">
                                 <SwipeView.RightItems>
                                     <SwipeItems>
                                         <SwipeItem

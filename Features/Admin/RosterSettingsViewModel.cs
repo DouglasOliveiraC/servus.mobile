@@ -16,43 +16,41 @@ public partial class RosterSettingsViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid rosterId;
+    public partial Guid RosterId { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private string name = string.Empty;
+    public partial string Name { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string minIntervalDays = "0";
+    public partial string MinIntervalDays { get; set; } = "0";
 
     [ObservableProperty]
-    private bool requiresAdminApproval;
+    public partial bool RequiresAdminApproval { get; set; }
 
     [ObservableProperty]
-    private string minDaysAfterReturnBeforeEligible = "0";
+    public partial string MinDaysAfterReturnBeforeEligible { get; set; } = "0";
 
     [ObservableProperty]
-    private bool fillShiftsEarliestFirst = true;
+    public partial bool FillShiftsEarliestFirst { get; set; } = true;
 
     [ObservableProperty]
-    private TimeSpan serviceDayStartTime = new(8, 0, 0);
+    public partial TimeSpan ServiceDayStartTime { get; set; } = new(8, 0, 0);
 
     /// <summary>Read-only summary — WorkdayShiftSize/RestDayShiftSize are now derived from
     /// the shifts below, shown here so the admin can see the total without adding them up.</summary>
     [ObservableProperty]
-    private int workdayShiftSize;
+    public partial int WorkdayShiftSize { get; set; }
 
     [ObservableProperty]
-    private int restDayShiftSize;
+    public partial int RestDayShiftSize { get; set; }
 
     public ObservableCollection<ServiceShiftEditRow> Shifts { get; } = [];
-
-    private bool _isLoading;
 
     /// <summary>No UI exposes these yet — round-tripped as loaded so saving other fields
     /// doesn't silently reset a roster's existing queue direction back to the default.</summary>
@@ -66,7 +64,6 @@ public partial class RosterSettingsViewModel : ObservableObject
 
         IsBusy = true;
         HasError = false;
-        _isLoading = true;
         try
         {
             var roster = await _rosterService.GetRosterByIdAsync(RosterId);
@@ -94,7 +91,6 @@ public partial class RosterSettingsViewModel : ObservableObject
         finally
         {
             IsBusy = false;
-            _isLoading = false;
         }
     }
 
@@ -174,16 +170,16 @@ public partial class ServiceShiftEditRow : ObservableObject
     }
 
     [ObservableProperty]
-    private TimeSpan startTime;
+    public partial TimeSpan StartTime { get; set; }
 
     [ObservableProperty]
-    private TimeSpan endTime;
+    public partial TimeSpan EndTime { get; set; }
 
     [ObservableProperty]
-    private string workdayCapacity = "1";
+    public partial string WorkdayCapacity { get; set; } = "1";
 
     [ObservableProperty]
-    private string restDayCapacity = "1";
+    public partial string RestDayCapacity { get; set; } = "1";
 
     public ServiceShiftInputDto ToInputDto() => new(
         TimeOnly.FromTimeSpan(StartTime),

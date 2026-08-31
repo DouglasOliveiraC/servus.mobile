@@ -22,31 +22,31 @@ public partial class RosterScheduleViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid rosterId;
+    public partial Guid RosterId { get; set; }
 
     [ObservableProperty]
-    private string rosterName = string.Empty;
+    public partial string RosterName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private DateTime fromDate = DateTime.Today;
+    public partial DateTime FromDate { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private DateTime toDate = DateTime.Today.AddDays(30);
+    public partial DateTime ToDate { get; set; } = DateTime.Today.AddDays(30);
 
     [ObservableProperty]
-    private string? summaryText;
+    public partial string? SummaryText { get; set; }
 
     [ObservableProperty]
-    private string? selectionHint;
+    public partial string? SelectionHint { get; set; }
 
     [ObservableProperty]
-    private Guid selectedAssignmentId;
+    public partial Guid SelectedAssignmentId { get; set; }
 
     public ObservableCollection<ScheduleDayDto> Days { get; } = [];
 

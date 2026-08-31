@@ -21,26 +21,33 @@ public partial class RosterDetailViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid rosterId;
+    public partial Guid RosterId { get; set; }
 
     [ObservableProperty]
-    private string rosterName = string.Empty;
+    public partial string RosterName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
+
+    /// <summary>Drives visibility of every admin-only action in this page (add/remove member,
+    /// generate schedule, grant/revoke access, settings) — backed by the API's per-request
+    /// authorization check (org admin OR RosterAccess.IsFullAdmin), never trusted as the
+    /// actual access control.</summary>
+    [ObservableProperty]
+    public partial bool CanManage { get; set; }
 
     // Members
     [ObservableProperty]
-    private bool isAddMemberFormVisible;
+    public partial bool IsAddMemberFormVisible { get; set; }
 
     [ObservableProperty]
-    private string memberSearchText = string.Empty;
+    public partial string MemberSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string newMemberPosition = "1";
+    public partial string NewMemberPosition { get; set; } = "1";
 
     public ObservableCollection<RosterMemberRow> Members { get; } = [];
 
@@ -48,26 +55,26 @@ public partial class RosterDetailViewModel : ObservableObject
 
     // Schedule generation
     [ObservableProperty]
-    private DateTime generateFrom = DateTime.Today;
+    public partial DateTime GenerateFrom { get; set; } = DateTime.Today;
 
     [ObservableProperty]
-    private DateTime generateTo = DateTime.Today.AddDays(30);
+    public partial DateTime GenerateTo { get; set; } = DateTime.Today.AddDays(30);
 
     [ObservableProperty]
-    private string? generateResultMessage;
+    public partial string? GenerateResultMessage { get; set; }
 
     // Duty counts
     public ObservableCollection<MemberDutyCountDto> DutyCounts { get; } = [];
 
     // Access
     [ObservableProperty]
-    private bool isGrantAccessFormVisible;
+    public partial bool IsGrantAccessFormVisible { get; set; }
 
     [ObservableProperty]
-    private string accessSearchText = string.Empty;
+    public partial string AccessSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool newAccessIsFullAdmin;
+    public partial bool NewAccessIsFullAdmin { get; set; }
 
     public ObservableCollection<RosterAccessRow> Accesses { get; } = [];
 
@@ -82,6 +89,9 @@ public partial class RosterDetailViewModel : ObservableObject
         HasError = false;
         try
         {
+            var roster = await _rosterService.GetRosterByIdAsync(RosterId);
+            CanManage = roster.CanManage;
+
             var members = await _rosterService.GetRosterMembersAsync(RosterId);
             var orderedMembers = members.OrderBy(m => m.WorkdayPosition).ToList();
             Members.Clear();

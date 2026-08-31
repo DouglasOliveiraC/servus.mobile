@@ -30,37 +30,37 @@ public partial class DayScheduleEditViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid rosterId;
+    public partial Guid RosterId { get; set; }
 
     [ObservableProperty]
-    private string dateText = string.Empty;
+    public partial string DateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private DateOnly date;
+    public partial DateOnly Date { get; set; }
 
     [ObservableProperty]
-    private string dateLabel = string.Empty;
+    public partial string DateLabel { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string rosterName = string.Empty;
+    public partial string RosterName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    private bool hasError;
+    public partial bool HasError { get; set; }
 
     [ObservableProperty]
-    private bool isSwapFormVisible;
+    public partial bool IsSwapFormVisible { get; set; }
 
     [ObservableProperty]
-    private ScheduleAssignmentDto? swapTarget;
+    public partial ScheduleAssignmentDto? SwapTarget { get; set; }
 
     [ObservableProperty]
-    private string memberSearchText = string.Empty;
+    public partial string MemberSearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? swapWarningMessage;
+    public partial string? SwapWarningMessage { get; set; }
 
     public ObservableCollection<ScheduleAssignmentDto> Assignments { get; } = [];
 
@@ -71,10 +71,10 @@ public partial class DayScheduleEditViewModel : ObservableObject
     public ObservableCollection<MemberDto> MemberSearchResults { get; } = [];
 
     [ObservableProperty]
-    private bool isMoveShiftFormVisible;
+    public partial bool IsMoveShiftFormVisible { get; set; }
 
     [ObservableProperty]
-    private ScheduleAssignmentDto? moveShiftTarget;
+    public partial ScheduleAssignmentDto? MoveShiftTarget { get; set; }
 
     public ObservableCollection<ServiceShiftDto> AvailableShiftsForMove { get; } = [];
 

@@ -20,22 +20,22 @@ public partial class LoginViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private string email = string.Empty;
+    public partial string Email { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string password = string.Empty;
+    public partial string Password { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? emailError;
+    public partial string? EmailError { get; set; }
 
     [ObservableProperty]
-    private string? passwordError;
+    public partial string? PasswordError { get; set; }
 
     [ObservableProperty]
-    private string? serverError;
+    public partial string? ServerError { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     public event EventHandler? LoginSucceeded;
 

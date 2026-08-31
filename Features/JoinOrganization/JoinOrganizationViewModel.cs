@@ -14,16 +14,16 @@ public partial class JoinOrganizationViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private string code = string.Empty;
+    public partial string Code { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string? serverError;
+    public partial string? ServerError { get; set; }
 
     [ObservableProperty]
-    private string? successMessage;
+    public partial string? SuccessMessage { get; set; }
 
     [ObservableProperty]
-    private bool isBusy;
+    public partial bool IsBusy { get; set; }
 
     [RelayCommand(CanExecute = nameof(CanJoin))]
     private async Task JoinAsync()
