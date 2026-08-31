@@ -13,8 +13,8 @@ public interface IMemberService
     Task DeleteMemberAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Every Subroster this Member is queued in, already joined with its owning Roster —
-    /// avoids the client fanning out over rosters and subrosters just to find where one
+    /// Every Roster this Member is queued in, already joined with its owning Organization —
+    /// avoids the client fanning out over organizations and rosters just to find where one
     /// Member sits.
     /// </summary>
     Task<IReadOnlyList<MemberMembershipDto>> GetMembershipsAsync(Guid id, CancellationToken cancellationToken = default);

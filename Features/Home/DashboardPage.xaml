@@ -66,13 +66,13 @@
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <Border Grid.Column="0" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                            <Label Text="{Binding OrganizationCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
                             <Label Text="Organizações" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Column="1" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding SubrosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
                             <Label Text="Escalas" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                     </Border>
@@ -99,7 +99,7 @@
 
                 <!-- Empty state -->
                 <Border
-                    IsVisible="{Binding RosterCount, Converter={StaticResource IntIsZeroConverter}}"
+                    IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsZeroConverter}}"
                     StrokeShape="RoundRectangle 12"
                     Stroke="Transparent"
                     BackgroundColor="White"
@@ -136,9 +136,9 @@
                             <Label FontSize="15" FontAttributes="Bold" TextColor="White">
                                 <Label.FormattedText>
                                     <FormattedString>
-                                        <Span Text="{Binding NextDuty.SubrosterName}" />
-                                        <Span Text=" · " />
                                         <Span Text="{Binding NextDuty.RosterName}" />
+                                        <Span Text=" · " />
+                                        <Span Text="{Binding NextDuty.OrganizationName}" />
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
@@ -157,7 +157,7 @@
 
                 <!-- Swap trend card -->
                 <Border
-                    IsVisible="{Binding RosterCount, Converter={StaticResource IntIsNotZeroConverter}}"
+                    IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsNotZeroConverter}}"
                     StrokeShape="RoundRectangle 14"
                     Stroke="Transparent"
                     BackgroundColor="White"
@@ -314,14 +314,14 @@
                         <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                             <Label Text="Entrar em organização" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="JoinRosterPage" />
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="JoinOrganizationPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
                         <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                             <Label Text="Gerenciar organizações" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="RosterListPage" />
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="OrganizationListPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
@@ -335,16 +335,16 @@
                     </Grid>
                 </VerticalStackLayout>
 
-                <!-- Rosters -->
-                <VerticalStackLayout Spacing="10" IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                <!-- Organizations -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding Organizations.Count, Converter={StaticResource IntIsNotZeroConverter}}">
                     <Label Text="Minhas organizações" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
 
-                    <CollectionView ItemsSource="{Binding Rosters}">
+                    <CollectionView ItemsSource="{Binding Organizations}">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:RosterSummary">
+                            <DataTemplate x:DataType="local:OrganizationSummary">
                                 <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -352,7 +352,7 @@
                                             <Label FontSize="12" TextColor="{StaticResource Neutral600}">
                                                 <Label.FormattedText>
                                                     <FormattedString>
-                                                        <Span Text="{Binding SubrosterCount}" />
+                                                        <Span Text="{Binding RosterCount}" />
                                                         <Span Text=" escala(s) · " />
                                                         <Span Text="{Binding UpcomingAssignmentCount}" />
                                                         <Span Text=" plantão(ões) em 14 dias" />
@@ -417,7 +417,7 @@
                                                     <FormattedString>
                                                         <Span Text="{Binding TotalAssignments}" />
                                                         <Span Text=" plantão(ões) em " />
-                                                        <Span Text="{Binding SubrosterCount}" />
+                                                        <Span Text="{Binding RosterCount}" />
                                                         <Span Text=" escala(s)" />
                                                     </FormattedString>
                                                 </Label.FormattedText>

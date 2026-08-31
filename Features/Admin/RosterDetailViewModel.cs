@@ -7,24 +7,24 @@ using IMemberService = Servus.Mobile.Services.Members.IMemberService;
 
 namespace Servus.Mobile.Features.Admin;
 
-[QueryProperty(nameof(SubrosterId), "subrosterId")]
-[QueryProperty(nameof(SubrosterName), "subrosterName")]
-public partial class SubrosterDetailViewModel : ObservableObject
+[QueryProperty(nameof(RosterId), "rosterId")]
+[QueryProperty(nameof(RosterName), "rosterName")]
+public partial class RosterDetailViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
     private readonly IMemberService _memberService;
 
-    public SubrosterDetailViewModel(IRosterService rosterService, IMemberService memberService)
+    public RosterDetailViewModel(IRosterService rosterService, IMemberService memberService)
     {
         _rosterService = rosterService;
         _memberService = memberService;
     }
 
     [ObservableProperty]
-    private Guid subrosterId;
+    private Guid rosterId;
 
     [ObservableProperty]
-    private string subrosterName = string.Empty;
+    private string rosterName = string.Empty;
 
     [ObservableProperty]
     private bool isBusy;
@@ -42,7 +42,7 @@ public partial class SubrosterDetailViewModel : ObservableObject
     [ObservableProperty]
     private string newMemberPosition = "1";
 
-    public ObservableCollection<SubrosterMemberRow> Members { get; } = [];
+    public ObservableCollection<RosterMemberRow> Members { get; } = [];
 
     public ObservableCollection<MemberDto> MemberSearchResults { get; } = [];
 
@@ -69,46 +69,46 @@ public partial class SubrosterDetailViewModel : ObservableObject
     [ObservableProperty]
     private bool newAccessIsFullAdmin;
 
-    public ObservableCollection<SubrosterAccessRow> Accesses { get; } = [];
+    public ObservableCollection<RosterAccessRow> Accesses { get; } = [];
 
     public ObservableCollection<MemberDto> AccessSearchResults { get; } = [];
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || SubrosterId == Guid.Empty) return;
+        if (IsBusy || RosterId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
         try
         {
-            var members = await _rosterService.GetSubrosterMembersAsync(SubrosterId);
-            var orderedMembers = members.OrderBy(m => m.Position).ToList();
+            var members = await _rosterService.GetRosterMembersAsync(RosterId);
+            var orderedMembers = members.OrderBy(m => m.WorkdayPosition).ToList();
             Members.Clear();
             for (var i = 0; i < orderedMembers.Count; i++)
             {
-                // Position é um contador interno do algoritmo de fila (só cresce, nunca reseta);
-                // o rank exibido é a ordem relativa 1-based dentro da fila atual.
-                Members.Add(new SubrosterMemberRow(orderedMembers[i], i + 1));
+                // WorkdayPosition é um contador interno do algoritmo de fila (só cresce, nunca
+                // reseta); o rank exibido é a ordem relativa 1-based dentro da fila atual.
+                Members.Add(new RosterMemberRow(orderedMembers[i], i + 1));
             }
 
-            var dutyCounts = await _rosterService.GetDutyCountsAsync(SubrosterId);
+            var dutyCounts = await _rosterService.GetDutyCountsAsync(RosterId);
             DutyCounts.Clear();
             foreach (var count in dutyCounts.OrderByDescending(c => c.AssignmentCount))
             {
                 DutyCounts.Add(count);
             }
 
-            // SubrosterAccessDto só traz MemberId (o endpoint da API não resolve nome);
+            // RosterAccessDto só traz MemberId (o endpoint da API não resolve nome);
             // usa a lista de membros da escala, já carregada acima, para exibir o nome.
             var memberNamesById = members.ToDictionary(m => m.MemberId, m => m.MemberName);
 
-            var accesses = await _rosterService.GetSubrosterAccessesAsync(SubrosterId);
+            var accesses = await _rosterService.GetRosterAccessesAsync(RosterId);
             Accesses.Clear();
             foreach (var access in accesses)
             {
                 var memberName = memberNamesById.TryGetValue(access.MemberId, out var name) ? name : "Membro fora da escala";
-                Accesses.Add(new SubrosterAccessRow(access.Id, access.MemberId, memberName, access.IsFullAdmin));
+                Accesses.Add(new RosterAccessRow(access.Id, access.MemberId, memberName, access.IsFullAdmin));
             }
         }
         catch (Exception)
@@ -154,7 +154,7 @@ public partial class SubrosterDetailViewModel : ObservableObject
 
         try
         {
-            await _rosterService.AddSubrosterMemberAsync(SubrosterId, member.Id, rank);
+            await _rosterService.AddRosterMemberAsync(RosterId, member.Id, rank, QueueType.Workday);
             IsAddMemberFormVisible = false;
             MemberSearchResults.Clear();
             MemberSearchText = string.Empty;
@@ -167,14 +167,14 @@ public partial class SubrosterDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task RemoveMemberAsync(SubrosterMemberRow member)
+    private async Task RemoveMemberAsync(RosterMemberRow member)
     {
         var confirmed = await Shell.Current.DisplayAlertAsync("Remover membro", $"Remover \"{member.MemberName}\" da escala?", "Remover", "Cancelar");
         if (!confirmed) return;
 
         try
         {
-            await _rosterService.RemoveSubrosterMemberAsync(member.Id);
+            await _rosterService.RemoveRosterMemberAsync(member.Id);
             await LoadAsync();
         }
         catch (Exception)
@@ -190,7 +190,7 @@ public partial class SubrosterDetailViewModel : ObservableObject
         {
             var from = DateOnly.FromDateTime(GenerateFrom);
             var to = DateOnly.FromDateTime(GenerateTo);
-            var schedule = await _rosterService.GenerateScheduleAsync(SubrosterId, from, to);
+            var schedule = await _rosterService.GenerateScheduleAsync(RosterId, from, to);
             var assignmentCount = schedule.Days.Sum(d => d.Assignments.Count);
             GenerateResultMessage = $"Plantões gerados: {schedule.Days.Count} dia(s), {assignmentCount} plantão(ões).";
             await LoadAsync();
@@ -233,7 +233,7 @@ public partial class SubrosterDetailViewModel : ObservableObject
     {
         try
         {
-            await _rosterService.GrantSubrosterAccessAsync(SubrosterId, member.Id, NewAccessIsFullAdmin);
+            await _rosterService.GrantRosterAccessAsync(RosterId, member.Id, NewAccessIsFullAdmin);
             IsGrantAccessFormVisible = false;
             AccessSearchResults.Clear();
             AccessSearchText = string.Empty;
@@ -249,18 +249,18 @@ public partial class SubrosterDetailViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenSettingsAsync()
     {
-        await Shell.Current.GoToAsync(nameof(SubrosterSettingsPage), new Dictionary<string, object>
+        await Shell.Current.GoToAsync(nameof(RosterSettingsPage), new Dictionary<string, object>
         {
-            ["subrosterId"] = SubrosterId
+            ["rosterId"] = RosterId
         });
     }
 
     [RelayCommand]
     private async Task ViewScheduleAsync()
     {
-        await Shell.Current.GoToAsync("SubrosterSchedulePage", new Dictionary<string, object>
+        await Shell.Current.GoToAsync("RosterSchedulePage", new Dictionary<string, object>
         {
-            ["subrosterId"] = SubrosterId
+            ["rosterId"] = RosterId
         });
     }
 
@@ -269,19 +269,19 @@ public partial class SubrosterDetailViewModel : ObservableObject
     {
         await Shell.Current.GoToAsync("SwapHistoryPage", new Dictionary<string, object>
         {
-            ["subrosterId"] = SubrosterId
+            ["rosterId"] = RosterId
         });
     }
 
     [RelayCommand]
-    private async Task RevokeAccessAsync(SubrosterAccessRow access)
+    private async Task RevokeAccessAsync(RosterAccessRow access)
     {
         var confirmed = await Shell.Current.DisplayAlertAsync("Revogar acesso", "Revogar este acesso de gestão?", "Revogar", "Cancelar");
         if (!confirmed) return;
 
         try
         {
-            await _rosterService.RevokeSubrosterAccessAsync(access.Id);
+            await _rosterService.RevokeRosterAccessAsync(access.Id);
             await LoadAsync();
         }
         catch (Exception)
@@ -295,14 +295,14 @@ public partial class SubrosterDetailViewModel : ObservableObject
     partial void OnAccessSearchTextChanged(string value) => SearchAccessMembersCommand.Execute(null);
 }
 
-public record SubrosterAccessRow(Guid Id, Guid MemberId, string MemberName, bool IsFullAdmin);
+public record RosterAccessRow(Guid Id, Guid MemberId, string MemberName, bool IsFullAdmin);
 
-// Position (do DTO original) é um contador interno do algoritmo de fila — só cresce a cada
-// geração de escala e nunca reseta. Rank é a posição relativa 1-based dentro da fila atual,
-// que é o que a tela deve mostrar; ela muda se alguém for adicionado/removido/reordenado.
-public record SubrosterMemberRow(SubrosterMemberDto Dto, int Rank)
+// WorkdayPosition (do DTO original) é um contador interno do algoritmo de fila — só cresce a
+// cada geração de escala e nunca reseta. Rank é a posição relativa 1-based dentro da fila
+// atual, que é o que a tela deve mostrar; ela muda se alguém for adicionado/removido/reordenado.
+public record RosterMemberRow(RosterMemberDto Dto, int Rank)
 {
     public Guid Id => Dto.Id;
     public string MemberName => Dto.MemberName;
-    public string? PendingReturnPriorityReason => Dto.PendingReturnPriorityReason;
+    public string? PendingReturnPriorityReason => Dto.PendingReturnPriorityWorkdayReason;
 }

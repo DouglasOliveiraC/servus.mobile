@@ -11,11 +11,11 @@ public class CalendarDayOverrideService : ICalendarDayOverrideService
         _httpClient = httpClient;
     }
 
-    public async Task<Guid> CreateAsync(Guid rosterId, DateOnly date, bool isRestDay, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateAsync(Guid organizationId, DateOnly date, bool isRestDay, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync("api/calendar-day-override", new
         {
-            RosterId = rosterId,
+            OrganizationId = organizationId,
             Date = date,
             IsRestDay = isRestDay
         }, cancellationToken);
@@ -36,10 +36,10 @@ public class CalendarDayOverrideService : ICalendarDayOverrideService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<IReadOnlyList<CalendarDayOverrideDto>> GetByRangeAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CalendarDayOverrideDto>> GetByRangeAsync(Guid organizationId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
     {
         var result = await _httpClient.GetFromJsonAsync<List<CalendarDayOverrideDto>>(
-            $"api/calendar-day-override?rosterId={rosterId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}", cancellationToken);
+            $"api/calendar-day-override?organizationId={organizationId}&from={from:yyyy-MM-dd}&to={to:yyyy-MM-dd}", cancellationToken);
         return result ?? [];
     }
 

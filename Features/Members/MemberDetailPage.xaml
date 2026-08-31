@@ -145,8 +145,8 @@
 
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                                 <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                                    <Label Text="{Binding RosterName}" FontSize="10.5" FontAttributes="Bold" TextColor="{StaticResource Neutral400}" />
-                                                    <Label Text="{Binding SubrosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                    <Label Text="{Binding OrganizationName}" FontSize="10.5" FontAttributes="Bold" TextColor="{StaticResource Neutral400}" />
+                                                    <Label Text="{Binding RosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                                                 </VerticalStackLayout>
                                                 <Border
                                                     Grid.Column="1"
@@ -185,7 +185,7 @@
                                                     Grid.Row="1" Grid.Column="0"
                                                     Style="{StaticResource SubtleButton}"
                                                     Text="Abrir escala"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=OpenSubrosterCommand}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MemberDetailViewModel}}, Path=OpenRosterCommand}"
                                                     CommandParameter="{Binding .}" />
                                                 <buttons:SfButton
                                                     Grid.Row="1" Grid.Column="1"
@@ -224,19 +224,19 @@
 
                                 <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
                                     <inputs:SfComboBox
-                                        ItemsSource="{Binding Rosters}"
+                                        ItemsSource="{Binding Organizations}"
                                         DisplayMemberPath="Name"
-                                        SelectedItem="{Binding SelectedRoster}" />
+                                        SelectedItem="{Binding SelectedOrganization}" />
                                 </sf:SfTextInputLayout>
 
                                 <sf:SfTextInputLayout
                                     Hint="Escala"
                                     ContainerType="Outlined"
-                                    IsEnabled="{Binding SelectedRoster, Converter={StaticResource IsNotNullConverter}}">
+                                    IsEnabled="{Binding SelectedOrganization, Converter={StaticResource IsNotNullConverter}}">
                                     <inputs:SfComboBox
-                                        ItemsSource="{Binding AvailableSubrosters}"
+                                        ItemsSource="{Binding AvailableRosters}"
                                         DisplayMemberPath="Name"
-                                        SelectedItem="{Binding SelectedSubroster}" />
+                                        SelectedItem="{Binding SelectedRoster}" />
                                 </sf:SfTextInputLayout>
 
                                 <sf:SfTextInputLayout

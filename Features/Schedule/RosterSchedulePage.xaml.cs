@@ -1,10 +1,10 @@
 namespace Servus.Mobile.Features.Schedule;
 
-public partial class SubrosterSchedulePage : ContentPage
+public partial class RosterSchedulePage : ContentPage
 {
-    private readonly SubrosterScheduleViewModel _viewModel;
+    private readonly RosterScheduleViewModel _viewModel;
 
-    public SubrosterSchedulePage(SubrosterScheduleViewModel viewModel)
+    public RosterSchedulePage(RosterScheduleViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

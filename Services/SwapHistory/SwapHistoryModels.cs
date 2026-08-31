@@ -9,7 +9,7 @@ public enum SwapCauseDto
 
 public record SwapHistoryEntryDto(
     Guid Id,
-    Guid SubrosterId,
+    Guid RosterId,
     DateOnly Date,
     Guid FromMemberId,
     Guid ToMemberId,

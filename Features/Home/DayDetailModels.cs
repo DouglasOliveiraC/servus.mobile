@@ -1,3 +1,3 @@
 namespace Servus.Mobile.Features.Home;
 
-public record DaySubrosterGroup(Guid SubrosterId, string RosterName, string SubrosterName, IReadOnlyList<string> MemberNames);
+public record DayRosterGroup(Guid RosterId, string OrganizationName, string RosterName, IReadOnlyList<string> MemberNames);

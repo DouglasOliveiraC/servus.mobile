@@ -1,10 +1,10 @@
 namespace Servus.Mobile.Features.Admin;
 
-public partial class SubrosterSettingsPage : ContentPage
+public partial class OrganizationListPage : ContentPage
 {
-    private readonly SubrosterSettingsViewModel _viewModel;
+    private readonly OrganizationListViewModel _viewModel;
 
-    public SubrosterSettingsPage(SubrosterSettingsViewModel viewModel)
+    public OrganizationListPage(OrganizationListViewModel viewModel)
     {
         InitializeComponent();
         _viewModel = viewModel;

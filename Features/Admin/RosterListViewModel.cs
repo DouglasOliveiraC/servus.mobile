@@ -5,6 +5,8 @@ using Servus.Mobile.Services.Rosters;
 
 namespace Servus.Mobile.Features.Admin;
 
+[QueryProperty(nameof(OrganizationId), "organizationId")]
+[QueryProperty(nameof(OrganizationName), "organizationName")]
 public partial class RosterListViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
@@ -15,23 +17,50 @@ public partial class RosterListViewModel : ObservableObject
     }
 
     [ObservableProperty]
+    private Guid organizationId;
+
+    [ObservableProperty]
+    private string organizationName = string.Empty;
+
+    [ObservableProperty]
     private bool isBusy;
 
     [ObservableProperty]
     private bool hasError;
+
+    [ObservableProperty]
+    private bool isFormVisible;
+
+    [ObservableProperty]
+    private string newName = string.Empty;
+
+    [ObservableProperty]
+    private string newMinIntervalDays = "1";
+
+    [ObservableProperty]
+    private TimeSpan newServiceDayStartTime = new(8, 0, 0);
+
+    [ObservableProperty]
+    private string newMinDaysAfterReturnBeforeEligible = "0";
+
+    [ObservableProperty]
+    private bool newRequiresAdminApproval;
+
+    [ObservableProperty]
+    private bool newCreatorIsMember = true;
 
     public ObservableCollection<RosterDto> Rosters { get; } = [];
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
+        if (IsBusy || OrganizationId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
         try
         {
-            var rosters = await _rosterService.GetMyRostersAsync();
+            var rosters = await _rosterService.GetRostersAsync(OrganizationId);
             Rosters.Clear();
             foreach (var roster in rosters)
             {
@@ -49,36 +78,35 @@ public partial class RosterListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task CreateRosterAsync()
-    {
-        var name = await Shell.Current.DisplayPromptAsync("Nova organização", "Nome da organização (ex.: hospital, batalhão, equipe):");
-        if (string.IsNullOrWhiteSpace(name)) return;
-
-        try
-        {
-            await _rosterService.CreateRosterAsync(name.Trim());
-            await LoadAsync();
-        }
-        catch (Exception)
-        {
-            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível criar a organização.", "OK");
-        }
-    }
+    private void ToggleForm() => IsFormVisible = !IsFormVisible;
 
     [RelayCommand]
-    private async Task RenameRosterAsync(RosterDto roster)
+    private async Task CreateRosterAsync()
     {
-        var name = await Shell.Current.DisplayPromptAsync("Renomear organização", "Novo nome:", initialValue: roster.Name);
-        if (string.IsNullOrWhiteSpace(name) || name.Trim() == roster.Name) return;
+        if (string.IsNullOrWhiteSpace(NewName)) return;
+
+        var minInterval = int.TryParse(NewMinIntervalDays, out var mi) ? mi : 1;
+        var minDaysAfterReturn = int.TryParse(NewMinDaysAfterReturnBeforeEligible, out var md) ? md : 0;
+        var serviceDayStartTime = TimeOnly.FromTimeSpan(NewServiceDayStartTime);
 
         try
         {
-            await _rosterService.UpdateRosterNameAsync(roster.Id, name.Trim());
+            // serviceShifts: null auto-generates the default set (six 4-hour shifts) seeded
+            // from serviceDayStartTime — fine-tuning shift count/duration/capacity happens in
+            // RosterSettingsPage after creation, not here.
+            await _rosterService.CreateRosterAsync(OrganizationId, NewName.Trim(), minInterval, NewRequiresAdminApproval, NewCreatorIsMember, minDaysAfterReturn, fillShiftsEarliestFirst: true, serviceDayStartTime, QueueDirection.TopToBottom, QueueDirection.TopToBottom, serviceShifts: null);
+            NewName = string.Empty;
+            NewMinIntervalDays = "1";
+            NewServiceDayStartTime = new TimeSpan(8, 0, 0);
+            NewMinDaysAfterReturnBeforeEligible = "0";
+            NewRequiresAdminApproval = false;
+            NewCreatorIsMember = true;
+            IsFormVisible = false;
             await LoadAsync();
         }
         catch (Exception)
         {
-            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível renomear a organização.", "OK");
+            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível criar a escala.", "OK");
         }
     }
 
@@ -86,8 +114,8 @@ public partial class RosterListViewModel : ObservableObject
     private async Task DeleteRosterAsync(RosterDto roster)
     {
         var typed = await Shell.Current.DisplayPromptAsync(
-            "Excluir organização",
-            $"Esta ação exclui também todas as escalas e remove os vínculos e acessos de membros com \"{roster.Name}\" e não pode ser desfeita. Os membros continuam cadastrados no sistema.\n\nDigite \"{roster.Name}\" para confirmar:");
+            "Excluir escala",
+            $"Esta ação remove todos os vínculos e acessos de membros com \"{roster.Name}\" e não pode ser desfeita. Os membros continuam cadastrados no sistema.\n\nDigite \"{roster.Name}\" para confirmar:");
 
         if (typed?.Trim() != roster.Name) return;
 
@@ -98,26 +126,17 @@ public partial class RosterListViewModel : ObservableObject
         }
         catch (Exception)
         {
-            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível excluir a organização.", "OK");
+            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível excluir a escala.", "OK");
         }
     }
 
     [RelayCommand]
     private static async Task OpenRosterAsync(RosterDto roster)
     {
-        await Shell.Current.GoToAsync(nameof(SubrosterListPage), new Dictionary<string, object>
+        await Shell.Current.GoToAsync(nameof(RosterDetailPage), new Dictionary<string, object>
         {
             ["rosterId"] = roster.Id,
             ["rosterName"] = roster.Name
-        });
-    }
-
-    [RelayCommand]
-    private static async Task OpenCalendarOverridesAsync(RosterDto roster)
-    {
-        await Shell.Current.GoToAsync("CalendarOverridesPage", new Dictionary<string, object>
-        {
-            ["rosterId"] = roster.Id
         });
     }
 }

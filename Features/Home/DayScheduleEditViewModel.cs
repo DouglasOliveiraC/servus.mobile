@@ -8,20 +8,20 @@ using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 namespace Servus.Mobile.Features.Home;
 
 /// <summary>
-/// Lets an admin swap who is scheduled on one specific day of one Subroster — reuses the
+/// Lets an admin swap who is scheduled on one specific day of one Roster — reuses the
 /// admin-direct swap endpoint (PUT api/duty-assignment/{id}/swap), which unlike the peer
 /// SwapRequest flow needs no negotiation/approval. The candidate list for "who can this
-/// slot go to" is the Subroster's own queue (fetched once here, filtered in memory as the
+/// slot go to" is the Roster's own queue (fetched once here, filtered in memory as the
 /// admin types) rather than every Member in the system, matching the backend's own new
-/// validation that the replacement must belong to this Subroster's queue.
+/// validation that the replacement must belong to this Roster's queue.
 /// </summary>
-[QueryProperty(nameof(SubrosterId), "subrosterId")]
+[QueryProperty(nameof(RosterId), "rosterId")]
 [QueryProperty(nameof(DateText), "date")]
 public partial class DayScheduleEditViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
 
-    private IReadOnlyList<SubrosterMemberDto> _queue = [];
+    private IReadOnlyList<RosterMemberDto> _queue = [];
     private IReadOnlyList<ServiceShiftDto> _shifts = [];
 
     public DayScheduleEditViewModel(IRosterService rosterService)
@@ -30,7 +30,7 @@ public partial class DayScheduleEditViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid subrosterId;
+    private Guid rosterId;
 
     [ObservableProperty]
     private string dateText = string.Empty;
@@ -42,7 +42,7 @@ public partial class DayScheduleEditViewModel : ObservableObject
     private string dateLabel = string.Empty;
 
     [ObservableProperty]
-    private string subrosterName = string.Empty;
+    private string rosterName = string.Empty;
 
     [ObservableProperty]
     private bool isBusy;
@@ -91,14 +91,14 @@ public partial class DayScheduleEditViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || SubrosterId == Guid.Empty || Date == default) return;
+        if (IsBusy || RosterId == Guid.Empty || Date == default) return;
 
         IsBusy = true;
         HasError = false;
         try
         {
-            var schedule = await _rosterService.GetScheduleAsync(SubrosterId, Date, Date);
-            SubrosterName = schedule.SubrosterName;
+            var schedule = await _rosterService.GetScheduleAsync(RosterId, Date, Date);
+            RosterName = schedule.RosterName;
 
             var day = schedule.Days.FirstOrDefault(d => d.Date == Date);
             Assignments.Clear();
@@ -107,8 +107,8 @@ public partial class DayScheduleEditViewModel : ObservableObject
                 Assignments.Add(assignment);
             }
 
-            var subroster = await _rosterService.GetSubrosterByIdAsync(SubrosterId);
-            _shifts = subroster.ServiceShifts.OrderBy(s => s.SortOrder).ToList();
+            var roster = await _rosterService.GetRosterByIdAsync(RosterId);
+            _shifts = roster.ServiceShifts.OrderBy(s => s.SortOrder).ToList();
 
             ShiftGroups.Clear();
             foreach (var shift in _shifts)
@@ -117,7 +117,7 @@ public partial class DayScheduleEditViewModel : ObservableObject
                 ShiftGroups.Add(new ShiftGroup(shift, shiftAssignments));
             }
 
-            _queue = await _rosterService.GetSubrosterMembersAsync(SubrosterId);
+            _queue = await _rosterService.GetRosterMembersAsync(RosterId);
         }
         catch (Exception)
         {

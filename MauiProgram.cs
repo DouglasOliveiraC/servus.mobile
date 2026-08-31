@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Servus.Mobile.Features.Admin;
 using Servus.Mobile.Features.CalendarOverrides;
 using Servus.Mobile.Features.Home;
-using Servus.Mobile.Features.JoinRoster;
+using Servus.Mobile.Features.JoinOrganization;
 using Servus.Mobile.Features.Login;
 using Servus.Mobile.Features.Profile;
 using Servus.Mobile.Features.Register;
@@ -14,6 +14,7 @@ using Servus.Mobile.Services.CalendarOverrides;
 using Servus.Mobile.Services.Http;
 using Servus.Mobile.Services.MemberClaimCodes;
 using Servus.Mobile.Services.Members;
+using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 using Servus.Mobile.Services.SwapRequests;
@@ -46,6 +47,11 @@ public static class MauiProgram
 		{
 			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
 		});
+
+		builder.Services.AddHttpClient<IOrganizationService, OrganizationService>(client =>
+		{
+			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
+		}).AddHttpMessageHandler<AuthHeaderHandler>();
 
 		builder.Services.AddHttpClient<IRosterService, RosterService>(client =>
 		{
@@ -106,11 +112,11 @@ public static class MauiProgram
 		builder.Services.AddTransient<UnavailabilityViewModel>();
 		builder.Services.AddTransient<UnavailabilityPage>();
 
-		builder.Services.AddTransient<SubrosterScheduleViewModel>();
-		builder.Services.AddTransient<SubrosterSchedulePage>();
+		builder.Services.AddTransient<RosterScheduleViewModel>();
+		builder.Services.AddTransient<RosterSchedulePage>();
 
-		builder.Services.AddTransient<JoinRosterViewModel>();
-		builder.Services.AddTransient<JoinRosterPage>();
+		builder.Services.AddTransient<JoinOrganizationViewModel>();
+		builder.Services.AddTransient<JoinOrganizationPage>();
 
 		builder.Services.AddTransient<CalendarOverridesViewModel>();
 		builder.Services.AddTransient<CalendarOverridesPage>();
@@ -118,14 +124,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<ProfileViewModel>();
 		builder.Services.AddTransient<ProfilePage>();
 
+		builder.Services.AddTransient<OrganizationListViewModel>();
+		builder.Services.AddTransient<OrganizationListPage>();
 		builder.Services.AddTransient<RosterListViewModel>();
 		builder.Services.AddTransient<RosterListPage>();
-		builder.Services.AddTransient<SubrosterListViewModel>();
-		builder.Services.AddTransient<SubrosterListPage>();
-		builder.Services.AddTransient<SubrosterDetailViewModel>();
-		builder.Services.AddTransient<SubrosterDetailPage>();
-		builder.Services.AddTransient<SubrosterSettingsViewModel>();
-		builder.Services.AddTransient<SubrosterSettingsPage>();
+		builder.Services.AddTransient<RosterDetailViewModel>();
+		builder.Services.AddTransient<RosterDetailPage>();
+		builder.Services.AddTransient<RosterSettingsViewModel>();
+		builder.Services.AddTransient<RosterSettingsPage>();
 
 		builder.Services.AddTransient<Servus.Mobile.Features.Members.MembersViewModel>();
 		builder.Services.AddTransient<Servus.Mobile.Features.Members.MembersPage>();

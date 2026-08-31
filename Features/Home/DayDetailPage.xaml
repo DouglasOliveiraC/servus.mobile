@@ -38,7 +38,7 @@
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="local:DaySubrosterGroup">
+                        <DataTemplate x:DataType="local:DayRosterGroup">
                             <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
@@ -48,8 +48,8 @@
                                 <VerticalStackLayout Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="1">
-                                            <Label Text="{Binding SubrosterName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                                            <Label Text="{Binding RosterName}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                            <Label Text="{Binding RosterName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label Text="{Binding OrganizationName}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
                                         </VerticalStackLayout>
                                         <Label
                                             Grid.Column="1"

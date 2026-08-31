@@ -16,7 +16,7 @@
             <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
 
                 <VerticalStackLayout Spacing="1">
-                    <Label Text="{Binding SubrosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Label Text="{Binding RosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                     <Label Text="{Binding DateLabel}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
                 </VerticalStackLayout>
 

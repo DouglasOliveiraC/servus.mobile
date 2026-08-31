@@ -8,7 +8,7 @@ namespace Servus.Mobile.Features.Swaps;
 
 public record SwapHistoryEntryViewData(DateOnly Date, string FromMemberName, string ToMemberName, SwapCauseDto Cause);
 
-[QueryProperty(nameof(SubrosterId), "subrosterId")]
+[QueryProperty(nameof(RosterId), "rosterId")]
 public partial class SwapHistoryViewModel : ObservableObject
 {
     private readonly ISwapHistoryService _swapHistoryService;
@@ -21,7 +21,7 @@ public partial class SwapHistoryViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid subrosterId;
+    private Guid rosterId;
 
     [ObservableProperty]
     private bool isBusy;
@@ -34,7 +34,7 @@ public partial class SwapHistoryViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || SubrosterId == Guid.Empty) return;
+        if (IsBusy || RosterId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
@@ -43,7 +43,7 @@ public partial class SwapHistoryViewModel : ObservableObject
             var members = await _memberService.SearchMembersAsync(null);
             var namesById = members.ToDictionary(m => m.Id, m => m.Name);
 
-            var history = await _swapHistoryService.GetBySubrosterIdAsync(SubrosterId);
+            var history = await _swapHistoryService.GetByRosterIdAsync(RosterId);
 
             Entries.Clear();
             foreach (var entry in history.OrderByDescending(e => e.Date))

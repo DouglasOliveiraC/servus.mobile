@@ -2,13 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Services.MemberClaimCodes;
 
-namespace Servus.Mobile.Features.JoinRoster;
+namespace Servus.Mobile.Features.JoinOrganization;
 
-public partial class JoinRosterViewModel : ObservableObject
+public partial class JoinOrganizationViewModel : ObservableObject
 {
     private readonly IMemberClaimCodeService _claimCodeService;
 
-    public JoinRosterViewModel(IMemberClaimCodeService claimCodeService)
+    public JoinOrganizationViewModel(IMemberClaimCodeService claimCodeService)
     {
         _claimCodeService = claimCodeService;
     }

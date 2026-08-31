@@ -5,18 +5,18 @@ using Servus.Mobile.Services.Rosters;
 
 namespace Servus.Mobile.Features.Admin;
 
-[QueryProperty(nameof(SubrosterId), "subrosterId")]
-public partial class SubrosterSettingsViewModel : ObservableObject
+[QueryProperty(nameof(RosterId), "rosterId")]
+public partial class RosterSettingsViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
 
-    public SubrosterSettingsViewModel(IRosterService rosterService)
+    public RosterSettingsViewModel(IRosterService rosterService)
     {
         _rosterService = rosterService;
     }
 
     [ObservableProperty]
-    private Guid subrosterId;
+    private Guid rosterId;
 
     [ObservableProperty]
     private bool isBusy;
@@ -54,28 +54,35 @@ public partial class SubrosterSettingsViewModel : ObservableObject
 
     private bool _isLoading;
 
+    /// <summary>No UI exposes these yet — round-tripped as loaded so saving other fields
+    /// doesn't silently reset a roster's existing queue direction back to the default.</summary>
+    private QueueDirection _workdayQueueDirection = QueueDirection.TopToBottom;
+    private QueueDirection _weekendQueueDirection = QueueDirection.TopToBottom;
+
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || SubrosterId == Guid.Empty) return;
+        if (IsBusy || RosterId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
         _isLoading = true;
         try
         {
-            var subroster = await _rosterService.GetSubrosterByIdAsync(SubrosterId);
-            Name = subroster.Name;
-            MinIntervalDays = subroster.MinIntervalDays.ToString();
-            WorkdayShiftSize = subroster.WorkdayShiftSize;
-            RestDayShiftSize = subroster.RestDayShiftSize;
-            RequiresAdminApproval = subroster.RequiresAdminApproval;
-            MinDaysAfterReturnBeforeEligible = subroster.MinDaysAfterReturnBeforeEligible.ToString();
-            FillShiftsEarliestFirst = subroster.FillShiftsEarliestFirst;
-            ServiceDayStartTime = subroster.ServiceDayStartTime.ToTimeSpan();
+            var roster = await _rosterService.GetRosterByIdAsync(RosterId);
+            Name = roster.Name;
+            MinIntervalDays = roster.MinIntervalDays.ToString();
+            WorkdayShiftSize = roster.WorkdayShiftSize;
+            RestDayShiftSize = roster.RestDayShiftSize;
+            RequiresAdminApproval = roster.RequiresAdminApproval;
+            MinDaysAfterReturnBeforeEligible = roster.MinDaysAfterReturnBeforeEligible.ToString();
+            FillShiftsEarliestFirst = roster.FillShiftsEarliestFirst;
+            ServiceDayStartTime = roster.ServiceDayStartTime.ToTimeSpan();
+            _workdayQueueDirection = roster.WorkdayQueueDirection;
+            _weekendQueueDirection = roster.WeekendQueueDirection;
 
             Shifts.Clear();
-            foreach (var shift in subroster.ServiceShifts.OrderBy(s => s.SortOrder))
+            foreach (var shift in roster.ServiceShifts.OrderBy(s => s.SortOrder))
             {
                 Shifts.Add(new ServiceShiftEditRow(shift));
             }
@@ -112,13 +119,13 @@ public partial class SubrosterSettingsViewModel : ObservableObject
 
         // Full replace: an admin who opened this screen sees and can edit every shift, so an
         // empty Shifts list here really does mean "remove all shifts", not "leave untouched"
-        // (that's what a null list would mean instead, but SubrosterSettingsPage always shows
+        // (that's what a null list would mean instead, but RosterSettingsPage always shows
         // the current set already loaded).
         var shifts = Shifts.Select(s => s.ToInputDto()).ToList();
 
         try
         {
-            await _rosterService.UpdateSubrosterAsync(SubrosterId, Name.Trim(), minInterval, RequiresAdminApproval, minDaysAfterReturn, FillShiftsEarliestFirst, serviceDayStartTime, shifts);
+            await _rosterService.UpdateRosterAsync(RosterId, Name.Trim(), minInterval, RequiresAdminApproval, minDaysAfterReturn, FillShiftsEarliestFirst, serviceDayStartTime, _workdayQueueDirection, _weekendQueueDirection, shifts);
             await LoadAsync();
             await Shell.Current.DisplayAlertAsync("Configurações", "Alterações salvas.", "OK");
         }
@@ -129,7 +136,7 @@ public partial class SubrosterSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteSubrosterAsync()
+    private async Task DeleteRosterAsync()
     {
         var typed = await Shell.Current.DisplayPromptAsync(
             "Excluir escala",
@@ -139,7 +146,7 @@ public partial class SubrosterSettingsViewModel : ObservableObject
 
         try
         {
-            await _rosterService.DeleteSubrosterAsync(SubrosterId);
+            await _rosterService.DeleteRosterAsync(RosterId);
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception)

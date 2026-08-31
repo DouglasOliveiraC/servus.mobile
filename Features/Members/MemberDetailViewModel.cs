@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Services.MemberClaimCodes;
+using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.Unavailabilities;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
@@ -14,17 +15,20 @@ namespace Servus.Mobile.Features.Members;
 public partial class MemberDetailViewModel : ObservableObject
 {
     private readonly IMemberService _memberService;
+    private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
     private readonly IMemberClaimCodeService _claimCodeService;
     private readonly IMemberUnavailabilityService _unavailabilityService;
 
     public MemberDetailViewModel(
         IMemberService memberService,
+        IOrganizationService organizationService,
         IRosterService rosterService,
         IMemberClaimCodeService claimCodeService,
         IMemberUnavailabilityService unavailabilityService)
     {
         _memberService = memberService;
+        _organizationService = organizationService;
         _rosterService = rosterService;
         _claimCodeService = claimCodeService;
         _unavailabilityService = unavailabilityService;
@@ -66,17 +70,17 @@ public partial class MemberDetailViewModel : ObservableObject
     private bool isAddMembershipFormVisible;
 
     [ObservableProperty]
-    private RosterDto? selectedRoster;
+    private OrganizationDto? selectedOrganization;
 
     [ObservableProperty]
-    private SubrosterDto? selectedSubroster;
+    private RosterDto? selectedRoster;
 
     [ObservableProperty]
     private string newMembershipPosition = string.Empty;
 
-    public ObservableCollection<RosterDto> Rosters { get; } = [];
+    public ObservableCollection<OrganizationDto> Organizations { get; } = [];
 
-    public ObservableCollection<SubrosterDto> AvailableSubrosters { get; } = [];
+    public ObservableCollection<RosterDto> AvailableRosters { get; } = [];
 
     // Unavailability form
     [ObservableProperty]
@@ -123,7 +127,7 @@ public partial class MemberDetailViewModel : ObservableObject
 
             await LoadMembershipsAsync();
             await LoadUnavailabilitiesAsync();
-            await LoadRostersAsync();
+            await LoadOrganizationsAsync();
         }
         catch (Exception)
         {
@@ -145,10 +149,10 @@ public partial class MemberDetailViewModel : ObservableObject
             Memberships.Add(new MembershipRow(membership));
         }
 
-        var rosterCount = memberships.Select(m => m.RosterId).Distinct().Count();
+        var organizationCount = memberships.Select(m => m.OrganizationId).Distinct().Count();
         MembershipsSummary = memberships.Count == 0
             ? "Este membro ainda não está em nenhuma escala."
-            : $"{memberships.Count} escala(s) em {rosterCount} organização(ões).";
+            : $"{memberships.Count} escala(s) em {organizationCount} organização(ões).";
     }
 
     private async Task LoadUnavailabilitiesAsync()
@@ -170,13 +174,13 @@ public partial class MemberDetailViewModel : ObservableObject
         }
     }
 
-    private async Task LoadRostersAsync()
+    private async Task LoadOrganizationsAsync()
     {
-        var rosters = await _rosterService.GetMyRostersAsync();
-        Rosters.Clear();
-        foreach (var roster in rosters.OrderBy(r => r.Name))
+        var organizations = await _organizationService.GetMyOrganizationsAsync();
+        Organizations.Clear();
+        foreach (var organization in organizations.OrderBy(o => o.Name))
         {
-            Rosters.Add(roster);
+            Organizations.Add(organization);
         }
     }
 
@@ -214,38 +218,38 @@ public partial class MemberDetailViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedRosterChanged(RosterDto? value)
+    partial void OnSelectedOrganizationChanged(OrganizationDto? value)
     {
-        SelectedSubroster = null;
-        AvailableSubrosters.Clear();
+        SelectedRoster = null;
+        AvailableRosters.Clear();
         if (value is null) return;
 
-        _ = LoadAvailableSubrostersAsync(value.Id);
+        _ = LoadAvailableRostersAsync(value.Id);
     }
 
-    private async Task LoadAvailableSubrostersAsync(Guid rosterId)
+    private async Task LoadAvailableRostersAsync(Guid organizationId)
     {
         try
         {
-            var subrosters = await _rosterService.GetSubrostersAsync(rosterId);
-            var alreadyIn = Memberships.Select(m => m.SubrosterId).ToHashSet();
+            var rosters = await _rosterService.GetRostersAsync(organizationId);
+            var alreadyIn = Memberships.Select(m => m.RosterId).ToHashSet();
 
-            AvailableSubrosters.Clear();
-            foreach (var subroster in subrosters.Where(s => !alreadyIn.Contains(s.Id)).OrderBy(s => s.Name))
+            AvailableRosters.Clear();
+            foreach (var roster in rosters.Where(r => !alreadyIn.Contains(r.Id)).OrderBy(r => r.Name))
             {
-                AvailableSubrosters.Add(subroster);
+                AvailableRosters.Add(roster);
             }
         }
         catch (Exception)
         {
-            AvailableSubrosters.Clear();
+            AvailableRosters.Clear();
         }
     }
 
     [RelayCommand]
     private async Task AddMembershipAsync()
     {
-        if (SelectedSubroster is null)
+        if (SelectedRoster is null)
         {
             await Shell.Current.DisplayAlertAsync("Escala obrigatória", "Escolha a organização e a escala em que o membro vai entrar.", "OK");
             return;
@@ -255,7 +259,7 @@ public partial class MemberDetailViewModel : ObservableObject
         int rank;
         if (string.IsNullOrWhiteSpace(NewMembershipPosition))
         {
-            var queue = await _rosterService.GetSubrosterMembersAsync(SelectedSubroster.Id);
+            var queue = await _rosterService.GetRosterMembersAsync(SelectedRoster.Id);
             rank = queue.Count + 1;
         }
         else if (!int.TryParse(NewMembershipPosition, out rank) || rank < 1)
@@ -266,7 +270,7 @@ public partial class MemberDetailViewModel : ObservableObject
 
         try
         {
-            await _rosterService.AddSubrosterMemberAsync(SelectedSubroster.Id, MemberId, rank);
+            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, MemberId, rank, QueueType.Workday);
             ResetMembershipForm();
             IsAddMembershipFormVisible = false;
             await LoadMembershipsAsync();
@@ -282,7 +286,7 @@ public partial class MemberDetailViewModel : ObservableObject
     {
         var input = await Shell.Current.DisplayPromptAsync(
             "Posição na fila",
-            $"Nova posição de {Name} em \"{row.SubrosterName}\" (1 a {Math.Max(row.QueueSize, 1)}):",
+            $"Nova posição de {Name} em \"{row.RosterName}\" (1 a {Math.Max(row.QueueSize, 1)}):",
             initialValue: row.Rank.ToString(),
             keyboard: Keyboard.Numeric);
 
@@ -295,7 +299,7 @@ public partial class MemberDetailViewModel : ObservableObject
 
         try
         {
-            await _rosterService.ReorderSubrosterMemberAsync(row.SubrosterMemberId, newRank);
+            await _rosterService.ReorderRosterMemberAsync(row.RosterMemberId, newRank, QueueType.Workday);
             await LoadMembershipsAsync();
         }
         catch (Exception)
@@ -309,13 +313,13 @@ public partial class MemberDetailViewModel : ObservableObject
     {
         var confirmed = await Shell.Current.DisplayAlertAsync(
             "Sair da escala",
-            $"Remover {Name} da escala \"{row.SubrosterName}\"? O membro continua cadastrado e nas outras escalas.",
+            $"Remover {Name} da escala \"{row.RosterName}\"? O membro continua cadastrado e nas outras escalas.",
             "Remover", "Cancelar");
         if (!confirmed) return;
 
         try
         {
-            await _rosterService.RemoveSubrosterMemberAsync(row.SubrosterMemberId);
+            await _rosterService.RemoveRosterMemberAsync(row.RosterMemberId);
             await LoadMembershipsAsync();
         }
         catch (Exception)
@@ -333,20 +337,20 @@ public partial class MemberDetailViewModel : ObservableObject
             {
                 var confirmed = await Shell.Current.DisplayAlertAsync(
                     "Revogar gestão",
-                    $"Tirar a permissão de gerenciar \"{row.SubrosterName}\" de {Name}?",
+                    $"Tirar a permissão de gerenciar \"{row.RosterName}\" de {Name}?",
                     "Revogar", "Cancelar");
                 if (!confirmed) return;
 
-                await _rosterService.RevokeSubrosterAccessAsync(accessId);
+                await _rosterService.RevokeRosterAccessAsync(accessId);
             }
             else
             {
                 var isFullAdmin = await Shell.Current.DisplayAlertAsync(
                     "Conceder gestão",
-                    $"Que nível de acesso {Name} terá em \"{row.SubrosterName}\"?",
+                    $"Que nível de acesso {Name} terá em \"{row.RosterName}\"?",
                     "Administrador total", "Somente visualizar");
 
-                await _rosterService.GrantSubrosterAccessAsync(row.SubrosterId, MemberId, isFullAdmin);
+                await _rosterService.GrantRosterAccessAsync(row.RosterId, MemberId, isFullAdmin);
             }
 
             await LoadMembershipsAsync();
@@ -358,12 +362,12 @@ public partial class MemberDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenSubrosterAsync(MembershipRow row)
+    private async Task OpenRosterAsync(MembershipRow row)
     {
-        await Shell.Current.GoToAsync("SubrosterDetailPage", new Dictionary<string, object>
+        await Shell.Current.GoToAsync("RosterDetailPage", new Dictionary<string, object>
         {
-            ["subrosterId"] = row.SubrosterId,
-            ["subrosterName"] = row.SubrosterName
+            ["rosterId"] = row.RosterId,
+            ["rosterName"] = row.RosterName
         });
     }
 
@@ -425,14 +429,14 @@ public partial class MemberDetailViewModel : ObservableObject
         {
             // O código é emitido no escopo de uma organização; sem nenhuma escala o membro
             // ainda não pertence a nenhuma, então não há escopo para emitir.
-            var rosterId = Memberships.FirstOrDefault()?.RosterId;
-            if (rosterId is null)
+            var organizationId = Memberships.FirstOrDefault()?.OrganizationId;
+            if (organizationId is null)
             {
                 ClaimCodeStatusMessage = "Não foi possível gerar o código: este membro ainda não está em nenhuma escala.";
                 return;
             }
 
-            var result = await _claimCodeService.GenerateMemberClaimCodeAsync(rosterId.Value, MemberId, expiresAt: null);
+            var result = await _claimCodeService.GenerateMemberClaimCodeAsync(organizationId.Value, MemberId, expiresAt: null);
             GeneratedClaimCode = result.Code;
         }
         catch (Exception)
@@ -476,10 +480,10 @@ public partial class MemberDetailViewModel : ObservableObject
 
     private void ResetMembershipForm()
     {
+        SelectedOrganization = null;
         SelectedRoster = null;
-        SelectedSubroster = null;
         NewMembershipPosition = string.Empty;
-        AvailableSubrosters.Clear();
+        AvailableRosters.Clear();
     }
 }
 
@@ -487,22 +491,22 @@ public partial class MembershipRow : ObservableObject
 {
     public MembershipRow(MemberMembershipDto dto)
     {
-        SubrosterMemberId = dto.SubrosterMemberId;
-        SubrosterId = dto.SubrosterId;
-        SubrosterName = dto.SubrosterName;
+        RosterMemberId = dto.RosterMemberId;
         RosterId = dto.RosterId;
         RosterName = dto.RosterName;
+        OrganizationId = dto.OrganizationId;
+        OrganizationName = dto.OrganizationName;
         Rank = dto.Rank;
         QueueSize = dto.QueueSize;
         AccessId = dto.AccessId;
         IsFullAdmin = dto.IsFullAdmin;
     }
 
-    public Guid SubrosterMemberId { get; }
-    public Guid SubrosterId { get; }
-    public string SubrosterName { get; }
+    public Guid RosterMemberId { get; }
     public Guid RosterId { get; }
     public string RosterName { get; }
+    public Guid OrganizationId { get; }
+    public string OrganizationName { get; }
     public int Rank { get; }
     public int QueueSize { get; }
     public Guid? AccessId { get; }

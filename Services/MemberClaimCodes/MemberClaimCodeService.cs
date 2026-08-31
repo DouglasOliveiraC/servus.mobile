@@ -19,17 +19,17 @@ public class MemberClaimCodeService : IMemberClaimCodeService
         return result!;
     }
 
-    public async Task<GeneratedClaimCodeDto> GenerateMemberClaimCodeAsync(Guid rosterId, Guid memberId, DateTime? expiresAt, CancellationToken cancellationToken = default)
+    public async Task<GeneratedClaimCodeDto> GenerateMemberClaimCodeAsync(Guid organizationId, Guid memberId, DateTime? expiresAt, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members/{memberId}/claim-codes", new { ExpiresAt = expiresAt }, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync($"api/organization/{organizationId}/members/{memberId}/claim-codes", new { ExpiresAt = expiresAt }, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<GeneratedClaimCodeDto>(cancellationToken: cancellationToken);
         return result!;
     }
 
-    public async Task<GeneratedClaimCodeDto> GenerateRosterJoinCodeAsync(Guid rosterId, bool isSingleUse, DateTime? expiresAt, CancellationToken cancellationToken = default)
+    public async Task<GeneratedClaimCodeDto> GenerateOrganizationJoinCodeAsync(Guid organizationId, bool isSingleUse, DateTime? expiresAt, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/join-codes", new { IsSingleUse = isSingleUse, ExpiresAt = expiresAt }, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync($"api/organization/{organizationId}/join-codes", new { IsSingleUse = isSingleUse, ExpiresAt = expiresAt }, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<GeneratedClaimCodeDto>(cancellationToken: cancellationToken);
         return result!;

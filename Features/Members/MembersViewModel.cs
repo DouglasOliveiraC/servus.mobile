@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 using IMemberService = Servus.Mobile.Services.Members.IMemberService;
@@ -10,11 +11,13 @@ namespace Servus.Mobile.Features.Members;
 public partial class MembersViewModel : ObservableObject
 {
     private readonly IMemberService _memberService;
+    private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
 
-    public MembersViewModel(IMemberService memberService, IRosterService rosterService)
+    public MembersViewModel(IMemberService memberService, IOrganizationService organizationService, IRosterService rosterService)
     {
         _memberService = memberService;
+        _organizationService = organizationService;
         _rosterService = rosterService;
     }
 
@@ -37,21 +40,21 @@ public partial class MembersViewModel : ObservableObject
     private string newPhone = string.Empty;
 
     [ObservableProperty]
-    private RosterDto? selectedRoster;
+    private OrganizationDto? selectedOrganization;
 
     [ObservableProperty]
-    private SubrosterDto? selectedSubroster;
+    private RosterDto? selectedRoster;
 
     [ObservableProperty]
     private string newMemberPosition = "1";
 
     public ObservableCollection<MemberDto> AllMembers { get; } = [];
 
+    public ObservableCollection<OrganizationDto> Organizations { get; } = [];
+
     public ObservableCollection<RosterDto> Rosters { get; } = [];
 
-    public ObservableCollection<SubrosterDto> Subrosters { get; } = [];
-
-    public ObservableCollection<SubrosterMemberGroup> GroupedMembers { get; } = [];
+    public ObservableCollection<RosterMemberGroup> GroupedMembers { get; } = [];
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -69,14 +72,14 @@ public partial class MembersViewModel : ObservableObject
                 AllMembers.Add(member);
             }
 
-            var rosters = await _rosterService.GetMyRostersAsync();
-            Rosters.Clear();
-            foreach (var roster in rosters)
+            var organizations = await _organizationService.GetMyOrganizationsAsync();
+            Organizations.Clear();
+            foreach (var organization in organizations)
             {
-                Rosters.Add(roster);
+                Organizations.Add(organization);
             }
 
-            await LoadGroupedMembersAsync(rosters);
+            await LoadGroupedMembersAsync(organizations);
         }
         catch (Exception)
         {
@@ -88,40 +91,40 @@ public partial class MembersViewModel : ObservableObject
         }
     }
 
-    private async Task LoadGroupedMembersAsync(IReadOnlyList<RosterDto> rosters)
+    private async Task LoadGroupedMembersAsync(IReadOnlyList<OrganizationDto> organizations)
     {
         var membersById = AllMembers.ToDictionary(m => m.Id);
         var seenMemberIds = new HashSet<Guid>();
-        var groups = new List<SubrosterMemberGroup>();
+        var groups = new List<RosterMemberGroup>();
 
-        foreach (var roster in rosters)
+        foreach (var organization in organizations)
         {
-            IReadOnlyList<SubrosterDto> subrosters;
+            IReadOnlyList<RosterDto> rosters;
             try
             {
-                subrosters = await _rosterService.GetSubrostersAsync(roster.Id);
+                rosters = await _rosterService.GetRostersAsync(organization.Id);
             }
             catch (Exception)
             {
                 continue;
             }
 
-            foreach (var subroster in subrosters)
+            foreach (var roster in rosters)
             {
-                IReadOnlyList<SubrosterMemberDto> subrosterMembers;
+                IReadOnlyList<RosterMemberDto> rosterMembers;
                 try
                 {
-                    subrosterMembers = await _rosterService.GetSubrosterMembersAsync(subroster.Id);
+                    rosterMembers = await _rosterService.GetRosterMembersAsync(roster.Id);
                 }
                 catch (Exception)
                 {
                     continue;
                 }
 
-                var entries = subrosterMembers
-                    .Where(sm => membersById.ContainsKey(sm.MemberId))
-                    .OrderBy(sm => sm.Position)
-                    .Select((sm, index) => new MemberGroupEntry(membersById[sm.MemberId], index + 1))
+                var entries = rosterMembers
+                    .Where(rm => membersById.ContainsKey(rm.MemberId))
+                    .OrderBy(rm => rm.WorkdayPosition)
+                    .Select((rm, index) => new MemberGroupEntry(membersById[rm.MemberId], index + 1))
                     .ToList();
 
                 foreach (var entry in entries)
@@ -131,7 +134,7 @@ public partial class MembersViewModel : ObservableObject
 
                 if (entries.Count > 0)
                 {
-                    groups.Add(new SubrosterMemberGroup(roster.Name, subroster.Name, entries));
+                    groups.Add(new RosterMemberGroup(organization.Name, roster.Name, entries));
                 }
             }
         }
@@ -143,7 +146,7 @@ public partial class MembersViewModel : ObservableObject
 
         if (unassigned.Count > 0)
         {
-            groups.Add(new SubrosterMemberGroup("Sem organização", "Ainda não colocado em nenhuma escala", unassigned));
+            groups.Add(new RosterMemberGroup("Sem organização", "Ainda não colocado em nenhuma escala", unassigned));
         }
 
         GroupedMembers.Clear();
@@ -166,24 +169,24 @@ public partial class MembersViewModel : ObservableObject
         }
     }
 
-    partial void OnSelectedRosterChanged(RosterDto? value)
+    partial void OnSelectedOrganizationChanged(OrganizationDto? value)
     {
-        SelectedSubroster = null;
-        Subrosters.Clear();
+        SelectedRoster = null;
+        Rosters.Clear();
         if (value is null) return;
 
-        _ = LoadSubrostersAsync(value.Id);
+        _ = LoadRostersAsync(value.Id);
     }
 
-    private async Task LoadSubrostersAsync(Guid rosterId)
+    private async Task LoadRostersAsync(Guid organizationId)
     {
         try
         {
-            var subrosters = await _rosterService.GetSubrostersAsync(rosterId);
-            Subrosters.Clear();
-            foreach (var subroster in subrosters)
+            var rosters = await _rosterService.GetRostersAsync(organizationId);
+            Rosters.Clear();
+            foreach (var roster in rosters)
             {
-                Subrosters.Add(subroster);
+                Rosters.Add(roster);
             }
         }
         catch (Exception)
@@ -201,7 +204,7 @@ public partial class MembersViewModel : ObservableObject
         var email = string.IsNullOrWhiteSpace(NewEmail) ? null : NewEmail.Trim();
         var phone = string.IsNullOrWhiteSpace(NewPhone) ? null : NewPhone.Trim();
 
-        if (SelectedSubroster is null)
+        if (SelectedRoster is null)
         {
             await Shell.Current.DisplayAlertAsync("Escala obrigatória", "Todo membro precisa ser cadastrado já em uma organização e escala.", "OK");
             return;
@@ -221,7 +224,7 @@ public partial class MembersViewModel : ObservableObject
         {
             var position = int.TryParse(NewMemberPosition, out var p) ? p : 1;
             var created = await _memberService.CreateMemberAsync(name, email, phone);
-            await _rosterService.AddSubrosterMemberAsync(SelectedSubroster.Id, created.Id, position);
+            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, created.Id, position, QueueType.Workday);
 
             ResetForm();
             await LoadAsync();
@@ -247,9 +250,9 @@ public partial class MembersViewModel : ObservableObject
         NewName = string.Empty;
         NewEmail = string.Empty;
         NewPhone = string.Empty;
+        SelectedOrganization = null;
         SelectedRoster = null;
-        SelectedSubroster = null;
         NewMemberPosition = "1";
-        Subrosters.Clear();
+        Rosters.Clear();
     }
 }

@@ -6,8 +6,8 @@ using Servus.Mobile.Services.SwapRequests;
 
 namespace Servus.Mobile.Features.Schedule;
 
-[QueryProperty(nameof(SubrosterId), "subrosterId")]
-public partial class SubrosterScheduleViewModel : ObservableObject
+[QueryProperty(nameof(RosterId), "rosterId")]
+public partial class RosterScheduleViewModel : ObservableObject
 {
     private readonly IRosterService _rosterService;
     private readonly ISwapRequestService _swapRequestService;
@@ -15,17 +15,17 @@ public partial class SubrosterScheduleViewModel : ObservableObject
     private Guid? _myMemberId;
     private ScheduleAssignmentDto? _selectedMine;
 
-    public SubrosterScheduleViewModel(IRosterService rosterService, ISwapRequestService swapRequestService)
+    public RosterScheduleViewModel(IRosterService rosterService, ISwapRequestService swapRequestService)
     {
         _rosterService = rosterService;
         _swapRequestService = swapRequestService;
     }
 
     [ObservableProperty]
-    private Guid subrosterId;
+    private Guid rosterId;
 
     [ObservableProperty]
-    private string subrosterName = string.Empty;
+    private string rosterName = string.Empty;
 
     [ObservableProperty]
     private bool isBusy;
@@ -53,7 +53,7 @@ public partial class SubrosterScheduleViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || SubrosterId == Guid.Empty) return;
+        if (IsBusy || RosterId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
@@ -63,9 +63,9 @@ public partial class SubrosterScheduleViewModel : ObservableObject
 
             var from = DateOnly.FromDateTime(FromDate);
             var to = DateOnly.FromDateTime(ToDate);
-            var schedule = await _rosterService.GetScheduleAsync(SubrosterId, from, to);
+            var schedule = await _rosterService.GetScheduleAsync(RosterId, from, to);
 
-            SubrosterName = schedule.SubrosterName;
+            RosterName = schedule.RosterName;
 
             Days.Clear();
             foreach (var day in schedule.Days.OrderBy(d => d.Date))
@@ -73,7 +73,7 @@ public partial class SubrosterScheduleViewModel : ObservableObject
                 Days.Add(day);
             }
 
-            var counts = await _rosterService.GetDutyCountsAsync(SubrosterId);
+            var counts = await _rosterService.GetDutyCountsAsync(RosterId);
             var totalAssignments = counts.Sum(c => c.AssignmentCount);
             SummaryText = counts.Count > 0
                 ? $"{totalAssignments} plantão(ões) distribuídos entre {counts.Count} membro(s)"

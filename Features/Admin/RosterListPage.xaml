@@ -3,10 +3,12 @@
     x:Class="Servus.Mobile.Features.Admin.RosterListPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    xmlns:rosterModels="clr-namespace:Servus.Mobile.Services.Rosters"
     x:DataType="local:RosterListViewModel"
-    Title="Minhas organizações"
+    Title="{Binding OrganizationName}"
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
 
@@ -14,14 +16,78 @@
         <ScrollView>
             <VerticalStackLayout Padding="20,16,20,28" Spacing="16">
 
+                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" Padding="14">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Escalas desta organização" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                        <Label
+                            Text="Cada escala é uma fila independente de plantões, com seus próprios membros, ordem e regras de rodízio."
+                            FontSize="11.5"
+                            TextColor="{StaticResource Neutral700}" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <buttons:SfButton
-                    Text="+ Nova organização"
+                    Text="+ Nova escala"
                     Background="{StaticResource BrandPrimary}"
                     TextColor="White"
                     CornerRadius="9"
                     HeightRequest="46"
                     FontAttributes="Bold"
-                    Command="{Binding CreateRosterCommand}" />
+                    Command="{Binding ToggleFormCommand}" />
+
+                <Border
+                    IsVisible="{Binding IsFormVisible}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <VerticalStackLayout Spacing="10">
+                        <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                            <Entry Text="{Binding NewName}" />
+                        </sf:SfTextInputLayout>
+                        <sf:SfTextInputLayout Hint="Intervalo mínimo (dias)" ContainerType="Outlined">
+                            <Entry Text="{Binding NewMinIntervalDays}" Keyboard="Numeric" />
+                        </sf:SfTextInputLayout>
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Início do dia de serviço" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                            <TimePicker Time="{Binding NewServiceDayStartTime}" Format="HH:mm" />
+                            <Label
+                                Text="Os turnos padrão (seis quartos de 4h) são gerados a partir deste horário — ajuste a quantidade e duração depois em Configurações."
+                                FontSize="11"
+                                TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                        <sf:SfTextInputLayout Hint="Dias de respiro após retorno" ContainerType="Outlined">
+                            <Entry Text="{Binding NewMinDaysAfterReturnBeforeEligible}" Keyboard="Numeric" />
+                        </sf:SfTextInputLayout>
+                        <Label
+                            Text="Quantos dias após o fim do período fora o membro fica de fora da escala antes de voltar a ser elegível. Se a vez dele já tiver passado nesse meio tempo, ele é priorizado assim que esse respiro terminar."
+                            FontSize="11"
+                            TextColor="{StaticResource Neutral600}" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Requer aprovação do admin" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding NewRequiresAdminApproval}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Neutral200}" Margin="0,4" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Você entra na fila de plantões?" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                <Label Text="Gerenciar a escala não te coloca automaticamente na fila de plantões." FontSize="11" TextColor="{StaticResource Neutral600}" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding NewCreatorIsMember}" VerticalOptions="Center" />
+                        </Grid>
+
+                        <buttons:SfButton
+                            Text="Criar"
+                            Background="{StaticResource BrandPrimary}"
+                            TextColor="White"
+                            CornerRadius="9"
+                            HeightRequest="44"
+                            FontAttributes="Bold"
+                            Command="{Binding CreateRosterCommand}" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <Border
                     IsVisible="{Binding HasError}"
@@ -30,7 +96,7 @@
                     BackgroundColor="{StaticResource DangerSurface}"
                     Padding="14">
                     <Label
-                        Text="Não foi possível carregar suas organizações agora. Puxe para atualizar."
+                        Text="Não foi possível carregar as escalas agora."
                         TextColor="{StaticResource Danger}"
                         FontSize="13" />
                 </Border>
@@ -41,10 +107,7 @@
                     Stroke="Transparent"
                     BackgroundColor="White"
                     Padding="18">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Nenhuma organização criada ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                        <Label Text="Uma organização agrupa suas escalas de plantão. Toque em &quot;Nova organização&quot; para começar." FontSize="12.5" TextColor="{StaticResource Neutral600}" />
-                    </VerticalStackLayout>
+                    <Label Text="Nenhuma escala criada ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                 </Border>
 
                 <CollectionView ItemsSource="{Binding Rosters}" IsVisible="{Binding Rosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
@@ -52,20 +115,10 @@
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="local:RosterDto">
+                        <DataTemplate x:DataType="rosterModels:RosterDto">
                             <SwipeView>
                                 <SwipeView.RightItems>
                                     <SwipeItems>
-                                        <SwipeItem
-                                            Text="Dias especiais"
-                                            BackgroundColor="{StaticResource Neutral600}"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=OpenCalendarOverridesCommand}"
-                                            CommandParameter="{Binding .}" />
-                                        <SwipeItem
-                                            Text="Renomear"
-                                            BackgroundColor="{StaticResource BrandPrimary}"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterListViewModel}}, Path=RenameRosterCommand}"
-                                            CommandParameter="{Binding .}" />
                                         <SwipeItem
                                             Text="Excluir"
                                             BackgroundColor="{StaticResource Danger}"
@@ -83,7 +136,18 @@
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="2">
                                             <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                                            <Label Text="{Binding CreatedAt, StringFormat='Criada em {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                                            <Label FontSize="12" TextColor="{StaticResource Neutral600}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="Intervalo mín. " />
+                                                        <Span Text="{Binding MinIntervalDays}" />
+                                                        <Span Text="d · turno " />
+                                                        <Span Text="{Binding WorkdayShiftSize}" />
+                                                        <Span Text="/" />
+                                                        <Span Text="{Binding RestDayShiftSize}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
                                         </VerticalStackLayout>
                                         <Label
                                             Grid.Column="1"

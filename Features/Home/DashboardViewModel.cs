@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Features.Login;
 using Servus.Mobile.Services.Auth;
+using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 
@@ -17,12 +18,14 @@ public partial class DashboardViewModel : ObservableObject
     private const int VisibleDaysIncrement = 3;
     private const int PreviewNamesPerDay = 4;
 
+    private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
     private readonly IAuthService _authService;
     private readonly ISwapHistoryService _swapHistoryService;
 
-    public DashboardViewModel(IRosterService rosterService, IAuthService authService, ISwapHistoryService swapHistoryService)
+    public DashboardViewModel(IOrganizationService organizationService, IRosterService rosterService, IAuthService authService, ISwapHistoryService swapHistoryService)
     {
+        _organizationService = organizationService;
         _rosterService = rosterService;
         _authService = authService;
         _swapHistoryService = swapHistoryService;
@@ -42,10 +45,10 @@ public partial class DashboardViewModel : ObservableObject
     partial void OnUserEmailChanged(string? value) => OnPropertyChanged(nameof(UserInitial));
 
     [ObservableProperty]
-    private int rosterCount;
+    private int organizationCount;
 
     [ObservableProperty]
-    private int subrosterCount;
+    private int rosterCount;
 
     [ObservableProperty]
     private int upcomingDutyCount;
@@ -60,12 +63,12 @@ public partial class DashboardViewModel : ObservableObject
     private NextDutyInfo? nextDuty;
 
     [ObservableProperty]
-    private bool isAdminOfAnyRoster;
+    private bool isAdminOfAnyOrganization;
 
     [ObservableProperty]
     private int visibleDailyDutyCount = InitialVisibleDays;
 
-    public ObservableCollection<RosterSummary> Rosters { get; } = [];
+    public ObservableCollection<OrganizationSummary> Organizations { get; } = [];
 
     public ObservableCollection<UpcomingDuty> UpcomingDuties { get; } = [];
 
@@ -97,16 +100,16 @@ public partial class DashboardViewModel : ObservableObject
             UserEmail = user?.Email;
 
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
-            var rosters = await _rosterService.GetMyRostersAsync();
-            IsAdminOfAnyRoster = rosters.Any(r => r.IsAdmin);
+            var organizations = await _organizationService.GetMyOrganizationsAsync();
+            IsAdminOfAnyOrganization = organizations.Any(o => o.IsAdmin);
 
-            Rosters.Clear();
+            Organizations.Clear();
             UpcomingDuties.Clear();
 
             var today = DateOnly.FromDateTime(DateTime.Today);
             var windowEnd = today.AddDays(UpcomingWindowDays);
 
-            var totalSubrosters = 0;
+            var totalRosters = 0;
             var totalUpcoming = 0;
 
             var loadByMember = new Dictionary<string, int>();
@@ -120,18 +123,18 @@ public partial class DashboardViewModel : ObservableObject
 
             var swapEntries = new List<SwapHistoryEntryDto>();
 
-            foreach (var roster in rosters)
+            foreach (var organization in organizations)
             {
-                var subrosters = await _rosterService.GetSubrostersAsync(roster.Id);
-                totalSubrosters += subrosters.Count;
+                var rosters = await _rosterService.GetRostersAsync(organization.Id);
+                totalRosters += rosters.Count;
 
-                var upcomingForRoster = 0;
+                var upcomingForOrganization = 0;
 
-                foreach (var subroster in subrosters)
+                foreach (var roster in rosters)
                 {
-                    var schedule = await _rosterService.GetScheduleAsync(subroster.Id, today, windowEnd);
+                    var schedule = await _rosterService.GetScheduleAsync(roster.Id, today, windowEnd);
 
-                    if (roster.IsAdmin)
+                    if (organization.IsAdmin)
                     {
                         foreach (var day in schedule.Days)
                         {
@@ -144,37 +147,37 @@ public partial class DashboardViewModel : ObservableObject
 
                     foreach (var day in schedule.Days.Where(d => d.Assignments.Count > 0).OrderBy(d => d.Date))
                     {
-                        upcomingForRoster += day.Assignments.Count;
+                        upcomingForOrganization += day.Assignments.Count;
                         var isMine = myMemberId is not null && day.Assignments.Any(a => a.MemberId == myMemberId);
                         UpcomingDuties.Add(new UpcomingDuty(
+                            organization.Name,
                             roster.Name,
-                            subroster.Name,
                             day.Date,
                             day.Assignments.Select(a => a.MemberName).ToList(),
                             isMine));
 
-                        if (roster.IsAdmin && dailyTeam.ContainsKey(day.Date))
+                        if (organization.IsAdmin && dailyTeam.ContainsKey(day.Date))
                         {
                             dailyTeam[day.Date] += day.Assignments.Count;
                         }
                     }
 
-                    var dutyCounts = await _rosterService.GetDutyCountsAsync(subroster.Id);
+                    var dutyCounts = await _rosterService.GetDutyCountsAsync(roster.Id);
                     foreach (var count in dutyCounts)
                     {
                         loadByMember[count.MemberName] = loadByMember.GetValueOrDefault(count.MemberName) + count.AssignmentCount;
                     }
 
-                    var history = await _swapHistoryService.GetBySubrosterIdAsync(subroster.Id);
+                    var history = await _swapHistoryService.GetByRosterIdAsync(roster.Id);
                     swapEntries.AddRange(history);
                 }
 
-                totalUpcoming += upcomingForRoster;
-                Rosters.Add(new RosterSummary(roster.Id, roster.Name, subrosters.Count, upcomingForRoster));
+                totalUpcoming += upcomingForOrganization;
+                Organizations.Add(new OrganizationSummary(organization.Id, organization.Name, rosters.Count, upcomingForOrganization));
             }
 
-            RosterCount = rosters.Count;
-            SubrosterCount = totalSubrosters;
+            OrganizationCount = organizations.Count;
+            RosterCount = totalRosters;
             UpcomingDutyCount = totalUpcoming;
             MyUpcomingDutyCount = UpcomingDuties.Count(d => d.IsMine);
 
@@ -192,7 +195,7 @@ public partial class DashboardViewModel : ObservableObject
                 DailyDuties.Add(new DailyDutySummary(
                     group.Key,
                     group.Sum(d => d.MemberNames.Count),
-                    group.Select(d => d.SubrosterName).Distinct().Count(),
+                    group.Select(d => d.RosterName).Distinct().Count(),
                     group.Any(d => d.IsMine),
                     group.SelectMany(d => d.MemberNames).Take(PreviewNamesPerDay).ToList()));
             }
@@ -205,7 +208,7 @@ public partial class DashboardViewModel : ObservableObject
             }
 
             CoverageDays.Clear();
-            if (IsAdminOfAnyRoster)
+            if (IsAdminOfAnyOrganization)
             {
                 foreach (var date in dailyRequired.Keys.OrderBy(d => d))
                 {
@@ -221,7 +224,7 @@ public partial class DashboardViewModel : ObservableObject
             var nextMine = UpcomingDuties.FirstOrDefault(d => d.IsMine);
             NextDuty = nextMine is null
                 ? null
-                : new NextDutyInfo(nextMine.RosterName, nextMine.SubrosterName, nextMine.Date, nextMine.Date.DayNumber - today.DayNumber);
+                : new NextDutyInfo(nextMine.OrganizationName, nextMine.RosterName, nextMine.Date, nextMine.Date.DayNumber - today.DayNumber);
 
             BuildSwapTrend(swapEntries, today);
         }

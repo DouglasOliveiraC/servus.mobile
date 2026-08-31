@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Servus.Mobile.Features.Schedule.SubrosterSchedulePage"
+    x:Class="Servus.Mobile.Features.Schedule.RosterSchedulePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Schedule"
     xmlns:rosters="clr-namespace:Servus.Mobile.Services.Rosters"
-    x:DataType="local:SubrosterScheduleViewModel"
+    x:DataType="local:RosterScheduleViewModel"
     Title="Quadro de plantões"
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
@@ -14,7 +14,7 @@
         <ScrollView>
             <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
 
-                <Label Text="{Binding SubrosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Label Text="{Binding RosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
 
                 <Border
                     IsVisible="{Binding HasError}"
@@ -102,7 +102,7 @@
                                                         TextColor="{StaticResource BrandPrimary}"
                                                         VerticalOptions="Center">
                                                         <Label.GestureRecognizers>
-                                                            <TapGestureRecognizer Command="{Binding SelectAssignmentCommand, Source={RelativeSource AncestorType={x:Type local:SubrosterScheduleViewModel}}}" CommandParameter="{Binding .}" />
+                                                            <TapGestureRecognizer Command="{Binding SelectAssignmentCommand, Source={RelativeSource AncestorType={x:Type local:RosterScheduleViewModel}}}" CommandParameter="{Binding .}" />
                                                         </Label.GestureRecognizers>
                                                     </Label>
                                                 </Grid>

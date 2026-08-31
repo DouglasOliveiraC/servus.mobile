@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Servus.Mobile.Features.JoinRoster.JoinRosterPage"
+    x:Class="Servus.Mobile.Features.JoinOrganization.JoinOrganizationPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
-    xmlns:local="clr-namespace:Servus.Mobile.Features.JoinRoster"
-    x:DataType="local:JoinRosterViewModel"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.JoinOrganization"
+    x:DataType="local:JoinOrganizationViewModel"
     Title="Entrar em organização"
     BackgroundColor="{StaticResource White}"
     Shell.NavBarIsVisible="True">

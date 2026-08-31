@@ -11,9 +11,9 @@ public class SwapHistoryService : ISwapHistoryService
         _httpClient = httpClient;
     }
 
-    public async Task<IReadOnlyList<SwapHistoryEntryDto>> GetBySubrosterIdAsync(Guid subrosterId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<SwapHistoryEntryDto>> GetByRosterIdAsync(Guid rosterId, CancellationToken cancellationToken = default)
     {
-        var result = await _httpClient.GetFromJsonAsync<List<SwapHistoryEntryDto>>($"api/swap-history?subrosterId={subrosterId}", cancellationToken);
+        var result = await _httpClient.GetFromJsonAsync<List<SwapHistoryEntryDto>>($"api/swap-history?rosterId={rosterId}", cancellationToken);
         return result ?? [];
     }
 }

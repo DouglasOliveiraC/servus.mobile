@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Servus.Mobile.Features.Admin.SubrosterSettingsPage"
+    x:Class="Servus.Mobile.Features.Admin.RosterSettingsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
-    x:DataType="local:SubrosterSettingsViewModel"
+    x:DataType="local:RosterSettingsViewModel"
     Title="Configurações"
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
@@ -107,7 +107,7 @@
                                                         VerticalOptions="Center">
                                                         <Label.GestureRecognizers>
                                                             <TapGestureRecognizer
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterSettingsViewModel}}, Path=RemoveShiftCommand}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterSettingsViewModel}}, Path=RemoveShiftCommand}"
                                                                 CommandParameter="{Binding .}" />
                                                         </Label.GestureRecognizers>
                                                     </Label>
@@ -163,7 +163,7 @@
                                 CornerRadius="9"
                                 HeightRequest="44"
                                 FontAttributes="Bold"
-                                Command="{Binding DeleteSubrosterCommand}" />
+                                Command="{Binding DeleteRosterCommand}" />
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

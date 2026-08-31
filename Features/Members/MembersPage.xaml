@@ -54,10 +54,10 @@
                         <Label Text="Organização e escala" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                         <Label Text="Todo membro precisa já entrar em uma escala — não é possível cadastrar um membro solto." FontSize="11" TextColor="{StaticResource Neutral600}" />
                         <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
-                            <inputs:SfComboBox ItemsSource="{Binding Rosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedRoster}" />
+                            <inputs:SfComboBox ItemsSource="{Binding Organizations}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedOrganization}" />
                         </sf:SfTextInputLayout>
-                        <sf:SfTextInputLayout Hint="Escala" ContainerType="Outlined" IsEnabled="{Binding SelectedRoster, Converter={StaticResource IsNotNullConverter}}">
-                            <inputs:SfComboBox ItemsSource="{Binding Subrosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedSubroster}" />
+                        <sf:SfTextInputLayout Hint="Escala" ContainerType="Outlined" IsEnabled="{Binding SelectedOrganization, Converter={StaticResource IsNotNullConverter}}">
+                            <inputs:SfComboBox ItemsSource="{Binding Rosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedRoster}" />
                         </sf:SfTextInputLayout>
                         <sf:SfTextInputLayout Hint="Posição na fila" ContainerType="Outlined">
                             <Entry Text="{Binding NewMemberPosition}" Keyboard="Numeric" />
@@ -103,10 +103,10 @@
                         <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
                     </CollectionView.ItemsLayout>
                     <CollectionView.GroupHeaderTemplate>
-                        <DataTemplate x:DataType="local:SubrosterMemberGroup">
+                        <DataTemplate x:DataType="local:RosterMemberGroup">
                             <VerticalStackLayout Padding="2,14,2,4" Spacing="1">
-                                <Label Text="{Binding RosterName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                <Label Text="{Binding SubrosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                <Label Text="{Binding OrganizationName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                <Label Text="{Binding RosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                             </VerticalStackLayout>
                         </DataTemplate>
                     </CollectionView.GroupHeaderTemplate>

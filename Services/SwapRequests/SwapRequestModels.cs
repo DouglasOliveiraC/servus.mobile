@@ -12,7 +12,7 @@ public enum SwapRequestStatusDto
 
 public record SwapRequestDto(
     Guid Id,
-    Guid SubrosterId,
+    Guid RosterId,
     Guid? RequestingDutyAssignmentId,
     Guid? TargetDutyAssignmentId,
     Guid RequestingMemberId,

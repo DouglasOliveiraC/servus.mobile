@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ContentPage
-    x:Class="Servus.Mobile.Features.Admin.SubrosterDetailPage"
+    x:Class="Servus.Mobile.Features.Admin.RosterDetailPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
     xmlns:controls="clr-namespace:Servus.Mobile.Controls"
-    x:DataType="local:SubrosterDetailViewModel"
-    Title="{Binding SubrosterName}"
+    xmlns:rosterModels="clr-namespace:Servus.Mobile.Services.Rosters"
+    x:DataType="local:RosterDetailViewModel"
+    Title="{Binding RosterName}"
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
 
@@ -82,14 +83,14 @@
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:SubrosterMemberRow">
+                            <DataTemplate x:DataType="local:RosterMemberRow">
                                 <SwipeView>
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem
                                                 Text="Remover"
                                                 BackgroundColor="{StaticResource Danger}"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterDetailViewModel}}, Path=RemoveMemberCommand}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=RemoveMemberCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </SwipeItems>
                                     </SwipeView.RightItems>
@@ -175,7 +176,7 @@
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:MemberDutyCountDto">
+                            <DataTemplate x:DataType="rosterModels:MemberDutyCountDto">
                                 <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
@@ -235,14 +236,14 @@
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:SubrosterAccessRow">
+                            <DataTemplate x:DataType="local:RosterAccessRow">
                                 <SwipeView>
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem
                                                 Text="Revogar"
                                                 BackgroundColor="{StaticResource Danger}"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SubrosterDetailViewModel}}, Path=RevokeAccessCommand}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=RevokeAccessCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </SwipeItems>
                                     </SwipeView.RightItems>

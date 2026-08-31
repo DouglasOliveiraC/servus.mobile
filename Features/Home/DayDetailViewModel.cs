@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 
 namespace Servus.Mobile.Features.Home;
@@ -9,17 +10,19 @@ namespace Servus.Mobile.Features.Home;
 /// <summary>
 /// Date arrives as a "yyyy-MM-dd" query string, not a DateOnly — Shell query params only
 /// support simple primitives/strings, matching the rest of the app's navigation (see
-/// SubrosterScheduleViewModel's Guid QueryProperty). The page re-fetches assignments for
-/// every subroster the user belongs to and filters down to this one date, the same scan
+/// RosterScheduleViewModel's Guid QueryProperty). The page re-fetches assignments for
+/// every roster the user belongs to and filters down to this one date, the same scan
 /// DashboardViewModel already does for the whole window — there is no per-day endpoint.
 /// </summary>
 [QueryProperty(nameof(DateText), "date")]
 public partial class DayDetailViewModel : ObservableObject
 {
+    private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
 
-    public DayDetailViewModel(IRosterService rosterService)
+    public DayDetailViewModel(IOrganizationService organizationService, IRosterService rosterService)
     {
+        _organizationService = organizationService;
         _rosterService = rosterService;
     }
 
@@ -38,7 +41,7 @@ public partial class DayDetailViewModel : ObservableObject
     [ObservableProperty]
     private bool hasError;
 
-    public ObservableCollection<DaySubrosterGroup> Groups { get; } = [];
+    public ObservableCollection<DayRosterGroup> Groups { get; } = [];
 
     partial void OnDateTextChanged(string value)
     {
@@ -59,22 +62,22 @@ public partial class DayDetailViewModel : ObservableObject
         HasError = false;
         try
         {
-            var rosters = await _rosterService.GetMyRostersAsync();
+            var organizations = await _organizationService.GetMyOrganizationsAsync();
 
             Groups.Clear();
-            foreach (var roster in rosters)
+            foreach (var organization in organizations)
             {
-                var subrosters = await _rosterService.GetSubrostersAsync(roster.Id);
-                foreach (var subroster in subrosters)
+                var rosters = await _rosterService.GetRostersAsync(organization.Id);
+                foreach (var roster in rosters)
                 {
-                    var schedule = await _rosterService.GetScheduleAsync(subroster.Id, Date, Date);
+                    var schedule = await _rosterService.GetScheduleAsync(roster.Id, Date, Date);
                     var day = schedule.Days.FirstOrDefault(d => d.Date == Date);
                     if (day is null || day.Assignments.Count == 0) continue;
 
-                    Groups.Add(new DaySubrosterGroup(
-                        subroster.Id,
+                    Groups.Add(new DayRosterGroup(
+                        roster.Id,
+                        organization.Name,
                         roster.Name,
-                        subroster.Name,
                         day.Assignments.Select(a => a.MemberName).ToList()));
                 }
             }
@@ -90,11 +93,11 @@ public partial class DayDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenEditAsync(DaySubrosterGroup group)
+    private async Task OpenEditAsync(DayRosterGroup group)
     {
         await Shell.Current.GoToAsync(nameof(DayScheduleEditPage), new Dictionary<string, object>
         {
-            ["subrosterId"] = group.SubrosterId,
+            ["rosterId"] = group.RosterId,
             ["date"] = DateText
         });
     }

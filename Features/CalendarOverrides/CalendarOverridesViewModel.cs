@@ -5,7 +5,7 @@ using Servus.Mobile.Services.CalendarOverrides;
 
 namespace Servus.Mobile.Features.CalendarOverrides;
 
-[QueryProperty(nameof(RosterId), "rosterId")]
+[QueryProperty(nameof(OrganizationId), "organizationId")]
 public partial class CalendarOverridesViewModel : ObservableObject
 {
     private readonly ICalendarDayOverrideService _overrideService;
@@ -16,7 +16,7 @@ public partial class CalendarOverridesViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private Guid rosterId;
+    private Guid organizationId;
 
     [ObservableProperty]
     private bool isBusy;
@@ -41,7 +41,7 @@ public partial class CalendarOverridesViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy || RosterId == Guid.Empty) return;
+        if (IsBusy || OrganizationId == Guid.Empty) return;
 
         IsBusy = true;
         HasError = false;
@@ -49,7 +49,7 @@ public partial class CalendarOverridesViewModel : ObservableObject
         {
             var from = DateOnly.FromDateTime(RangeFrom);
             var to = DateOnly.FromDateTime(RangeTo);
-            var overrides = await _overrideService.GetByRangeAsync(RosterId, from, to);
+            var overrides = await _overrideService.GetByRangeAsync(OrganizationId, from, to);
 
             Overrides.Clear();
             foreach (var item in overrides.OrderBy(o => o.Date))
@@ -72,7 +72,7 @@ public partial class CalendarOverridesViewModel : ObservableObject
     {
         try
         {
-            await _overrideService.CreateAsync(RosterId, DateOnly.FromDateTime(NewDate), NewIsRestDay);
+            await _overrideService.CreateAsync(OrganizationId, DateOnly.FromDateTime(NewDate), NewIsRestDay);
             await LoadAsync();
         }
         catch (Exception)

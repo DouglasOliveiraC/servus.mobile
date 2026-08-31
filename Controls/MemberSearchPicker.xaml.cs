@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Servus.Mobile.Controls;
 
-// Reúne a estrutura duplicada em SubrosterDetailPage (busca de membro para "Adicionar"
+// Reúne a estrutura duplicada em RosterDetailPage (busca de membro para "Adicionar"
 // e para "Conceder acesso"): SfTextInputLayout de busca + CollectionView de resultados
 // clicáveis. Cada tela mantém seu próprio ViewModel/estado de busca por trás — este
 // controle só une o binding de texto, a lista e o comando de seleção num único bloco
