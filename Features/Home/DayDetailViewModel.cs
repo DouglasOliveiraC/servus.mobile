@@ -2,8 +2,11 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Home;
 
@@ -15,12 +18,17 @@ namespace Servus.Mobile.Features.Home;
 /// DashboardViewModel already does for the whole window — there is no per-day endpoint.
 /// </summary>
 [QueryProperty(nameof(DateText), "date")]
-public partial class DayDetailViewModel : ObservableObject
+public partial class DayDetailViewModel : BaseViewModel
 {
     private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
 
-    public DayDetailViewModel(IOrganizationService organizationService, IRosterService rosterService)
+    public DayDetailViewModel(
+        IOrganizationService organizationService,
+        IRosterService rosterService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _organizationService = organizationService;
         _rosterService = rosterService;
@@ -93,12 +101,10 @@ public partial class DayDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenEditAsync(DayRosterGroup group)
-    {
-        await Shell.Current.GoToAsync(nameof(DayScheduleEditPage), new Dictionary<string, object>
+    private Task OpenEditAsync(DayRosterGroup group) =>
+        NavigationService.GoToAsync(Routes.DayScheduleEdit, new Dictionary<string, object>
         {
             ["rosterId"] = group.RosterId,
             ["date"] = DateText
         });
-    }
 }

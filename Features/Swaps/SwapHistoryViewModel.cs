@@ -1,20 +1,28 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.Members;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.SwapHistory;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Swaps;
 
 public record SwapHistoryEntryViewData(DateOnly Date, string FromMemberName, string ToMemberName, SwapCauseDto Cause);
 
 [QueryProperty(nameof(RosterId), "rosterId")]
-public partial class SwapHistoryViewModel : ObservableObject
+public partial class SwapHistoryViewModel : BaseViewModel
 {
     private readonly ISwapHistoryService _swapHistoryService;
     private readonly IMemberService _memberService;
 
-    public SwapHistoryViewModel(ISwapHistoryService swapHistoryService, IMemberService memberService)
+    public SwapHistoryViewModel(
+        ISwapHistoryService swapHistoryService,
+        IMemberService memberService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _swapHistoryService = swapHistoryService;
         _memberService = memberService;

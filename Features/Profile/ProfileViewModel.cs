@@ -1,15 +1,17 @@
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Servus.Mobile.Features.Login;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Members;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using Servus.Mobile.Services.Users;
 
 namespace Servus.Mobile.Features.Profile;
 
-public partial class ProfileViewModel : ObservableObject
+public partial class ProfileViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
     private readonly IUserService _userService;
@@ -18,7 +20,14 @@ public partial class ProfileViewModel : ObservableObject
 
     private Guid _userId;
 
-    public ProfileViewModel(IAuthService authService, IUserService userService, IRosterService rosterService, IMemberService memberService)
+    public ProfileViewModel(
+        IAuthService authService,
+        IUserService userService,
+        IRosterService rosterService,
+        IMemberService memberService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _authService = authService;
         _userService = userService;
@@ -206,7 +215,7 @@ public partial class ProfileViewModel : ObservableObject
                 "Senha alterada",
                 "Sua senha foi alterada com sucesso. Entre novamente com a nova senha.",
                 "OK");
-            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+            await NavigationService.GoToRootAsync(Routes.Login);
         }
         catch (Exception)
         {
@@ -292,7 +301,7 @@ public partial class ProfileViewModel : ObservableObject
         {
             await _userService.DeleteAccountAsync(_userId);
             await _authService.LogoutAsync();
-            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+            await NavigationService.GoToRootAsync(Routes.Login);
         }
         catch (Exception)
         {
@@ -304,6 +313,6 @@ public partial class ProfileViewModel : ObservableObject
     private async Task LogoutAsync()
     {
         await _authService.LogoutAsync();
-        await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+        await NavigationService.GoToRootAsync(Routes.Login);
     }
 }

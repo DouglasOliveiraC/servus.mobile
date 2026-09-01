@@ -1,13 +1,16 @@
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.Auth;
+using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Telemetry;
 
 // Color/Colors: Microsoft.Maui.Graphics (via Microsoft.Maui.Controls global usings)
 
 namespace Servus.Mobile.Features.Register;
 
-public partial class RegisterViewModel : ObservableObject
+public partial class RegisterViewModel : BaseViewModel
 {
     private static readonly Regex EmailRegex = new(
         @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
@@ -17,7 +20,8 @@ public partial class RegisterViewModel : ObservableObject
 
     private readonly IAuthService _authService;
 
-    public RegisterViewModel(IAuthService authService)
+    public RegisterViewModel(IAuthService authService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _authService = authService;
     }
@@ -96,7 +100,7 @@ public partial class RegisterViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static Task GoBackAsync() => Shell.Current.GoToAsync("..");
+    private Task GoBackAsync() => NavigationService.GoBackAsync();
 
     [RelayCommand(CanExecute = nameof(CanRegister))]
     private async Task RegisterAsync()

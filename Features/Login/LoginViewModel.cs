@@ -1,12 +1,14 @@
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Servus.Mobile.Features.Register;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.Auth;
+using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Login;
 
-public partial class LoginViewModel : ObservableObject
+public partial class LoginViewModel : BaseViewModel
 {
     private static readonly Regex EmailRegex = new(
         @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
@@ -14,7 +16,8 @@ public partial class LoginViewModel : ObservableObject
 
     private readonly IAuthService _authService;
 
-    public LoginViewModel(IAuthService authService)
+    public LoginViewModel(IAuthService authService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _authService = authService;
     }
@@ -54,7 +57,7 @@ public partial class LoginViewModel : ObservableObject
             "OK");
 
     [RelayCommand]
-    private static Task GoToRegisterAsync() => Shell.Current.GoToAsync(nameof(RegisterPage));
+    private Task GoToRegisterAsync() => NavigationService.GoToAsync(Routes.Register);
 
     [RelayCommand(CanExecute = nameof(CanLogin))]
     private async Task LoginAsync()

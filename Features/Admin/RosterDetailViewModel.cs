@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 using IMemberService = Servus.Mobile.Services.Members.IMemberService;
 
@@ -9,12 +12,17 @@ namespace Servus.Mobile.Features.Admin;
 
 [QueryProperty(nameof(RosterId), "rosterId")]
 [QueryProperty(nameof(RosterName), "rosterName")]
-public partial class RosterDetailViewModel : ObservableObject
+public partial class RosterDetailViewModel : BaseViewModel
 {
     private readonly IRosterService _rosterService;
     private readonly IMemberService _memberService;
 
-    public RosterDetailViewModel(IRosterService rosterService, IMemberService memberService)
+    public RosterDetailViewModel(
+        IRosterService rosterService,
+        IMemberService memberService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _rosterService = rosterService;
         _memberService = memberService;
@@ -257,31 +265,25 @@ public partial class RosterDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenSettingsAsync()
-    {
-        await Shell.Current.GoToAsync(nameof(RosterSettingsPage), new Dictionary<string, object>
+    private Task OpenSettingsAsync() =>
+        NavigationService.GoToAsync(Routes.RosterSettings, new Dictionary<string, object>
         {
             ["rosterId"] = RosterId
         });
-    }
 
     [RelayCommand]
-    private async Task ViewScheduleAsync()
-    {
-        await Shell.Current.GoToAsync("RosterSchedulePage", new Dictionary<string, object>
+    private Task ViewScheduleAsync() =>
+        NavigationService.GoToAsync(Routes.RosterSchedule, new Dictionary<string, object>
         {
             ["rosterId"] = RosterId
         });
-    }
 
     [RelayCommand]
-    private async Task ViewSwapHistoryAsync()
-    {
-        await Shell.Current.GoToAsync("SwapHistoryPage", new Dictionary<string, object>
+    private Task ViewSwapHistoryAsync() =>
+        NavigationService.GoToAsync(Routes.SwapHistory, new Dictionary<string, object>
         {
             ["rosterId"] = RosterId
         });
-    }
 
     [RelayCommand]
     private async Task RevokeAccessAsync(RosterAccessRow access)

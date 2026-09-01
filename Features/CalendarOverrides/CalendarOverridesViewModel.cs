@@ -1,16 +1,20 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.CalendarOverrides;
+using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.CalendarOverrides;
 
 [QueryProperty(nameof(OrganizationId), "organizationId")]
-public partial class CalendarOverridesViewModel : ObservableObject
+public partial class CalendarOverridesViewModel : BaseViewModel
 {
     private readonly ICalendarDayOverrideService _overrideService;
 
-    public CalendarOverridesViewModel(ICalendarDayOverrideService overrideService)
+    public CalendarOverridesViewModel(ICalendarDayOverrideService overrideService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _overrideService = overrideService;
     }

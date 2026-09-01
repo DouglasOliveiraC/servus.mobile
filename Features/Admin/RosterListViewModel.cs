@@ -1,18 +1,22 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Admin;
 
 [QueryProperty(nameof(OrganizationId), "organizationId")]
 [QueryProperty(nameof(OrganizationName), "organizationName")]
 [QueryProperty(nameof(IsOrganizationAdmin), "isOrganizationAdmin")]
-public partial class RosterListViewModel : ObservableObject
+public partial class RosterListViewModel : BaseViewModel
 {
     private readonly IRosterService _rosterService;
 
-    public RosterListViewModel(IRosterService rosterService)
+    public RosterListViewModel(IRosterService rosterService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _rosterService = rosterService;
     }
@@ -137,12 +141,10 @@ public partial class RosterListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static async Task OpenRosterAsync(RosterDto roster)
-    {
-        await Shell.Current.GoToAsync(nameof(RosterDetailPage), new Dictionary<string, object>
+    private Task OpenRosterAsync(RosterDto roster) =>
+        NavigationService.GoToAsync(Routes.RosterDetail, new Dictionary<string, object>
         {
             ["rosterId"] = roster.Id,
             ["rosterName"] = roster.Name
         });
-    }
 }

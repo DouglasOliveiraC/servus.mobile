@@ -1,19 +1,27 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using Servus.Mobile.Services.Unavailabilities;
 
 namespace Servus.Mobile.Features.Unavailability;
 
-public partial class UnavailabilityViewModel : ObservableObject
+public partial class UnavailabilityViewModel : BaseViewModel
 {
     private readonly IMemberUnavailabilityService _unavailabilityService;
     private readonly IRosterService _rosterService;
 
     private Guid? _myMemberId;
 
-    public UnavailabilityViewModel(IMemberUnavailabilityService unavailabilityService, IRosterService rosterService)
+    public UnavailabilityViewModel(
+        IMemberUnavailabilityService unavailabilityService,
+        IRosterService rosterService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _unavailabilityService = unavailabilityService;
         _rosterService = rosterService;

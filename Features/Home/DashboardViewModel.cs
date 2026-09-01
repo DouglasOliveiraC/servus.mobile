@@ -2,15 +2,17 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Servus.Mobile.Features.Login;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.Auth;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Home;
 
-public partial class DashboardViewModel : ObservableObject
+public partial class DashboardViewModel : BaseViewModel
 {
     private const int UpcomingWindowDays = 14;
     private const int SwapTrendWeeks = 6;
@@ -23,7 +25,14 @@ public partial class DashboardViewModel : ObservableObject
     private readonly IAuthService _authService;
     private readonly ISwapHistoryService _swapHistoryService;
 
-    public DashboardViewModel(IOrganizationService organizationService, IRosterService rosterService, IAuthService authService, ISwapHistoryService swapHistoryService)
+    public DashboardViewModel(
+        IOrganizationService organizationService,
+        IRosterService rosterService,
+        IAuthService authService,
+        ISwapHistoryService swapHistoryService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _organizationService = organizationService;
         _rosterService = rosterService;
@@ -259,13 +268,11 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenDayDetailAsync(DateOnly date)
-    {
-        await Shell.Current.GoToAsync(nameof(DayDetailPage), new Dictionary<string, object>
+    private Task OpenDayDetailAsync(DateOnly date) =>
+        NavigationService.GoToAsync(Routes.DayDetail, new Dictionary<string, object>
         {
             ["date"] = date.ToString("yyyy-MM-dd")
         });
-    }
 
     private void BuildSwapTrend(List<SwapHistoryEntryDto> swapEntries, DateOnly today)
     {
@@ -290,9 +297,9 @@ public partial class DashboardViewModel : ObservableObject
     private async Task LogoutAsync()
     {
         await _authService.LogoutAsync();
-        await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+        await NavigationService.GoToRootAsync(Routes.Login);
     }
 
     [RelayCommand]
-    private static async Task GoToQuickActionAsync(string route) => await Shell.Current.GoToAsync(route);
+    private Task GoToQuickActionAsync(string route) => NavigationService.GoToAsync(route);
 }

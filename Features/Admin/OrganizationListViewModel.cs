@@ -1,15 +1,19 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Admin;
 
-public partial class OrganizationListViewModel : ObservableObject
+public partial class OrganizationListViewModel : BaseViewModel
 {
     private readonly IOrganizationService _organizationService;
 
-    public OrganizationListViewModel(IOrganizationService organizationService)
+    public OrganizationListViewModel(IOrganizationService organizationService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _organizationService = organizationService;
     }
@@ -103,22 +107,18 @@ public partial class OrganizationListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static async Task OpenOrganizationAsync(OrganizationDto organization)
-    {
-        await Shell.Current.GoToAsync(nameof(RosterListPage), new Dictionary<string, object>
+    private Task OpenOrganizationAsync(OrganizationDto organization) =>
+        NavigationService.GoToAsync(Routes.RosterList, new Dictionary<string, object>
         {
             ["organizationId"] = organization.Id,
             ["organizationName"] = organization.Name,
             ["isOrganizationAdmin"] = organization.IsAdmin
         });
-    }
 
     [RelayCommand]
-    private static async Task OpenCalendarOverridesAsync(OrganizationDto organization)
-    {
-        await Shell.Current.GoToAsync("CalendarOverridesPage", new Dictionary<string, object>
+    private Task OpenCalendarOverridesAsync(OrganizationDto organization) =>
+        NavigationService.GoToAsync(Routes.CalendarOverrides, new Dictionary<string, object>
         {
             ["organizationId"] = organization.Id
         });
-    }
 }

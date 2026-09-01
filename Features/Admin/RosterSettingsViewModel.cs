@@ -1,16 +1,20 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Admin;
 
 [QueryProperty(nameof(RosterId), "rosterId")]
-public partial class RosterSettingsViewModel : ObservableObject
+public partial class RosterSettingsViewModel : BaseViewModel
 {
     private readonly IRosterService _rosterService;
 
-    public RosterSettingsViewModel(IRosterService rosterService)
+    public RosterSettingsViewModel(IRosterService rosterService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _rosterService = rosterService;
     }
@@ -143,7 +147,7 @@ public partial class RosterSettingsViewModel : ObservableObject
         try
         {
             await _rosterService.DeleteRosterAsync(RosterId);
-            await Shell.Current.GoToAsync("..");
+            await NavigationService.GoBackAsync();
         }
         catch (Exception)
         {

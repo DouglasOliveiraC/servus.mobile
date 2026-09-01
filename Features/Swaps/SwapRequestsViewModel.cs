@@ -1,19 +1,27 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapRequests;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Swaps;
 
-public partial class SwapRequestsViewModel : ObservableObject
+public partial class SwapRequestsViewModel : BaseViewModel
 {
     private readonly ISwapRequestService _swapRequestService;
     private readonly IRosterService _rosterService;
 
     private Guid _myMemberId;
 
-    public SwapRequestsViewModel(ISwapRequestService swapRequestService, IRosterService rosterService)
+    public SwapRequestsViewModel(
+        ISwapRequestService swapRequestService,
+        IRosterService rosterService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _swapRequestService = swapRequestService;
         _rosterService = rosterService;

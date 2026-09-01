@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.MemberClaimCodes;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using Servus.Mobile.Services.Unavailabilities;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 using MemberMembershipDto = Servus.Mobile.Services.Members.MemberMembershipDto;
@@ -12,7 +15,7 @@ using IMemberService = Servus.Mobile.Services.Members.IMemberService;
 namespace Servus.Mobile.Features.Members;
 
 [QueryProperty(nameof(MemberId), "memberId")]
-public partial class MemberDetailViewModel : ObservableObject
+public partial class MemberDetailViewModel : BaseViewModel
 {
     private readonly IMemberService _memberService;
     private readonly IOrganizationService _organizationService;
@@ -25,7 +28,10 @@ public partial class MemberDetailViewModel : ObservableObject
         IOrganizationService organizationService,
         IRosterService rosterService,
         IMemberClaimCodeService claimCodeService,
-        IMemberUnavailabilityService unavailabilityService)
+        IMemberUnavailabilityService unavailabilityService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _memberService = memberService;
         _organizationService = organizationService;
@@ -362,14 +368,12 @@ public partial class MemberDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task OpenRosterAsync(MembershipRow row)
-    {
-        await Shell.Current.GoToAsync("RosterDetailPage", new Dictionary<string, object>
+    private Task OpenRosterAsync(MembershipRow row) =>
+        NavigationService.GoToAsync(Routes.RosterDetail, new Dictionary<string, object>
         {
             ["rosterId"] = row.RosterId,
             ["rosterName"] = row.RosterName
         });
-    }
 
     [RelayCommand]
     private void ToggleAddUnavailabilityForm()
@@ -470,7 +474,7 @@ public partial class MemberDetailViewModel : ObservableObject
         try
         {
             await _memberService.DeleteMemberAsync(MemberId);
-            await Shell.Current.GoToAsync("..");
+            await NavigationService.GoBackAsync();
         }
         catch (Exception)
         {

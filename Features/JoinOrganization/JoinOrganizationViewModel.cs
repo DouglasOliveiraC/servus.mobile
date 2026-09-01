@@ -1,14 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
 using Servus.Mobile.Services.MemberClaimCodes;
+using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.JoinOrganization;
 
-public partial class JoinOrganizationViewModel : ObservableObject
+public partial class JoinOrganizationViewModel : BaseViewModel
 {
     private readonly IMemberClaimCodeService _claimCodeService;
 
-    public JoinOrganizationViewModel(IMemberClaimCodeService claimCodeService)
+    public JoinOrganizationViewModel(IMemberClaimCodeService claimCodeService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _claimCodeService = claimCodeService;
     }
@@ -43,7 +47,7 @@ public partial class JoinOrganizationViewModel : ObservableObject
             var result = await _claimCodeService.RedeemAsync(Code.Trim());
             SuccessMessage = $"Você entrou como {result.MemberName}!";
             await Task.Delay(1200);
-            await Shell.Current.GoToAsync("//MainPage");
+            await NavigationService.GoToRootAsync(Routes.Dashboard);
         }
         catch (Exception)
         {

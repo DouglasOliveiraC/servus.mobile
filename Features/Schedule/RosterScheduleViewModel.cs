@@ -1,13 +1,16 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapRequests;
+using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Schedule;
 
 [QueryProperty(nameof(RosterId), "rosterId")]
-public partial class RosterScheduleViewModel : ObservableObject
+public partial class RosterScheduleViewModel : BaseViewModel
 {
     private readonly IRosterService _rosterService;
     private readonly ISwapRequestService _swapRequestService;
@@ -15,7 +18,12 @@ public partial class RosterScheduleViewModel : ObservableObject
     private Guid? _myMemberId;
     private ScheduleAssignmentDto? _selectedMine;
 
-    public RosterScheduleViewModel(IRosterService rosterService, ISwapRequestService swapRequestService)
+    public RosterScheduleViewModel(
+        IRosterService rosterService,
+        ISwapRequestService swapRequestService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _rosterService = rosterService;
         _swapRequestService = swapRequestService;

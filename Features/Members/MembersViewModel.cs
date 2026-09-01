@@ -1,20 +1,29 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 using IMemberService = Servus.Mobile.Services.Members.IMemberService;
 
 namespace Servus.Mobile.Features.Members;
 
-public partial class MembersViewModel : ObservableObject
+public partial class MembersViewModel : BaseViewModel
 {
     private readonly IMemberService _memberService;
     private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
 
-    public MembersViewModel(IMemberService memberService, IOrganizationService organizationService, IRosterService rosterService)
+    public MembersViewModel(
+        IMemberService memberService,
+        IOrganizationService organizationService,
+        IRosterService rosterService,
+        INavigationService navigationService,
+        ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _memberService = memberService;
         _organizationService = organizationService;
@@ -259,13 +268,11 @@ public partial class MembersViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static async Task OpenMemberAsync(MemberDto member)
-    {
-        await Shell.Current.GoToAsync(nameof(MemberDetailPage), new Dictionary<string, object>
+    private Task OpenMemberAsync(MemberDto member) =>
+        NavigationService.GoToAsync(Routes.MemberDetail, new Dictionary<string, object>
         {
             ["memberId"] = member.Id
         });
-    }
 
     private void ResetForm()
     {

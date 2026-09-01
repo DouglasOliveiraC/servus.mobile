@@ -1,4 +1,9 @@
+using Azure.Monitor.OpenTelemetry.Exporter;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Servus.Mobile.Features.Admin;
 using Servus.Mobile.Features.CalendarOverrides;
 using Servus.Mobile.Features.Home;
@@ -14,10 +19,12 @@ using Servus.Mobile.Services.CalendarOverrides;
 using Servus.Mobile.Services.Http;
 using Servus.Mobile.Services.MemberClaimCodes;
 using Servus.Mobile.Services.Members;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 using Servus.Mobile.Services.SwapRequests;
+using Servus.Mobile.Services.Telemetry;
 using Servus.Mobile.Services.Unavailabilities;
 using Servus.Mobile.Services.Users;
 using Syncfusion.Maui.Core.Hosting;
@@ -39,6 +46,9 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
+
+		ConfigureTelemetry(builder);
+		builder.Services.AddSingleton<INavigationService, NavigationService>();
 
 		builder.Services.AddSingleton<ITokenStore, SecureTokenStore>();
 		builder.Services.AddTransient<AuthHeaderHandler>();
@@ -154,5 +164,30 @@ public static class MauiProgram
 		{
 			Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(licenseKey);
 		}
+	}
+
+	// Mesma filosofia do SYNCFUSION_LICENSE_KEY acima: connection string lida de variável
+	// de ambiente em build-time, nunca commitada. Sem ela, ITelemetryService fica em modo
+	// no-op (ILogger<T> null) em vez de derrubar o app — não há Application Insights
+	// provisionado em todo ambiente de desenvolvimento local.
+	private static void ConfigureTelemetry(MauiAppBuilder builder)
+	{
+		var connectionString = Environment.GetEnvironmentVariable("APPINSIGHTS_CONNECTION_STRING");
+		if (string.IsNullOrWhiteSpace(connectionString))
+		{
+			builder.Services.AddSingleton<ITelemetryService, TelemetryService>();
+			return;
+		}
+
+		builder.Services.AddOpenTelemetry()
+			.ConfigureResource(r => r.AddService("Servus.Mobile"))
+			.WithTracing(tracing => tracing
+				.AddSource("Servus.Mobile")
+				.AddHttpClientInstrumentation()
+				.AddAzureMonitorTraceExporter(o => o.ConnectionString = connectionString))
+			.WithLogging(logging => logging
+				.AddAzureMonitorLogExporter(o => o.ConnectionString = connectionString));
+
+		builder.Services.AddSingleton<ITelemetryService, TelemetryService>();
 	}
 }

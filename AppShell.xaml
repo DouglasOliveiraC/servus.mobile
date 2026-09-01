@@ -16,6 +16,6 @@
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate home:DashboardPage}"
-        Route="MainPage" />
+        Route="DashboardPage" />
 
 </Shell>

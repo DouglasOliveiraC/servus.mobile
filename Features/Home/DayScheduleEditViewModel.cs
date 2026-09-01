@@ -2,7 +2,10 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Servus.Mobile.Common;
+using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Rosters;
+using Servus.Mobile.Services.Telemetry;
 using MemberDto = Servus.Mobile.Services.Members.MemberDto;
 
 namespace Servus.Mobile.Features.Home;
@@ -17,14 +20,15 @@ namespace Servus.Mobile.Features.Home;
 /// </summary>
 [QueryProperty(nameof(RosterId), "rosterId")]
 [QueryProperty(nameof(DateText), "date")]
-public partial class DayScheduleEditViewModel : ObservableObject
+public partial class DayScheduleEditViewModel : BaseViewModel
 {
     private readonly IRosterService _rosterService;
 
     private IReadOnlyList<RosterMemberDto> _queue = [];
     private IReadOnlyList<ServiceShiftDto> _shifts = [];
 
-    public DayScheduleEditViewModel(IRosterService rosterService)
+    public DayScheduleEditViewModel(IRosterService rosterService, INavigationService navigationService, ITelemetryService telemetry)
+        : base(navigationService, telemetry)
     {
         _rosterService = rosterService;
     }
