@@ -48,13 +48,38 @@ public partial class MembersViewModel : ObservableObject
     [ObservableProperty]
     public partial string NewMemberPosition { get; set; } = "1";
 
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = string.Empty;
+
     public ObservableCollection<MemberDto> AllMembers { get; } = [];
 
     public ObservableCollection<OrganizationDto> Organizations { get; } = [];
 
     public ObservableCollection<RosterDto> Rosters { get; } = [];
 
+    // Todos os grupos carregados, sem filtro de busca aplicado.
+    private readonly List<RosterMemberGroup> _allGroups = [];
+
+    // Subconjunto de _allGroups efetivamente exibido: grupos sem nenhum membro
+    // correspondente à busca atual são removidos daqui (não só esvaziados), para não
+    // deixar cabeçalhos vazios na tela.
     public ObservableCollection<RosterMemberGroup> GroupedMembers { get; } = [];
+
+    partial void OnSearchTextChanged(string value) => ApplySearchFilter();
+
+    private void ApplySearchFilter()
+    {
+        var normalized = SearchText.Trim();
+
+        GroupedMembers.Clear();
+        foreach (var group in _allGroups)
+        {
+            if (group.ApplyFilter(normalized))
+            {
+                GroupedMembers.Add(group);
+            }
+        }
+    }
 
     [RelayCommand]
     public async Task LoadAsync()
@@ -149,11 +174,9 @@ public partial class MembersViewModel : ObservableObject
             groups.Add(new RosterMemberGroup("Sem organização", "Ainda não colocado em nenhuma escala", unassigned));
         }
 
-        GroupedMembers.Clear();
-        foreach (var group in groups)
-        {
-            GroupedMembers.Add(group);
-        }
+        _allGroups.Clear();
+        _allGroups.AddRange(groups);
+        ApplySearchFilter();
     }
 
     [RelayCommand]

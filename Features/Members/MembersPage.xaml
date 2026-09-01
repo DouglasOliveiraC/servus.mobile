@@ -18,6 +18,10 @@
 
                 <Label Text="Membros cadastrados aqui continuam no sistema mesmo que sejam removidos ou uma escala inteira seja excluída." FontSize="12" TextColor="{StaticResource Neutral600}" />
 
+                <sf:SfTextInputLayout Hint="Buscar membro" ContainerType="Outlined">
+                    <Entry Text="{Binding SearchText}" ReturnType="Search" />
+                </sf:SfTextInputLayout>
+
                 <buttons:SfButton
                     Text="+ Novo membro"
                     Background="{StaticResource BrandPrimary}"
@@ -97,59 +101,92 @@
 
                 <CollectionView
                     ItemsSource="{Binding GroupedMembers}"
-                    IsGrouped="True"
                     IsVisible="{Binding GroupedMembers.Count, Converter={StaticResource IntIsNotZeroConverter}}">
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
                     </CollectionView.ItemsLayout>
-                    <CollectionView.GroupHeaderTemplate>
-                        <DataTemplate x:DataType="local:RosterMemberGroup">
-                            <VerticalStackLayout Padding="2,14,2,4" Spacing="1">
-                                <Label Text="{Binding OrganizationName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                <Label Text="{Binding RosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </CollectionView.GroupHeaderTemplate>
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="local:MemberGroupEntry">
-                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MembersViewModel}}, Path=OpenMemberCommand}"
-                                        CommandParameter="{Binding Member}" />
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                    <Border
-                                        Grid.Column="0"
-                                        StrokeShape="RoundRectangle 8"
-                                        Stroke="Transparent"
-                                        BackgroundColor="{StaticResource BrandSurface}"
-                                        Padding="8,4"
-                                        VerticalOptions="Center">
-                                        <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                        <Label Text="{Binding Member.Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <DataTemplate x:DataType="local:RosterMemberGroup">
+                            <VerticalStackLayout Spacing="6">
+
+                                <!-- Cabeçalho do grupo: sempre visível, expande/recolhe ao tocar -->
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14,12">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="1">
+                                            <Label Text="{Binding OrganizationName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                            <Label Text="{Binding RosterName}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        </VerticalStackLayout>
+                                        <Border
+                                            Grid.Column="1"
+                                            StrokeShape="RoundRectangle 8"
+                                            Stroke="Transparent"
+                                            BackgroundColor="{StaticResource BrandSurface}"
+                                            Padding="8,4"
+                                            VerticalOptions="Center">
+                                            <Label Text="{Binding TotalCount}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                        </Border>
                                         <Label
-                                            Text="{Binding Member.Email}"
-                                            IsVisible="{Binding Member.Email, Converter={StaticResource StringNotEmptyConverter}}"
-                                            FontSize="12"
-                                            TextColor="{StaticResource Neutral600}" />
-                                        <Label
-                                            Text="Vinculado a uma conta"
-                                            IsVisible="{Binding Member.UserId, Converter={StaticResource IsNotNullConverter}}"
-                                            FontSize="11"
-                                            FontAttributes="Bold"
-                                            TextColor="{StaticResource BrandPrimary}" />
-                                    </VerticalStackLayout>
-                                    <Label
-                                        Grid.Column="2"
-                                        Text="›"
-                                        FontSize="20"
-                                        TextColor="{StaticResource Neutral600}"
-                                        VerticalOptions="Center" />
-                                </Grid>
-                            </Border>
+                                            Grid.Column="2"
+                                            Text="{Binding IsExpanded, Converter={StaticResource ChevronConverter}}"
+                                            FontSize="16"
+                                            TextColor="{StaticResource Neutral600}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Membros do grupo: só renderizados quando expandido -->
+                                <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="6">
+                                    <BindableLayout.ItemsSource>
+                                        <Binding Path="." />
+                                    </BindableLayout.ItemsSource>
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:MemberGroupEntry">
+                                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MembersViewModel}}, Path=OpenMemberCommand}"
+                                                        CommandParameter="{Binding Member}" />
+                                                </Border.GestureRecognizers>
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                                    <Border
+                                                        Grid.Column="0"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        Stroke="Transparent"
+                                                        BackgroundColor="{StaticResource BrandSurface}"
+                                                        Padding="8,4"
+                                                        VerticalOptions="Center">
+                                                        <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                                    </Border>
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding Member.Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                        <Label
+                                                            Text="{Binding Member.Email}"
+                                                            IsVisible="{Binding Member.Email, Converter={StaticResource StringNotEmptyConverter}}"
+                                                            FontSize="12"
+                                                            TextColor="{StaticResource Neutral600}" />
+                                                        <Label
+                                                            Text="Vinculado a uma conta"
+                                                            IsVisible="{Binding Member.UserId, Converter={StaticResource IsNotNullConverter}}"
+                                                            FontSize="11"
+                                                            FontAttributes="Bold"
+                                                            TextColor="{StaticResource BrandPrimary}" />
+                                                    </VerticalStackLayout>
+                                                    <Label
+                                                        Grid.Column="2"
+                                                        Text="›"
+                                                        FontSize="20"
+                                                        TextColor="{StaticResource Neutral600}"
+                                                        VerticalOptions="Center" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
