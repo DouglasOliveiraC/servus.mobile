@@ -45,9 +45,16 @@ public record ScheduleDayDto(DateOnly Date, bool IsRestDay, int RequiredShiftSiz
 
 public record RosterScheduleDto(Guid RosterId, string RosterName, IReadOnlyList<ScheduleDayDto> Days);
 
+/// <summary>
+/// WorkdayRank/WeekendRank são a posição 1-based já resolvida contra a QueueDirection da
+/// fila — ordene e exiba por eles. Workday/WeekendPosition são os contadores internos: só
+/// crescem, e uma fila BottomToTop os lê ao contrário, então ordenar por Position mostraria
+/// a fila invertida.
+/// </summary>
 public record RosterMemberDto(
     Guid Id, Guid RosterId, Guid MemberId, string MemberName,
     int WorkdayPosition, int WeekendPosition,
+    int WorkdayRank, int WeekendRank,
     string? PendingReturnPriorityWorkdayReason,
     string? PendingReturnPriorityWeekendReason);
 

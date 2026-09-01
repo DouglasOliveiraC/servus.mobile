@@ -101,13 +101,12 @@ public partial class RosterDetailViewModel : BaseViewModel
             CanManage = roster.CanManage;
 
             var members = await _rosterService.GetRosterMembersAsync(RosterId);
-            var orderedMembers = members.OrderBy(m => m.WorkdayPosition).ToList();
             Members.Clear();
-            for (var i = 0; i < orderedMembers.Count; i++)
+            // WorkdayRank já vem resolvido contra a direção de leitura da fila; ordenar por
+            // WorkdayPosition mostraria uma fila BottomToTop de trás para frente.
+            foreach (var member in members.OrderBy(m => m.WorkdayRank))
             {
-                // WorkdayPosition é um contador interno do algoritmo de fila (só cresce, nunca
-                // reseta); o rank exibido é a ordem relativa 1-based dentro da fila atual.
-                Members.Add(new RosterMemberRow(orderedMembers[i], i + 1));
+                Members.Add(new RosterMemberRow(member, member.WorkdayRank));
             }
 
             var dutyCounts = await _rosterService.GetDutyCountsAsync(RosterId);
@@ -309,9 +308,10 @@ public partial class RosterDetailViewModel : BaseViewModel
 
 public record RosterAccessRow(Guid Id, Guid MemberId, string MemberName, bool IsFullAdmin);
 
-// WorkdayPosition (do DTO original) é um contador interno do algoritmo de fila — só cresce a
-// cada geração de escala e nunca reseta. Rank é a posição relativa 1-based dentro da fila
-// atual, que é o que a tela deve mostrar; ela muda se alguém for adicionado/removido/reordenado.
+// Rank é a posição relativa 1-based dentro da fila atual (hoje vinda de Dto.WorkdayRank),
+// que é o que a tela deve mostrar; ela muda se alguém for adicionado/removido/reordenado.
+// Continua sendo um parâmetro em vez de uma propriedade derivada porque a mesma linha é
+// usada para a fila de fim de semana, cujo rank é outro.
 public record RosterMemberRow(RosterMemberDto Dto, int Rank)
 {
     public Guid Id => Dto.Id;
