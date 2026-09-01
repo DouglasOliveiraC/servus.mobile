@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Servus.Mobile.Services.Realtime;
 
 namespace Servus.Mobile.Services.Auth;
 
@@ -7,11 +8,13 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _httpClient;
     private readonly ITokenStore _tokenStore;
+    private readonly IRealtimeClient _realtimeClient;
 
-    public AuthService(HttpClient httpClient, ITokenStore tokenStore)
+    public AuthService(HttpClient httpClient, ITokenStore tokenStore, IRealtimeClient realtimeClient)
     {
         _httpClient = httpClient;
         _tokenStore = tokenStore;
+        _realtimeClient = realtimeClient;
     }
 
     public async Task<AuthResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -38,6 +41,7 @@ public class AuthService : IAuthService
             }
 
             await _tokenStore.SaveTokenAsync(body.Token);
+            await _realtimeClient.ConnectAsync();
             return AuthResult.Ok();
         }
 
@@ -94,7 +98,11 @@ public class AuthService : IAuthService
         return new CurrentUser(userId, email ?? string.Empty);
     }
 
-    public Task LogoutAsync() => _tokenStore.ClearAsync();
+    public async Task LogoutAsync()
+    {
+        await _realtimeClient.DisconnectAsync();
+        await _tokenStore.ClearAsync();
+    }
 
     // Nunca repassa problem.Errors/Title da API ao usuário: são mensagens de model validation
     // do ASP.NET em inglês com nomes de campo crus (ex: "The DisplayName field is required."),

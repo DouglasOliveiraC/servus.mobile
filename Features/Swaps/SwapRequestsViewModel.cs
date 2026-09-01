@@ -1,15 +1,17 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Servus.Mobile.Common;
 using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapRequests;
 using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Features.Swaps;
 
-public partial class SwapRequestsViewModel : BaseViewModel
+public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdatedMessage>
 {
     private readonly ISwapRequestService _swapRequestService;
     private readonly IRosterService _rosterService;
@@ -25,7 +27,13 @@ public partial class SwapRequestsViewModel : BaseViewModel
     {
         _swapRequestService = swapRequestService;
         _rosterService = rosterService;
+        WeakReferenceMessenger.Default.RegisterAll(this);
     }
+
+    // Qualquer evento de swap (solicitado/respondido/aprovado/cancelado/expirado) invalida
+    // as duas listas por igual — mais simples e seguro do que tentar decidir, a partir só do
+    // Status recebido, se a mudança afeta "aguardando minha resposta" ou "solicitadas por mim".
+    public void Receive(SwapUpdatedMessage message) => MainThread.BeginInvokeOnMainThread(() => _ = LoadAsync());
 
     [ObservableProperty]
     public partial bool IsBusy { get; set; }

@@ -21,6 +21,7 @@ using Servus.Mobile.Services.MemberClaimCodes;
 using Servus.Mobile.Services.Members;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
+using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 using Servus.Mobile.Services.SwapRequests;
@@ -52,6 +53,7 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<ITokenStore, SecureTokenStore>();
 		builder.Services.AddTransient<AuthHeaderHandler>();
+		builder.Services.AddSingleton<IRealtimeClient, RealtimeClient>();
 
 		builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 		{

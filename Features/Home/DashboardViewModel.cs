@@ -6,6 +6,7 @@ using Servus.Mobile.Common;
 using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
+using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 using Servus.Mobile.Services.Telemetry;
@@ -24,12 +25,14 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly IRosterService _rosterService;
     private readonly IAuthService _authService;
     private readonly ISwapHistoryService _swapHistoryService;
+    private readonly IRealtimeClient _realtimeClient;
 
     public DashboardViewModel(
         IOrganizationService organizationService,
         IRosterService rosterService,
         IAuthService authService,
         ISwapHistoryService swapHistoryService,
+        IRealtimeClient realtimeClient,
         INavigationService navigationService,
         ITelemetryService telemetry)
         : base(navigationService, telemetry)
@@ -38,6 +41,7 @@ public partial class DashboardViewModel : BaseViewModel
         _rosterService = rosterService;
         _authService = authService;
         _swapHistoryService = swapHistoryService;
+        _realtimeClient = realtimeClient;
     }
 
     [ObservableProperty]
@@ -107,6 +111,7 @@ public partial class DashboardViewModel : BaseViewModel
         {
             var user = await _authService.GetCurrentUserAsync();
             UserEmail = user?.Email;
+            await _realtimeClient.ConnectAsync();
 
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
             var organizations = await _organizationService.GetMyOrganizationsAsync();
