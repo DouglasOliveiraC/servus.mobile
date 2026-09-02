@@ -61,6 +61,9 @@ public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpd
     public partial bool HasError { get; set; }
 
     [ObservableProperty]
+    public partial bool CanManage { get; set; }
+
+    [ObservableProperty]
     public partial DateTime FromDate { get; set; } = DateTime.Today;
 
     [ObservableProperty]
@@ -68,6 +71,9 @@ public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpd
 
     [ObservableProperty]
     public partial string? SummaryText { get; set; }
+
+    [ObservableProperty]
+    public partial string? PublishResultMessage { get; set; }
 
     [ObservableProperty]
     public partial string? SelectionHint { get; set; }
@@ -87,6 +93,9 @@ public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpd
         try
         {
             _myMemberId = await _rosterService.GetMyMemberIdAsync();
+
+            var roster = await _rosterService.GetRosterByIdAsync(RosterId);
+            CanManage = roster.CanManage;
 
             var from = DateOnly.FromDateTime(FromDate);
             var to = DateOnly.FromDateTime(ToDate);
@@ -113,6 +122,24 @@ public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpd
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PublishScheduleAsync()
+    {
+        try
+        {
+            var from = DateOnly.FromDateTime(FromDate);
+            var to = DateOnly.FromDateTime(ToDate);
+            var result = await _rosterService.PublishScheduleAsync(RosterId, from, to);
+            PublishResultMessage = $"{result.AssignmentsPublished} plantão(ões) publicado(s).";
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            PublishResultMessage = null;
+            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível publicar a escala.", "OK");
         }
     }
 

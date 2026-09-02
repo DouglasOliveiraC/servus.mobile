@@ -276,7 +276,7 @@ public partial class MemberDetailViewModel : BaseViewModel
 
         try
         {
-            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, MemberId, rank, QueueType.Workday);
+            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, MemberId, rank);
             ResetMembershipForm();
             IsAddMembershipFormVisible = false;
             await LoadMembershipsAsync();
@@ -305,7 +305,7 @@ public partial class MemberDetailViewModel : BaseViewModel
 
         try
         {
-            await _rosterService.ReorderRosterMemberAsync(row.RosterMemberId, newRank, QueueType.Workday);
+            await _rosterService.ReorderRosterMemberAsync(row.RosterMemberId, newRank);
             await LoadMembershipsAsync();
         }
         catch (Exception)

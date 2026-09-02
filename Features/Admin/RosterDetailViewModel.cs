@@ -61,6 +61,32 @@ public partial class RosterDetailViewModel : BaseViewModel
 
     public ObservableCollection<MemberDto> MemberSearchResults { get; } = [];
 
+    // Import em lote
+    [ObservableProperty]
+    public partial bool IsImportFormVisible { get; set; }
+
+    [ObservableProperty]
+    public partial string ImportText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string? ImportSummaryText { get; set; }
+
+    [ObservableProperty]
+    public partial string? ImportResultMessage { get; set; }
+
+    // Ponto de partida (fila que já rodava antes de entrar no sistema)
+    [ObservableProperty]
+    public partial bool IsStartingPointFormVisible { get; set; }
+
+    [ObservableProperty]
+    public partial RosterMemberRow? StartingPointWorkdayMember { get; set; }
+
+    [ObservableProperty]
+    public partial RosterMemberRow? StartingPointWeekendMember { get; set; }
+
+    [ObservableProperty]
+    public partial string? StartingPointResultMessage { get; set; }
+
     // Schedule generation
     [ObservableProperty]
     public partial DateTime GenerateFrom { get; set; } = DateTime.Today;
@@ -102,11 +128,9 @@ public partial class RosterDetailViewModel : BaseViewModel
 
             var members = await _rosterService.GetRosterMembersAsync(RosterId);
             Members.Clear();
-            // WorkdayRank já vem resolvido contra a direção de leitura da fila; ordenar por
-            // WorkdayPosition mostraria uma fila BottomToTop de trás para frente.
-            foreach (var member in members.OrderBy(m => m.WorkdayRank))
+            foreach (var member in members.OrderBy(m => m.Rank))
             {
-                Members.Add(new RosterMemberRow(member, member.WorkdayRank));
+                Members.Add(new RosterMemberRow(member));
             }
 
             var dutyCounts = await _rosterService.GetDutyCountsAsync(RosterId);
@@ -171,7 +195,7 @@ public partial class RosterDetailViewModel : BaseViewModel
 
         try
         {
-            await _rosterService.AddRosterMemberAsync(RosterId, member.Id, rank, QueueType.Workday);
+            await _rosterService.AddRosterMemberAsync(RosterId, member.Id, rank);
             IsAddMemberFormVisible = false;
             MemberSearchResults.Clear();
             MemberSearchText = string.Empty;
@@ -197,6 +221,94 @@ public partial class RosterDetailViewModel : BaseViewModel
         catch (Exception)
         {
             await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível remover o membro.", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleImportForm()
+    {
+        IsImportFormVisible = !IsImportFormVisible;
+        ImportText = string.Empty;
+        ImportSummaryText = null;
+        ImportResultMessage = null;
+    }
+
+    partial void OnImportTextChanged(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ImportSummaryText = null;
+            return;
+        }
+
+        var parsed = MemberListParser.Parse(value);
+        var parts = new List<string> { $"{parsed.Rows.Count} pessoa(s)" };
+        if (parsed.DuplicateNames.Count > 0)
+        {
+            parts.Add($"{parsed.DuplicateNames.Count} nome(s) repetido(s) ignorado(s)");
+        }
+        if (parsed.Errors.Count > 0)
+        {
+            parts.Add($"{parsed.Errors.Count} linha(s) com problema");
+        }
+        ImportSummaryText = string.Join(" · ", parts);
+    }
+
+    [RelayCommand]
+    private async Task ImportMembersAsync()
+    {
+        var parsed = MemberListParser.Parse(ImportText);
+        if (parsed.Rows.Count == 0) return;
+
+        try
+        {
+            var entries = parsed.Rows
+                .Select(r => new ImportRosterMemberEntryDto(r.Name, r.Email, r.Phone))
+                .ToList();
+            var result = await _rosterService.ImportRosterMembersAsync(RosterId, entries);
+            ImportResultMessage = $"{result.Imported.Count} membro(s) importado(s).";
+            IsImportFormVisible = false;
+            ImportText = string.Empty;
+            ImportSummaryText = null;
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            ImportResultMessage = null;
+            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível importar a lista.", "OK");
+        }
+    }
+
+    [RelayCommand]
+    private void ToggleStartingPointForm()
+    {
+        IsStartingPointFormVisible = !IsStartingPointFormVisible;
+        StartingPointWorkdayMember = null;
+        StartingPointWeekendMember = null;
+        StartingPointResultMessage = null;
+    }
+
+    [RelayCommand]
+    private async Task SaveStartingPointAsync()
+    {
+        if (StartingPointWorkdayMember is null && StartingPointWeekendMember is null) return;
+
+        try
+        {
+            await _rosterService.SetNextUpRosterMemberAsync(
+                RosterId,
+                StartingPointWorkdayMember?.Id,
+                StartingPointWeekendMember?.Id);
+            StartingPointResultMessage = "Ponto de partida salvo.";
+            IsStartingPointFormVisible = false;
+            StartingPointWorkdayMember = null;
+            StartingPointWeekendMember = null;
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            StartingPointResultMessage = null;
+            await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível salvar o ponto de partida.", "OK");
         }
     }
 
@@ -308,13 +420,16 @@ public partial class RosterDetailViewModel : BaseViewModel
 
 public record RosterAccessRow(Guid Id, Guid MemberId, string MemberName, bool IsFullAdmin);
 
-// Rank é a posição relativa 1-based dentro da fila atual (hoje vinda de Dto.WorkdayRank),
-// que é o que a tela deve mostrar; ela muda se alguém for adicionado/removido/reordenado.
-// Continua sendo um parâmetro em vez de uma propriedade derivada porque a mesma linha é
-// usada para a fila de fim de semana, cujo rank é outro.
-public record RosterMemberRow(RosterMemberDto Dto, int Rank)
+// Rank é a posição 1-based na ordem institucional da fila — uma só, percorrida pelas duas
+// rotações — e é o que a tela mostra. Muda apenas se alguém for adicionado, removido ou
+// reordenado, nunca porque a escala rodou.
+public record RosterMemberRow(RosterMemberDto Dto)
 {
     public Guid Id => Dto.Id;
+    public int Rank => Dto.Rank;
     public string MemberName => Dto.MemberName;
-    public string? PendingReturnPriorityReason => Dto.PendingReturnPriorityWorkdayReason;
+
+    // A prioridade é por rotação: exibimos as duas juntas porque a linha é uma só.
+    public string? PendingReturnPriorityReason =>
+        Dto.PendingReturnPriorityWorkdayReason ?? Dto.PendingReturnPriorityWeekendReason;
 }

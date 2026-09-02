@@ -157,7 +157,7 @@ public partial class MembersViewModel : BaseViewModel
 
                 var entries = rosterMembers
                     .Where(rm => membersById.ContainsKey(rm.MemberId))
-                    .OrderBy(rm => rm.WorkdayPosition)
+                    .OrderBy(rm => rm.Rank)
                     .Select((rm, index) => new MemberGroupEntry(membersById[rm.MemberId], index + 1))
                     .ToList();
 
@@ -256,7 +256,7 @@ public partial class MembersViewModel : BaseViewModel
         {
             var position = int.TryParse(NewMemberPosition, out var p) ? p : 1;
             var created = await _memberService.CreateMemberAsync(name, email, phone);
-            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, created.Id, position, QueueType.Workday);
+            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, created.Id, position);
 
             ResetForm();
             await LoadAsync();

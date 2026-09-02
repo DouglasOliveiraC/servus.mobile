@@ -46,20 +46,29 @@ public record ScheduleDayDto(DateOnly Date, bool IsRestDay, int RequiredShiftSiz
 public record RosterScheduleDto(Guid RosterId, string RosterName, IReadOnlyList<ScheduleDayDto> Days);
 
 /// <summary>
-/// WorkdayRank/WeekendRank são a posição 1-based já resolvida contra a QueueDirection da
-/// fila — ordene e exiba por eles. Workday/WeekendPosition são os contadores internos: só
-/// crescem, e uma fila BottomToTop os lê ao contrário, então ordenar por Position mostraria
-/// a fila invertida.
+/// Rank é a posição 1-based do membro na ordem institucional da fila — a mesma para as duas
+/// rotações, e a que a tela exibe. Ela não muda porque a escala rodou; só uma reordenação
+/// explícita a altera. Position é o contador 0-based por trás dela: ordene e exiba por Rank.
+///
+/// Os dois motivos de prioridade continuam separados porque a vez pode ter sido perdida numa
+/// rotação e não na outra.
 /// </summary>
 public record RosterMemberDto(
     Guid Id, Guid RosterId, Guid MemberId, string MemberName,
-    int WorkdayPosition, int WeekendPosition,
-    int WorkdayRank, int WeekendRank,
+    int Position, int Rank,
     string? PendingReturnPriorityWorkdayReason,
     string? PendingReturnPriorityWeekendReason);
 
-public record MemberDutyCountDto(Guid MemberId, string MemberName, int Position, int AssignmentCount);
+public record MemberDutyCountDto(Guid MemberId, string MemberName, int Rank, int AssignmentCount);
 
 public record RosterAccessDto(Guid Id, Guid RosterId, Guid MemberId, bool IsFullAdmin, DateTime CreatedAt);
 
 public record SwapDutyAssignmentResultDto(Guid DutyAssignmentId, Guid RosterId, Guid MemberId, DateOnly Date, bool MinIntervalWarning, string? MinIntervalWarningMessage);
+
+public record ImportRosterMemberEntryDto(string Name, string? Email, string? Phone);
+
+public record ImportedRosterMemberDto(Guid MemberId, Guid RosterMemberId, string Name, int Rank);
+
+public record ImportRosterMembersResultDto(IReadOnlyList<ImportedRosterMemberDto> Imported, IReadOnlyList<string> SkippedDuplicateNames);
+
+public record PublishRosterScheduleResultDto(int AssignmentsPublished);

@@ -35,13 +35,23 @@
 
                 <!-- Membros -->
                 <VerticalStackLayout Spacing="10">
-                    <Grid ColumnDefinitions="*,Auto">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                         <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
                             <Label Text="Fila desta escala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                             <Label Text="A ordem abaixo define quem é escalado primeiro." FontSize="11" TextColor="{StaticResource Neutral600}" />
                         </VerticalStackLayout>
                         <buttons:SfButton
                             Grid.Column="1"
+                            Text="Importar"
+                            IsVisible="{Binding CanManage}"
+                            Background="{StaticResource Neutral100}"
+                            TextColor="{StaticResource Neutral900}"
+                            CornerRadius="8"
+                            HeightRequest="36"
+                            FontSize="12.5"
+                            Command="{Binding ToggleImportFormCommand}" />
+                        <buttons:SfButton
+                            Grid.Column="2"
                             Text="Adicionar"
                             IsVisible="{Binding CanManage}"
                             Background="{StaticResource BrandPrimary}"
@@ -51,6 +61,41 @@
                             FontSize="12.5"
                             Command="{Binding ToggleAddMemberFormCommand}" />
                     </Grid>
+
+                    <Border
+                        IsVisible="{Binding IsImportFormVisible}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                Text="Cole os nomes (um por linha). Colunas opcionais de e-mail e telefone podem vir separadas por ; , ou tabulação. A ordem das linhas vira a ordem da fila, que vale para dias úteis e fins de semana."
+                                FontSize="11.5"
+                                TextColor="{StaticResource Neutral600}" />
+                            <sf:SfTextInputLayout Hint="Lista de membros" ContainerType="Outlined">
+                                <Editor Text="{Binding ImportText}" AutoSize="TextChanges" MinimumHeightRequest="120" />
+                            </sf:SfTextInputLayout>
+                            <Label
+                                Text="{Binding ImportSummaryText}"
+                                IsVisible="{Binding ImportSummaryText, Converter={StaticResource StringNotEmptyConverter}}"
+                                FontSize="11.5"
+                                TextColor="{StaticResource Neutral600}" />
+                            <buttons:SfButton
+                                Text="Importar lista"
+                                Background="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="40"
+                                FontSize="13"
+                                Command="{Binding ImportMembersCommand}" />
+                            <Label
+                                Text="{Binding ImportResultMessage}"
+                                IsVisible="{Binding ImportResultMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                                FontSize="12.5"
+                                TextColor="{StaticResource BrandPrimary}" />
+                        </VerticalStackLayout>
+                    </Border>
 
                     <Border
                         IsVisible="{Binding IsAddMemberFormVisible}"
@@ -67,6 +112,56 @@
                                 SearchText="{Binding MemberSearchText}"
                                 Results="{Binding MemberSearchResults}"
                                 SelectCommand="{Binding AddMemberCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding CanManage}">
+                        <Label Grid.Column="0" />
+                        <buttons:SfButton
+                            Grid.Column="1"
+                            Text="De onde continuar"
+                            Background="{StaticResource Neutral100}"
+                            TextColor="{StaticResource Neutral900}"
+                            CornerRadius="8"
+                            HeightRequest="36"
+                            FontSize="12.5"
+                            Command="{Binding ToggleStartingPointFormCommand}" />
+                    </Grid>
+
+                    <Border
+                        IsVisible="{Binding IsStartingPointFormVisible}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="14">
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                Text="Esta fila já estava rodando antes de entrar no sistema. Indique de quem é a próxima escala em cada rotação — a ordem da lista não muda, só o ponto de partida."
+                                FontSize="11.5"
+                                TextColor="{StaticResource Neutral600}" />
+                            <Label Text="Próximo em dias úteis" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Picker
+                                ItemsSource="{Binding Members}"
+                                ItemDisplayBinding="{Binding MemberName}"
+                                SelectedItem="{Binding StartingPointWorkdayMember}" />
+                            <Label Text="Próximo em fim de semana" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Picker
+                                ItemsSource="{Binding Members}"
+                                ItemDisplayBinding="{Binding MemberName}"
+                                SelectedItem="{Binding StartingPointWeekendMember}" />
+                            <buttons:SfButton
+                                Text="Salvar ponto de partida"
+                                Background="{StaticResource BrandPrimary}"
+                                TextColor="White"
+                                CornerRadius="8"
+                                HeightRequest="40"
+                                FontSize="13"
+                                Command="{Binding SaveStartingPointCommand}" />
+                            <Label
+                                Text="{Binding StartingPointResultMessage}"
+                                IsVisible="{Binding StartingPointResultMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                                FontSize="12.5"
+                                TextColor="{StaticResource BrandPrimary}" />
                         </VerticalStackLayout>
                     </Border>
 

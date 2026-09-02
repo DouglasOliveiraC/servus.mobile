@@ -97,9 +97,9 @@ public class RosterService : IRosterService
         return result ?? [];
     }
 
-    public async Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, QueueType queueType, CancellationToken cancellationToken = default)
+    public async Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members", new { MemberId = memberId, Rank = rank, QueueType = queueType }, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members", new { MemberId = memberId, Rank = rank }, cancellationToken);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<CreatedResult>(cancellationToken: cancellationToken);
         return result!.Id;
@@ -111,10 +111,39 @@ public class RosterService : IRosterService
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task ReorderRosterMemberAsync(Guid rosterMemberId, int newRank, QueueType queueType, CancellationToken cancellationToken = default)
+    public async Task ReorderRosterMemberAsync(Guid rosterMemberId, int newRank, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/roster/members/{rosterMemberId}/position", new { NewRank = newRank, QueueType = queueType }, cancellationToken);
+        var response = await _httpClient.PutAsJsonAsync($"api/roster/members/{rosterMemberId}/position", new { NewRank = newRank }, cancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<ImportRosterMembersResultDto> ImportRosterMembersAsync(Guid rosterId, IReadOnlyList<ImportRosterMemberEntryDto> entries, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members/import", new
+        {
+            Entries = entries.Select(e => new { e.Name, e.Email, e.Phone })
+        }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ImportRosterMembersResultDto>(cancellationToken: cancellationToken);
+        return result!;
+    }
+
+    public async Task SetNextUpRosterMemberAsync(Guid rosterId, Guid? workdayRosterMemberId, Guid? weekendRosterMemberId, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/roster/{rosterId}/members/next-up", new
+        {
+            WorkdayRosterMemberId = workdayRosterMemberId,
+            WeekendRosterMemberId = weekendRosterMemberId
+        }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<PublishRosterScheduleResultDto> PublishScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/publish", new { From = from, To = to }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<PublishRosterScheduleResultDto>(cancellationToken: cancellationToken);
+        return result!;
     }
 
     public async Task<IReadOnlyList<RosterAccessDto>> GetRosterAccessesAsync(Guid rosterId, CancellationToken cancellationToken = default)

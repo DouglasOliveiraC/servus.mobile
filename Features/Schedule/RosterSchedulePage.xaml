@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Schedule"
     xmlns:rosters="clr-namespace:Servus.Mobile.Services.Rosters"
+    xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     x:DataType="local:RosterScheduleViewModel"
     Title="Quadro de plantões"
     BackgroundColor="{StaticResource Neutral100}"
@@ -55,6 +56,22 @@
                     Padding="12">
                     <Label Text="{Binding SelectionHint}" FontSize="12.5" TextColor="{StaticResource Warning}" />
                 </Border>
+
+                <VerticalStackLayout IsVisible="{Binding CanManage}" Spacing="8">
+                    <buttons:SfButton
+                        Text="Publicar plantões do período"
+                        Background="{StaticResource BrandPrimary}"
+                        TextColor="White"
+                        CornerRadius="9"
+                        HeightRequest="44"
+                        FontAttributes="Bold"
+                        Command="{Binding PublishScheduleCommand}" />
+                    <Label
+                        Text="{Binding PublishResultMessage}"
+                        IsVisible="{Binding PublishResultMessage, Converter={StaticResource StringNotEmptyConverter}}"
+                        FontSize="12.5"
+                        TextColor="{StaticResource BrandPrimary}" />
+                </VerticalStackLayout>
 
                 <Border
                     IsVisible="{Binding Days.Count, Converter={StaticResource IntIsZeroConverter}}"

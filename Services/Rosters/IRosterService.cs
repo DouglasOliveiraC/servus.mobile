@@ -22,11 +22,22 @@ public interface IRosterService
 
     Task<IReadOnlyList<RosterMemberDto>> GetRosterMembersAsync(Guid rosterId, CancellationToken cancellationToken = default);
 
-    Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, QueueType queueType, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Rank é a posição 1-based na ordem institucional da fila — uma só, percorrida pelas
+    /// duas rotações —, então não há fila a escolher.
+    /// </summary>
+    Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, CancellationToken cancellationToken = default);
 
     Task RemoveRosterMemberAsync(Guid rosterMemberId, CancellationToken cancellationToken = default);
 
-    Task ReorderRosterMemberAsync(Guid rosterMemberId, int newRank, QueueType queueType, CancellationToken cancellationToken = default);
+    Task ReorderRosterMemberAsync(Guid rosterMemberId, int newRank, CancellationToken cancellationToken = default);
+
+    Task<ImportRosterMembersResultDto> ImportRosterMembersAsync(Guid rosterId, IReadOnlyList<ImportRosterMemberEntryDto> entries, CancellationToken cancellationToken = default);
+
+    /// <summary>Null leaves that rotation's starting point untouched.</summary>
+    Task SetNextUpRosterMemberAsync(Guid rosterId, Guid? workdayRosterMemberId, Guid? weekendRosterMemberId, CancellationToken cancellationToken = default);
+
+    Task<PublishRosterScheduleResultDto> PublishScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<RosterAccessDto>> GetRosterAccessesAsync(Guid rosterId, CancellationToken cancellationToken = default);
 
