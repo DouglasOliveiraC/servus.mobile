@@ -12,83 +12,159 @@
 
     <RefreshView Command="{Binding LoadCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="20,52,20,28" Spacing="18">
+            <Grid RowDefinitions="Auto,*" RowSpacing="0">
 
-                <!-- Header -->
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                    <Border
-                        Grid.Column="0"
-                        StrokeShape="RoundRectangle 20"
-                        Stroke="Transparent"
-                        BackgroundColor="{StaticResource BrandPrimary}"
-                        WidthRequest="40"
-                        HeightRequest="40"
-                        Padding="0">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
-                        </Border.GestureRecognizers>
-                        <Label
-                            Text="{Binding UserInitial}"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="White"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center" />
-                    </Border>
-                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
-                            <Label Grid.Column="0" Text="Olá!" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                            <ActivityIndicator
-                                Grid.Column="1"
-                                IsRunning="{Binding IsBusy}"
-                                IsVisible="{Binding IsBusy}"
-                                Color="{StaticResource BrandPrimary}"
-                                WidthRequest="18"
-                                HeightRequest="18"
-                                VerticalOptions="Center" />
+                <!-- Hero claro: identidade + próximo plantão, azul só em acentos -->
+                <Border
+                    Grid.Row="0"
+                    StrokeShape="RoundRectangle 20,20,20,20"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource Neutral50}"
+                    Padding="24,52,24,22">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
+
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <Border
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 18"
+                                Stroke="Transparent"
+                                BackgroundColor="{StaticResource BrandPrimary}"
+                                WidthRequest="42"
+                                HeightRequest="42"
+                                Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
+                                </Border.GestureRecognizers>
+                                <Label
+                                    Text="{Binding UserInitial}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="White"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding Greeting}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                    <ActivityIndicator
+                                        Grid.Column="1"
+                                        IsRunning="{Binding IsBusy}"
+                                        IsVisible="{Binding IsBusy}"
+                                        Color="{StaticResource BrandPrimary}"
+                                        WidthRequest="18"
+                                        HeightRequest="18"
+                                        VerticalOptions="Center" />
+                                </Grid>
+                                <Label Text="{Binding UserEmail}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                            <Border
+                                Grid.Column="2"
+                                StrokeShape="RoundRectangle 16"
+                                Stroke="{StaticResource Neutral200}"
+                                BackgroundColor="Transparent"
+                                Padding="12,7"
+                                VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Sair" TextColor="{StaticResource Neutral600}" FontSize="12.5" FontAttributes="Bold" />
+                            </Border>
                         </Grid>
-                        <Label Text="{Binding UserEmail}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
-                    </VerticalStackLayout>
-                    <Label
-                        Grid.Column="2"
-                        Text="Sair"
-                        TextColor="{StaticResource Danger}"
-                        FontSize="13"
-                        FontAttributes="Bold"
-                        VerticalOptions="Center">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                        </Label.GestureRecognizers>
-                    </Label>
-                </Grid>
 
-                <!-- Stat cards -->
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                    <Border Grid.Column="0" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding OrganizationCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                            <Label Text="Organizações" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Column="1" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding RosterCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                            <Label Text="Escalas" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Grid.Column="2" StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="12,14">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding MyUpcomingDutyCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                            <Label Text="Meus plantões (14d)" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
+                        <!-- Next duty: card branco com date-chip navy -->
+                        <Border
+                            Grid.Row="1"
+                            IsVisible="{Binding NextDuty, Converter={StaticResource IsNotNullConverter}}"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="{StaticResource BrandBorder}"
+                            BackgroundColor="White"
+                            Padding="14,12">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Border
+                                    Grid.Column="0"
+                                    StrokeShape="RoundRectangle 10"
+                                    Stroke="Transparent"
+                                    BackgroundColor="{StaticResource BrandPrimary}"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                    Padding="0">
+                                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                                        <Label
+                                            Text="{Binding NextDuty.Date, StringFormat='{0:dd}'}"
+                                            FontSize="18"
+                                            FontAttributes="Bold"
+                                            TextColor="White"
+                                            HorizontalTextAlignment="Center" />
+                                        <Label
+                                            Text="{Binding NextDuty.Date, StringFormat='{0:MMM}'}"
+                                            FontSize="10"
+                                            TextColor="{StaticResource BrandSurfaceStrong}"
+                                            HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="Meu próximo plantão" FontSize="9.5" FontAttributes="Bold" TextColor="{StaticResource Neutral500}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsBusy}" Value="True">
+                                                <Setter Property="Text" Value="Carregando…" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding NextDuty.RosterName}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding NextDuty.OrganizationName}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label FontSize="11.5" TextColor="{StaticResource Neutral600}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="em " />
+                                                <Span Text="{Binding NextDuty.DaysUntil}" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                                <Span Text=" dia(s)" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <!-- Stats: chips brancos, número em navy -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
+                                <VerticalStackLayout Spacing="1">
+                                    <Label Text="{Binding OrganizationCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                    <Label Text="Organizações" FontSize="10" TextColor="{StaticResource Neutral600}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
+                                <VerticalStackLayout Spacing="1">
+                                    <Label Text="{Binding RosterCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                    <Label Text="Escalas" FontSize="10" TextColor="{StaticResource Neutral600}" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Grid.Column="2" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
+                                <VerticalStackLayout Spacing="1">
+                                    <Label Text="{Binding MyUpcomingDutyCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                    <Label Text="Meus plantões (14d)" FontSize="10" TextColor="{StaticResource Neutral600}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+
+                    </Grid>
+                </Border>
+
+                <!-- Corpo: cards brancos com traço sutil sob o hero -->
+                <VerticalStackLayout Grid.Row="1" Padding="20,18,20,28" Spacing="18">
 
                 <!-- Error state -->
                 <Border
                     IsVisible="{Binding HasError}"
                     StrokeShape="RoundRectangle 12"
-                    Stroke="Transparent"
+                    Stroke="{StaticResource DangerBorder}"
                     BackgroundColor="{StaticResource DangerSurface}"
                     Padding="14">
                     <Label
@@ -101,7 +177,7 @@
                 <Border
                     IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsZeroConverter}}"
                     StrokeShape="RoundRectangle 12"
-                    Stroke="Transparent"
+                    Stroke="{StaticResource BrandBorder}"
                     BackgroundColor="White"
                     Padding="18">
                     <VerticalStackLayout Spacing="4">
@@ -110,56 +186,11 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Next duty -->
-                <Border
-                    IsVisible="{Binding NextDuty, Converter={StaticResource IsNotNullConverter}}"
-                    StrokeShape="RoundRectangle 14"
-                    Stroke="Transparent"
-                    BackgroundColor="{StaticResource BrandPrimary}"
-                    Padding="16,14">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center">
-                            <Label
-                                Text="{Binding NextDuty.Date, StringFormat='{0:dd}'}"
-                                FontSize="26"
-                                FontAttributes="Bold"
-                                TextColor="White"
-                                HorizontalTextAlignment="Center" />
-                            <Label
-                                Text="{Binding NextDuty.Date, StringFormat='{0:MMM}'}"
-                                FontSize="11.5"
-                                TextColor="{StaticResource BrandSurfaceStrong}"
-                                HorizontalTextAlignment="Center" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                            <Label Text="Meu próximo plantão" FontSize="12" TextColor="{StaticResource BrandSurfaceStrong}" />
-                            <Label FontSize="15" FontAttributes="Bold" TextColor="White">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding NextDuty.RosterName}" />
-                                        <Span Text=" · " />
-                                        <Span Text="{Binding NextDuty.OrganizationName}" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                            <Label FontSize="12.5" TextColor="{StaticResource BrandSurfaceStrong}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="em " />
-                                        <Span Text="{Binding NextDuty.DaysUntil}" FontAttributes="Bold" TextColor="White" />
-                                        <Span Text=" dia(s)" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
-
                 <!-- Swap trend card -->
                 <Border
                     IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsNotZeroConverter}}"
                     StrokeShape="RoundRectangle 14"
-                    Stroke="Transparent"
+                    Stroke="{StaticResource BrandBorder}"
                     BackgroundColor="White"
                     Padding="16,14">
                     <VerticalStackLayout Spacing="8">
@@ -210,7 +241,7 @@
                 <Border
                     IsVisible="{Binding MemberLoad.Count, Converter={StaticResource IntIsNotZeroConverter}}"
                     StrokeShape="RoundRectangle 14"
-                    Stroke="Transparent"
+                    Stroke="{StaticResource BrandBorder}"
                     BackgroundColor="White"
                     Padding="16,14">
                     <VerticalStackLayout Spacing="8">
@@ -240,7 +271,7 @@
                 <Border
                     IsVisible="{Binding CoverageDays.Count, Converter={StaticResource IntIsNotZeroConverter}}"
                     StrokeShape="RoundRectangle 14"
-                    Stroke="Transparent"
+                    Stroke="{StaticResource BrandBorder}"
                     BackgroundColor="White"
                     Padding="16,14">
                     <VerticalStackLayout Spacing="10">
@@ -277,11 +308,13 @@
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
-                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
-                            <BoxView Grid.Column="0" Color="{StaticResource BrandPrimary}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" />
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                            <BoxView Grid.Column="0" Color="{StaticResource Success}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" />
                             <Label Grid.Column="1" Text="Coberto" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
                             <BoxView Grid.Column="2" Color="{StaticResource AccentOrange}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
                             <Label Grid.Column="3" Text="Falta gente" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                            <BoxView Grid.Column="4" Color="{StaticResource Neutral200}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
+                            <Label Grid.Column="5" Text="Sem escala no dia" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
@@ -290,42 +323,42 @@
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Acesso rápido" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                        <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Trocas de plantão" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="SwapRequestsPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
-                        <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Indisponibilidade" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="UnavailabilityPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
-                        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Perfil" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
-                        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Entrar em organização" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="JoinOrganizationPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
-                        <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Gerenciar organizações" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="OrganizationListPage" />
                                 </Label.GestureRecognizers>
                             </Label>
                         </Border>
-                        <Border Grid.Row="2" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <Border Grid.Row="2" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                             <Label Text="Membros" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="MembersPage" />
@@ -345,7 +378,7 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="local:OrganizationSummary">
-                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="2">
                                             <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
@@ -383,7 +416,7 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="local:DailyDutySummary">
-                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand}"
@@ -455,7 +488,8 @@
                         Command="{Binding ShowMoreDailyDutiesCommand}" />
                 </VerticalStackLayout>
 
-            </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
         </ScrollView>
     </RefreshView>
 

@@ -10,6 +10,7 @@ using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
 using Servus.Mobile.Services.Telemetry;
+using Servus.Mobile.Services.Users;
 
 namespace Servus.Mobile.Features.Home;
 
@@ -24,6 +25,7 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly IOrganizationService _organizationService;
     private readonly IRosterService _rosterService;
     private readonly IAuthService _authService;
+    private readonly IUserService _userService;
     private readonly ISwapHistoryService _swapHistoryService;
     private readonly IRealtimeClient _realtimeClient;
 
@@ -31,6 +33,7 @@ public partial class DashboardViewModel : BaseViewModel
         IOrganizationService organizationService,
         IRosterService rosterService,
         IAuthService authService,
+        IUserService userService,
         ISwapHistoryService swapHistoryService,
         IRealtimeClient realtimeClient,
         INavigationService navigationService,
@@ -40,6 +43,7 @@ public partial class DashboardViewModel : BaseViewModel
         _organizationService = organizationService;
         _rosterService = rosterService;
         _authService = authService;
+        _userService = userService;
         _swapHistoryService = swapHistoryService;
         _realtimeClient = realtimeClient;
     }
@@ -51,11 +55,47 @@ public partial class DashboardViewModel : BaseViewModel
     public partial bool HasError { get; set; }
 
     [ObservableProperty]
+    public partial string? UserDisplayName { get; set; }
+
+    [ObservableProperty]
     public partial string? UserEmail { get; set; }
 
-    public string UserInitial => string.IsNullOrEmpty(UserEmail) ? "?" : UserEmail[..1].ToUpperInvariant();
+    // Primeiro token do DisplayName (ou do e-mail como fallback) — tanto para a
+    // saudação quanto para o avatar, porque o "sub" do JWT não carrega nome.
+    public string UserFirstName => string.IsNullOrWhiteSpace(UserDisplayName)
+        ? UserEmail?.Split('@')[0] ?? string.Empty
+        : UserDisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries)[0];
 
-    partial void OnUserEmailChanged(string? value) => OnPropertyChanged(nameof(UserInitial));
+    public string UserInitial => string.IsNullOrWhiteSpace(UserFirstName) ? "?" : UserFirstName[..1].ToUpperInvariant();
+
+    // Sem capitalização enforced para não distorcer nomes como "lucas" (exceções
+    // como "de/silva" tornariam um TitleCase correto verboso demais para o ganho.
+    public string Greeting
+    {
+        get
+        {
+            var hour = DateTime.Now.Hour;
+            var period = hour switch
+            {
+                < 5 => "Boa madrugada",
+                < 12 => "Bom dia",
+                < 18 => "Boa tarde",
+                _ => "Boa noite"
+            };
+            return string.IsNullOrWhiteSpace(UserFirstName) ? "Olá" : $"{period}, {UserFirstName}";
+        }
+    }
+
+    partial void OnUserDisplayNameChanged(string? value) => NotifyIdentityChanged();
+
+    partial void OnUserEmailChanged(string? value) => NotifyIdentityChanged();
+
+    private void NotifyIdentityChanged()
+    {
+        OnPropertyChanged(nameof(UserFirstName));
+        OnPropertyChanged(nameof(UserInitial));
+        OnPropertyChanged(nameof(Greeting));
+    }
 
     [ObservableProperty]
     public partial int OrganizationCount { get; set; }
@@ -111,6 +151,19 @@ public partial class DashboardViewModel : BaseViewModel
         {
             var user = await _authService.GetCurrentUserAsync();
             UserEmail = user?.Email;
+            if (user is not null)
+            {
+                // Endpoint falho não deve derrubar o dashboard — a saudação cai no
+                // fallback por e-mail sem quebrar o carregamento dos dados.
+                try
+                {
+                    UserDisplayName = (await _userService.GetByIdAsync(user.Id)).DisplayName;
+                }
+                catch (HttpRequestException)
+                {
+                    UserDisplayName = null;
+                }
+            }
             await _realtimeClient.ConnectAsync();
 
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
@@ -152,7 +205,10 @@ public partial class DashboardViewModel : BaseViewModel
                     {
                         foreach (var day in schedule.Days)
                         {
-                            if (dailyRequired.ContainsKey(day.Date) && !day.IsRestDay)
+                            // Rest day conta com RestDayShiftSize (> 0 quando há plantão de
+                            // fim de semana) — excluí-lo pintava sáb/dom de cinza mesmo com
+                            // gente escalada, mentindo sobre a cobertura real.
+                            if (dailyRequired.ContainsKey(day.Date))
                             {
                                 dailyRequired[day.Date] += day.RequiredShiftSize;
                             }

@@ -19,8 +19,10 @@ public record CoverageDayPoint(DateOnly Date, string DayLabel, string WeekdayLab
 {
     public bool HasGap => Required > 0 && Assigned < Required;
 
+    // Cinza só quando a escala não exige ninguém no dia (override de folga total);
+    // Assigned > 0 com Required == 0 ainda indica plantão coberto por cima.
     public string StatusColor => Required == 0
-        ? "#E3E6E5"
+        ? (Assigned > 0 ? "#3D6E68" : "#E3E6E5")
         : HasGap
             ? "#D98C3B"
             : "#3D6E68"; // Success (verde, independente do BrandPrimary)
