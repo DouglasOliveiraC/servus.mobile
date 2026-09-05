@@ -95,8 +95,18 @@ public partial class UnavailabilityViewModel : BaseViewModel
 
         try
         {
-            await _unavailabilityService.CreateAsync(_myMemberId.Value, start, end);
+            var result = await _unavailabilityService.CreateAsync(_myMemberId.Value, start, end);
             await LoadAsync();
+
+            // O período cadastrado pelo próprio membro não vale de imediato: sem dizer isso
+            // aqui, ele sairia da tela achando que já está liberado daqueles dias.
+            if (result.Status == MemberUnavailabilityStatus.Pending)
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Solicitação enviada",
+                    "Seu período foi registrado e passa a valer para a escala assim que um administrador aprovar.",
+                    "OK");
+            }
         }
         catch (Exception)
         {

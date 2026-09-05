@@ -33,6 +33,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(nameof(RosterListPage), typeof(RosterListPage));
 		Routing.RegisterRoute(nameof(RosterDetailPage), typeof(RosterDetailPage));
 		Routing.RegisterRoute(nameof(RosterSettingsPage), typeof(RosterSettingsPage));
+		Routing.RegisterRoute(nameof(RosterMemberProfilePage), typeof(RosterMemberProfilePage));
 		Routing.RegisterRoute(nameof(MembersPage), typeof(MembersPage));
 		Routing.RegisterRoute(nameof(MemberDetailPage), typeof(MemberDetailPage));
 	}

@@ -61,6 +61,81 @@ public record RosterMemberDto(
 
 public record MemberDutyCountDto(Guid MemberId, string MemberName, int Rank, int AssignmentCount);
 
+/// <summary>
+/// Retrato consolidado de UM membro dentro de UMA escala — o que o administrador precisa
+/// para decidir sobre essa pessoa sem abrir a escala inteira. Escopado à escala de
+/// propósito: serviços cumpridos e posição na fila só significam algo dentro de uma fila.
+/// </summary>
+public record RosterMemberProfileDto(
+    Guid RosterMemberId,
+    Guid RosterId,
+    string RosterName,
+    Guid MemberId,
+    string MemberName,
+    string? Email,
+    string? Phone,
+    bool IsLinkedToUser,
+    DateTime JoinedQueueAt,
+    int Rank,
+    int QueueSize,
+    bool IsWorkdayNextUp,
+    bool IsWeekendNextUp,
+    string? PendingReturnPriorityWorkdayReason,
+    string? PendingReturnPriorityWeekendReason,
+    RosterMemberDutySummaryDto Duties,
+    IReadOnlyList<RosterMemberDutyDto> UpcomingDuties,
+    IReadOnlyList<RosterMemberDutyDto> RecentDuties,
+    IReadOnlyList<RosterMemberSwapDto> SwapHistory,
+    IReadOnlyList<RosterMemberUnavailabilityDto> Unavailabilities);
+
+/// <summary>
+/// Completed é o que já passou E está publicado. Draft fica à parte porque um rascunho
+/// ainda pode sumir numa regeração e não representa compromisso assumido.
+/// </summary>
+public record RosterMemberDutySummaryDto(
+    int Completed,
+    int CompletedWorkday,
+    int CompletedRestDay,
+    int Scheduled,
+    int Draft,
+    DateOnly? LastDutyDate,
+    DateOnly? NextDutyDate,
+    double QueueAverageCompleted);
+
+public record RosterMemberDutyDto(
+    Guid Id, DateOnly Date, bool IsRestDay,
+    TimeOnly ShiftStartTime, TimeOnly ShiftEndTime,
+    DutyAssignmentStatus Status,
+    IReadOnlyList<string> CompanionNames);
+
+/// <summary>Direção vista do lado do membro exibido: Out = alguém assumiu o dia dele.</summary>
+public record RosterMemberSwapDto(
+    Guid Id, DateOnly Date, SwapDirection Direction,
+    Guid CounterpartMemberId, string CounterpartMemberName,
+    SwapCause Cause, DateTime CreatedAt);
+
+public enum SwapDirection
+{
+    Out,
+    In
+}
+
+/// <summary>
+/// Espelha Servus.Domain.Enums.SwapCause. Existe separado de SwapCauseDto
+/// (Services/SwapHistory) porque aquele não corresponde ao enum do servidor: a API serializa
+/// enum como inteiro, e ali 0/1 são lidos como Manual/Approved em vez de PeerSwap/AdminSwap.
+/// </summary>
+public enum SwapCause
+{
+    PeerSwap,
+    AdminSwap
+}
+
+public record RosterMemberUnavailabilityDto(
+    Guid Id, DateOnly StartDate, DateOnly EndDate,
+    string? ReasonName, Unavailabilities.MemberUnavailabilityStatus Status,
+    int DayCount, bool IsCurrent, DateTime CreatedAt);
+
 public record RosterAccessDto(Guid Id, Guid RosterId, Guid MemberId, bool IsFullAdmin, DateTime CreatedAt);
 
 public record SwapDutyAssignmentResultDto(Guid DutyAssignmentId, Guid RosterId, Guid MemberId, DateOnly Date, bool MinIntervalWarning, string? MinIntervalWarningMessage);

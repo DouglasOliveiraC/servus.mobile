@@ -392,13 +392,23 @@ public partial class MemberDetailViewModel : BaseViewModel
 
         try
         {
-            await _unavailabilityService.CreateAsync(
+            var result = await _unavailabilityService.CreateAsync(
                 MemberId,
                 DateOnly.FromDateTime(UnavailabilityStart),
                 DateOnly.FromDateTime(UnavailabilityEnd));
 
             IsAddUnavailabilityFormVisible = false;
             await LoadUnavailabilitiesAsync();
+
+            // Cadastro feito pelo admin já vale de imediato, então pode invalidar plantões
+            // que já foram publicados — sem este aviso ele só descobriria olhando a escala.
+            if (result.ConflictingPublishedDuties > 0)
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Escala precisa ser regerada",
+                    $"A ausência atinge {result.ConflictingPublishedDuties} plantão(ões) já publicado(s) deste membro. Regere a escala desse período ou troque o membro nesses dias.",
+                    "OK");
+            }
         }
         catch (Exception)
         {
@@ -534,18 +544,28 @@ public class UnavailabilityRow
         Id = dto.Id;
         StartDate = dto.StartDate;
         EndDate = dto.EndDate;
+        ApprovalStatus = dto.Status;
     }
 
     public Guid Id { get; }
     public DateOnly StartDate { get; }
     public DateOnly EndDate { get; }
+    public MemberUnavailabilityStatus ApprovalStatus { get; }
 
     public string Period => $"{StartDate:dd/MM/yyyy} a {EndDate:dd/MM/yyyy}";
 
+    /// <summary>
+    /// Fase no tempo (encerrada/em andamento/agendada), mas só depois de aprovada: um período
+    /// pendente ou recusado ainda não vale para a escala, e mostrá-lo como "Agendada" diria
+    /// ao admin que aquele membro já está fora daqueles dias quando ele não está.
+    /// </summary>
     public string Status
     {
         get
         {
+            if (ApprovalStatus == MemberUnavailabilityStatus.Pending) return "Aguardando aprovação";
+            if (ApprovalStatus == MemberUnavailabilityStatus.Rejected) return "Recusada";
+
             var today = DateOnly.FromDateTime(DateTime.Today);
             if (EndDate < today) return "Encerrada";
             return StartDate <= today ? "Em andamento" : "Agendada";

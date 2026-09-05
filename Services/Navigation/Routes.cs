@@ -22,6 +22,7 @@ public static class Routes
     public const string RosterList = nameof(Features.Admin.RosterListPage);
     public const string RosterDetail = nameof(Features.Admin.RosterDetailPage);
     public const string RosterSettings = nameof(Features.Admin.RosterSettingsPage);
+    public const string RosterMemberProfile = nameof(Features.Admin.RosterMemberProfilePage);
     public const string Members = nameof(Features.Members.MembersPage);
     public const string MemberDetail = nameof(Features.Members.MemberDetailPage);
 }

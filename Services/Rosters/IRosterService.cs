@@ -23,6 +23,12 @@ public interface IRosterService
     Task<IReadOnlyList<RosterMemberDto>> GetRosterMembersAsync(Guid rosterId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Exige permissão de gestão da escala: reúne contato, histórico de trocas e de ausências
+    /// do membro, que não é o que a escala publicada mostra a todos.
+    /// </summary>
+    Task<RosterMemberProfileDto> GetRosterMemberProfileAsync(Guid rosterId, Guid memberId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Rank é a posição 1-based na ordem institucional da fila — uma só, percorrida pelas
     /// duas rotações —, então não há fila a escolher.
     /// </summary>

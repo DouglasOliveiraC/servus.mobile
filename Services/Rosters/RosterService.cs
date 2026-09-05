@@ -97,6 +97,12 @@ public class RosterService : IRosterService
         return result ?? [];
     }
 
+    public async Task<RosterMemberProfileDto> GetRosterMemberProfileAsync(Guid rosterId, Guid memberId, CancellationToken cancellationToken = default)
+    {
+        var result = await _httpClient.GetFromJsonAsync<RosterMemberProfileDto>($"api/roster/{rosterId}/members/{memberId}/profile", cancellationToken);
+        return result!;
+    }
+
     public async Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members", new { MemberId = memberId, Rank = rank }, cancellationToken);

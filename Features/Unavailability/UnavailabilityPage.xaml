@@ -77,15 +77,31 @@
                             <DataTemplate x:DataType="unavail:MemberUnavailabilityDto">
                                 <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
                                     <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding StartDate, StringFormat='{0:dd/MM/yyyy}'}" FontAttributes="Bold" />
-                                                    <Span Text=" até " TextColor="{StaticResource Neutral600}" />
-                                                    <Span Text="{Binding EndDate, StringFormat='{0:dd/MM/yyyy}'}" FontAttributes="Bold" />
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                            <Label FontSize="13.5" TextColor="{StaticResource Neutral900}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding StartDate, StringFormat='{0:dd/MM/yyyy}'}" FontAttributes="Bold" />
+                                                        <Span Text=" até " TextColor="{StaticResource Neutral600}" />
+                                                        <Span Text="{Binding EndDate, StringFormat='{0:dd/MM/yyyy}'}" FontAttributes="Bold" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                            <!-- Só aparece enquanto o período não vale: aprovado é o estado normal
+                                                 e não precisa de rótulo. -->
+                                            <Label
+                                                Text="{Binding StatusLabel}"
+                                                IsVisible="{Binding IsPending}"
+                                                FontSize="11.5"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource Warning}" />
+                                            <Label
+                                                Text="{Binding StatusLabel}"
+                                                IsVisible="{Binding IsRejected}"
+                                                FontSize="11.5"
+                                                FontAttributes="Bold"
+                                                TextColor="{StaticResource Danger}" />
+                                        </VerticalStackLayout>
                                         <Label
                                             Grid.Column="1"
                                             Text="Remover"

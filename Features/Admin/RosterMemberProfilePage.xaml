@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    x:Class="Servus.Mobile.Features.Admin.RosterMemberProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Servus.Mobile.Features.Admin"
+    x:DataType="local:RosterMemberProfileViewModel"
+    Title="Perfil do membro"
+    BackgroundColor="{StaticResource Neutral100}"
+    Shell.NavBarIsVisible="True">
+
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
+
+                <Border
+                    IsVisible="{Binding HasError}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource DangerSurface}"
+                    Padding="14">
+                    <Label Text="Não foi possível carregar o perfil agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <!-- Identificação -->
+                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding RosterName}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                        <Label Text="{Binding MemberName}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label Text="{Binding QueueStanding}" FontSize="13" TextColor="{StaticResource Neutral600}" />
+                        <Label
+                            Text="{Binding Contact}"
+                            IsVisible="{Binding Contact, Converter={StaticResource StringNotEmptyConverter}}"
+                            FontSize="12.5"
+                            TextColor="{StaticResource Neutral600}" />
+                        <Label Text="{Binding JoinedQueueAt}" FontSize="12" TextColor="{StaticResource Neutral600}" />
+
+                        <Border
+                            IsVisible="{Binding HasNextUpBadges}"
+                            StrokeShape="RoundRectangle 8"
+                            Stroke="Transparent"
+                            BackgroundColor="{StaticResource BrandSurface}"
+                            Padding="10,5"
+                            HorizontalOptions="Start"
+                            Margin="0,4,0,0">
+                            <Label Text="{Binding NextUpBadges}" FontSize="11.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                        </Border>
+
+                        <Label
+                            Text="Conta conectada"
+                            IsVisible="{Binding IsLinkedToUser}"
+                            FontSize="11.5"
+                            TextColor="{StaticResource Neutral600}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Prioridade de retorno: explica por que essa pessoa pode ser escalada
+                     fora da ordem na próxima geração. -->
+                <Border
+                    IsVisible="{Binding HasReturnPriority}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="{StaticResource WarningSurface}"
+                    Padding="14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Prioridade de retorno pendente" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                        <Label Text="{Binding ReturnPriorityReason}" FontSize="12.5" TextColor="{StaticResource Warning}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Números -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Serviços cumpridos" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                            <Label Text="{Binding CompletedCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Label Text="{Binding CompletedComparison}" FontSize="11" TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Próximo serviço" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                            <Label Text="{Binding NextDuty}" FontSize="17" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                            <Label Text="{Binding NextDutyHint}" FontSize="11" TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Em dias úteis" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                            <Label Text="{Binding WorkdayCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Em fins de semana" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                            <Label Text="{Binding RestDayCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Próximos serviços -->
+                <Label Text="Próximos serviços" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Border
+                    IsVisible="{Binding UpcomingDuties.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <Label Text="Nenhum serviço à frente." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+                <CollectionView ItemsSource="{Binding UpcomingDuties}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:DutyRow">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="14,11">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding Date}" />
+                                                    <Span Text="  " />
+                                                    <Span Text="{Binding Shift}" FontAttributes="None" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label
+                                            Text="{Binding Companions}"
+                                            IsVisible="{Binding HasCompanions}"
+                                            FontSize="11.5"
+                                            TextColor="{StaticResource Neutral600}"
+                                            LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding DayType}" FontSize="11" TextColor="{StaticResource Neutral600}" HorizontalOptions="End" />
+                                        <Label Text="Rascunho" IsVisible="{Binding IsDraft}" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource Warning}" HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Serviços recentes -->
+                <Label Text="Serviços recentes" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Border
+                    IsVisible="{Binding RecentDuties.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <Label Text="Nenhum serviço cumprido ainda." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+                <CollectionView ItemsSource="{Binding RecentDuties}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:DutyRow">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="14,11">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding Date}" />
+                                                    <Span Text="  " />
+                                                    <Span Text="{Binding Shift}" FontAttributes="None" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label
+                                            Text="{Binding Companions}"
+                                            IsVisible="{Binding HasCompanions}"
+                                            FontSize="11.5"
+                                            TextColor="{StaticResource Neutral600}"
+                                            LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding DayType}" FontSize="11" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Trocas -->
+                <Label Text="Histórico de trocas" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Border
+                    IsVisible="{Binding Swaps.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <Label Text="Nenhuma troca registrada para este membro." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+                <CollectionView ItemsSource="{Binding Swaps}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:SwapRow">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="14,11">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Date}" FontSize="12" TextColor="{StaticResource Neutral600}" />
+                                    <Label Text="{Binding Description}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                    <Label Text="{Binding Detail}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Indisponibilidades -->
+                <Label Text="Histórico de indisponibilidades" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <Border
+                    IsVisible="{Binding Unavailabilities.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent"
+                    BackgroundColor="White"
+                    Padding="16">
+                    <Label Text="Nenhum período registrado." FontSize="13" TextColor="{StaticResource Neutral600}" />
+                </Border>
+                <CollectionView ItemsSource="{Binding Unavailabilities}">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="local:UnavailabilityRow">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="14,11">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Period}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        <Label Text="{Binding Detail}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="Em curso" IsVisible="{Binding IsCurrent}" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource Warning}" HorizontalOptions="End" />
+                                        <Label Text="Aguardando aprovação" IsVisible="{Binding IsPending}" FontSize="11" TextColor="{StaticResource Warning}" HorizontalOptions="End" />
+                                        <Label Text="Recusada" IsVisible="{Binding IsRejected}" FontSize="11" TextColor="{StaticResource Danger}" HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

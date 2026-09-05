@@ -191,11 +191,23 @@
                                         </SwipeItems>
                                     </SwipeView.RightItems>
                                     <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
-                                        <Grid ColumnDefinitions="Auto,*">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=OpenMemberProfileCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
                                             <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" Padding="8,4" Margin="0,0,10,0">
                                                 <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
                                             </Border>
                                             <Label Grid.Column="1" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                            <Label
+                                                Grid.Column="2"
+                                                Text="›"
+                                                IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage}"
+                                                FontSize="18"
+                                                TextColor="{StaticResource Neutral600}"
+                                                VerticalOptions="Center" />
                                         </Grid>
                                     </Border>
                                 </SwipeView>

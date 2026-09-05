@@ -389,6 +389,22 @@ public partial class RosterDetailViewModel : BaseViewModel
             ["rosterId"] = RosterId
         });
 
+    /// <summary>
+    /// O perfil consolidado exige permissão de gestão no servidor, então só faz sentido
+    /// abri-lo de uma fila que este usuário administra — abrir sem CanManage renderia 403.
+    /// </summary>
+    [RelayCommand]
+    private Task OpenMemberProfileAsync(RosterMemberRow member)
+    {
+        if (!CanManage) return Task.CompletedTask;
+
+        return NavigationService.GoToAsync(Routes.RosterMemberProfile, new Dictionary<string, object>
+        {
+            ["rosterId"] = RosterId,
+            ["memberId"] = member.MemberId
+        });
+    }
+
     [RelayCommand]
     private Task ViewSwapHistoryAsync() =>
         NavigationService.GoToAsync(Routes.SwapHistory, new Dictionary<string, object>
@@ -426,6 +442,7 @@ public record RosterAccessRow(Guid Id, Guid MemberId, string MemberName, bool Is
 public record RosterMemberRow(RosterMemberDto Dto)
 {
     public Guid Id => Dto.Id;
+    public Guid MemberId => Dto.MemberId;
     public int Rank => Dto.Rank;
     public string MemberName => Dto.MemberName;
 

@@ -144,6 +144,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<RosterDetailPage>();
 		builder.Services.AddTransient<RosterSettingsViewModel>();
 		builder.Services.AddTransient<RosterSettingsPage>();
+		builder.Services.AddTransient<RosterMemberProfileViewModel>();
+		builder.Services.AddTransient<RosterMemberProfilePage>();
 
 		builder.Services.AddTransient<Servus.Mobile.Features.Members.MembersViewModel>();
 		builder.Services.AddTransient<Servus.Mobile.Features.Members.MembersPage>();

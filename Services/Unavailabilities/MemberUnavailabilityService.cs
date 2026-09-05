@@ -11,7 +11,7 @@ public class MemberUnavailabilityService : IMemberUnavailabilityService
         _httpClient = httpClient;
     }
 
-    public async Task<Guid> CreateAsync(Guid memberId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default)
+    public async Task<CreateUnavailabilityResult> CreateAsync(Guid memberId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync("api/member-unavailability", new
         {
@@ -20,8 +20,8 @@ public class MemberUnavailabilityService : IMemberUnavailabilityService
             EndDate = endDate
         }, cancellationToken);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<CreatedResult>(cancellationToken: cancellationToken);
-        return result!.Id;
+        var result = await response.Content.ReadFromJsonAsync<CreateUnavailabilityResult>(cancellationToken: cancellationToken);
+        return result!;
     }
 
     public async Task<IReadOnlyList<MemberUnavailabilityDto>> GetByMemberIdAsync(Guid memberId, CancellationToken cancellationToken = default)
@@ -35,6 +35,4 @@ public class MemberUnavailabilityService : IMemberUnavailabilityService
         var response = await _httpClient.DeleteAsync($"api/member-unavailability/{id}", cancellationToken);
         response.EnsureSuccessStatusCode();
     }
-
-    private record CreatedResult(Guid Id);
 }
