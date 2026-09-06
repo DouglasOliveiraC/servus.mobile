@@ -18,7 +18,12 @@ public partial class RegisterPage : ContentPage
 
     private async void OnRegisterSucceeded(object? sender, EventArgs e)
     {
-        await Shell.Current.DisplayAlertAsync("Conta criada", "Sua conta foi criada. Entre com o e-mail e a senha que você acabou de definir.", "OK");
+        // Texto propositalmente igual para e-mail novo e já cadastrado — a API responde o mesmo
+        // nos dois casos para não revelar quem tem conta, e o alerta não pode desfazer isso.
+        await Shell.Current.DisplayAlertAsync(
+            "Verifique seu e-mail",
+            "Enviamos um e-mail com as instruções para ativar seu acesso. Confirme seu e-mail para poder entrar.",
+            "OK");
         await _navigationService.GoBackAsync();
     }
 }

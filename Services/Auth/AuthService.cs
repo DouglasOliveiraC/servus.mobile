@@ -66,8 +66,8 @@ public class AuthService : IAuthService
 
         if (response.IsSuccessStatusCode)
         {
-            // Registro só cria a conta — não salva token nem autentica. O usuário é
-            // mandado de volta para o Login para entrar com a senha que acabou de criar.
+            // Registro não autentica: a API responde 202 sem tokens, igual para e-mail novo e
+            // já cadastrado. A conta só fica utilizável após a confirmação por e-mail.
             return AuthResult.Ok();
         }
 
@@ -112,7 +112,9 @@ public class AuthService : IAuthService
         HttpStatusCode.TooManyRequests => "Muitas tentativas. Aguarde um momento antes de tentar novamente.",
         HttpStatusCode.Unauthorized => "E-mail ou senha incorretos.",
         HttpStatusCode.BadRequest => "Verifique os dados informados e tente novamente.",
-        HttpStatusCode.Conflict => "Esse e-mail já está cadastrado.",
+        // O cadastro não devolve mais "e-mail já cadastrado" em nenhum status: a API responde
+        // igual para e-mail novo e existente para não revelar quem tem conta.
+        HttpStatusCode.Forbidden => "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.",
         _ => "Não foi possível concluir. Tente novamente."
     };
 }
