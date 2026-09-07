@@ -161,22 +161,23 @@ public static class MauiProgram
 
 	private static void RegisterSyncfusionLicense()
 	{
-		// Chave lida de variável de ambiente em build-time, nunca commitada.
-		// Ver docs/tarefas para o passo de configuração do secret local.
-		var licenseKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
+		var licenseKey = ResolveBuildSecret(
+			BuildSecrets.SyncfusionLicenseKey,
+			"SYNCFUSION_LICENSE_KEY");
 		if (!string.IsNullOrWhiteSpace(licenseKey))
 		{
 			Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(licenseKey);
 		}
 	}
 
-	// Mesma filosofia do SYNCFUSION_LICENSE_KEY acima: connection string lida de variável
-	// de ambiente em build-time, nunca commitada. Sem ela, ITelemetryService fica em modo
-	// no-op (ILogger<T> null) em vez de derrubar o app — não há Application Insights
-	// provisionado em todo ambiente de desenvolvimento local.
+	// Sem connection string, ITelemetryService fica em modo no-op (ILogger<T> null) em vez de
+	// derrubar o app — não há Application Insights provisionado em todo ambiente de
+	// desenvolvimento local.
 	private static void ConfigureTelemetry(MauiAppBuilder builder)
 	{
-		var connectionString = Environment.GetEnvironmentVariable("APPINSIGHTS_CONNECTION_STRING");
+		var connectionString = ResolveBuildSecret(
+			BuildSecrets.ApplicationInsightsConnectionString,
+			"APPINSIGHTS_CONNECTION_STRING");
 		if (string.IsNullOrWhiteSpace(connectionString))
 		{
 			builder.Services.AddSingleton<ITelemetryService, TelemetryService>();
@@ -193,5 +194,22 @@ public static class MauiProgram
 				.AddAzureMonitorLogExporter(o => o.ConnectionString = connectionString));
 
 		builder.Services.AddSingleton<ITelemetryService, TelemetryService>();
+	}
+
+	/// <summary>
+	/// Valor gravado no assembly em build-time, com a variável de ambiente do processo como
+	/// alternativa.
+	/// </summary>
+	/// <remarks>
+	/// A ordem importa: antes só existia a leitura de ambiente, e ela SEMPRE devolve vazio no
+	/// aparelho — variável definida na máquina de build não viaja no APK. O que faz o app
+	/// instalado ter telemetria é a constante; o ambiente sobrou para rodar no Windows/desktop
+	/// sem recompilar (R4 no relatório 10).
+	/// </remarks>
+	private static string? ResolveBuildSecret(string compiledValue, string environmentVariableName)
+	{
+		return !string.IsNullOrWhiteSpace(compiledValue)
+			? compiledValue
+			: Environment.GetEnvironmentVariable(environmentVariableName);
 	}
 }

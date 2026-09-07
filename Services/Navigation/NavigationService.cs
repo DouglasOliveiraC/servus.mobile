@@ -21,18 +21,29 @@ public class NavigationService : INavigationService
 
     public Task GoBackAsync() => NavigateAsync("..", () => Shell.Current.GoToAsync(".."));
 
+    /// <remarks>
+    /// O destino é DIMENSÃO, não parte do nome do evento. Antes o nome era
+    /// "Navigate:{rota}", o que criava um evento distinto por rota — e por rota com id, um
+    /// evento distinto por escala visitada. Com o nome fixo, "quais telas são usadas" vira uma
+    /// agregação por Screen em vez de uma lista de nomes que ninguém consegue consultar junto.
+    ///
+    /// Mede o término do GoToAsync, que é quando a tela aparece — não quando ela tem dados. O
+    /// tempo até ficar útil é o screen.ready, que só a própria tela sabe emitir.
+    /// </remarks>
     private async Task NavigateAsync(string destination, Func<Task> navigate)
     {
-        using var _ = _telemetry.StartOperation($"Navigate:{destination}");
+        using var _ = _telemetry.StartOperation("screen.navigate");
         var sw = Stopwatch.StartNew();
+        var screen = new Dictionary<string, string> { ["Screen"] = destination };
+
         try
         {
             await navigate();
-            _telemetry.TrackEvent($"Navigate:{destination}", success: true, sw.Elapsed);
+            _telemetry.TrackEvent(ClientEventNames.ScreenViewed, ClientOutcome.Succeeded, sw.Elapsed, extra: screen);
         }
         catch (Exception ex)
         {
-            _telemetry.TrackEvent($"Navigate:{destination}", success: false, sw.Elapsed);
+            _telemetry.TrackEvent(ClientEventNames.ScreenViewed, ClientOutcome.Failed, sw.Elapsed, extra: screen);
             _telemetry.TrackException(ex);
             throw;
         }
