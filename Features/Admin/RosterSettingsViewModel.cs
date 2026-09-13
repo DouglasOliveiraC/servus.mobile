@@ -140,7 +140,7 @@ public partial class RosterSettingsViewModel : BaseViewModel
     {
         var typed = await Shell.Current.DisplayPromptAsync(
             "Excluir escala",
-            $"Esta ação remove todos os vínculos e acessos de membros com \"{Name}\" e não pode ser desfeita. Os membros continuam cadastrados no sistema.\n\nDigite \"{Name}\" para confirmar:");
+            $"Esta ação remove todos os vínculos e acessos de membros com \"{Name}\". Os membros continuam cadastrados no sistema, e o histórico de plantões é preservado.\n\nDigite \"{Name}\" para confirmar:");
 
         if (typed?.Trim() != Name) return;
 

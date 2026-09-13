@@ -91,7 +91,7 @@ public partial class OrganizationListViewModel : BaseViewModel
     {
         var typed = await Shell.Current.DisplayPromptAsync(
             "Excluir organização",
-            $"Esta ação exclui também todas as escalas e remove os vínculos e acessos de membros com \"{organization.Name}\" e não pode ser desfeita. Os membros continuam cadastrados no sistema.\n\nDigite \"{organization.Name}\" para confirmar:");
+            $"Esta ação exclui também todas as escalas e remove os vínculos e acessos de membros com \"{organization.Name}\". Os membros continuam cadastrados no sistema, e o histórico de plantões é preservado.\n\nDigite \"{organization.Name}\" para confirmar:");
 
         if (typed?.Trim() != organization.Name) return;
 
