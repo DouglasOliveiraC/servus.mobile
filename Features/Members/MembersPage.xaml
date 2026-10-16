@@ -91,12 +91,12 @@
                 </Border>
 
                 <Border
-                    IsVisible="{Binding GroupedMembers.Count, Converter={StaticResource IntIsZeroConverter}}"
+                    IsVisible="{Binding ShowEmptyState}"
                     StrokeShape="RoundRectangle 12"
                     Stroke="Transparent"
                     BackgroundColor="White"
                     Padding="18">
-                    <Label Text="Nenhum membro cadastrado ainda." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                    <Label Text="{Binding EmptyStateText}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                 </Border>
 
                 <CollectionView

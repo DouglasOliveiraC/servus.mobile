@@ -36,6 +36,18 @@ public partial class MembersViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool HasError { get; set; }
 
+    // GroupedMembers is empty both before the first load and when there really are no members;
+    // without this flag the "nenhum membro" card showed under the spinner while loading.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
+    public partial bool HasLoaded { get; set; }
+
+    public bool ShowEmptyState => HasLoaded && GroupedMembers.Count == 0;
+
+    public string EmptyStateText => string.IsNullOrWhiteSpace(SearchText)
+        ? "Nenhum membro cadastrado ainda."
+        : $"Nenhum membro encontrado para “{SearchText.Trim()}”.";
+
     [ObservableProperty]
     public partial bool IsFormVisible { get; set; }
 
@@ -88,6 +100,9 @@ public partial class MembersViewModel : BaseViewModel
                 GroupedMembers.Add(group);
             }
         }
+
+        OnPropertyChanged(nameof(ShowEmptyState));
+        OnPropertyChanged(nameof(EmptyStateText));
     }
 
     [RelayCommand]
@@ -114,6 +129,7 @@ public partial class MembersViewModel : BaseViewModel
             }
 
             await LoadGroupedMembersAsync(organizations);
+            HasLoaded = true;
         }
         catch (Exception)
         {
