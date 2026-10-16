@@ -5,162 +5,205 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+    xmlns:controls="clr-namespace:Servus.Mobile.Controls"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Home"
+    xmlns:nav="clr-namespace:Syncfusion.Maui.NavigationDrawer;assembly=Syncfusion.Maui.NavigationDrawer"
     x:DataType="local:DashboardViewModel"
-    BackgroundColor="{StaticResource Neutral100}"
-    Shell.NavBarIsVisible="False">
+    BackgroundColor="#F4F6F9"
+    Shell.NavBarIsVisible="False"
+    Shell.FlyoutBehavior="Disabled">
 
-    <RefreshView Command="{Binding LoadCommand}">
-        <ScrollView>
-            <Grid RowDefinitions="Auto,*" RowSpacing="0">
+    <ContentPage.Resources>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="Stroke" Value="{StaticResource Neutral200}" />
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="Padding" Value="16,14" />
+        </Style>
+        <Style x:Key="CardTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral900}" />
+        </Style>
+        <Style x:Key="CardSubtitle" TargetType="Label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral600}" />
+        </Style>
+        <Style x:Key="Eyebrow" TargetType="Label">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="CharacterSpacing" Value="1" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral500}" />
+        </Style>
+        <Style x:Key="LineIcon" TargetType="Path">
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="StrokeLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="Aspect" Value="None" />
+            <Setter Property="WidthRequest" Value="24" />
+            <Setter Property="HeightRequest" Value="24" />
+            <Setter Property="Scale" Value="0.75" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
 
-                <!-- Hero claro: identidade + próximo plantão, azul só em acentos -->
-                <Border
-                    Grid.Row="0"
-                    StrokeShape="RoundRectangle 20,20,20,20"
-                    Stroke="Transparent"
-                    BackgroundColor="{StaticResource Neutral50}"
-                    Padding="24,52,24,22">
-                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
-
-                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <Border
-                                Grid.Column="0"
-                                StrokeShape="RoundRectangle 18"
-                                Stroke="Transparent"
-                                BackgroundColor="{StaticResource BrandPrimary}"
-                                WidthRequest="42"
-                                HeightRequest="42"
-                                Padding="0">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
-                                </Border.GestureRecognizers>
-                                <Label
-                                    Text="{Binding UserInitial}"
-                                    FontSize="16"
-                                    FontAttributes="Bold"
-                                    TextColor="White"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" />
-                            </Border>
-                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
-                                    <Label Grid.Column="0" Text="{Binding Greeting}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
-                                    <ActivityIndicator
-                                        Grid.Column="1"
-                                        IsRunning="{Binding IsBusy}"
-                                        IsVisible="{Binding IsBusy}"
-                                        Color="{StaticResource BrandPrimary}"
-                                        WidthRequest="18"
-                                        HeightRequest="18"
-                                        VerticalOptions="Center" />
-                                </Grid>
-                                <Label Text="{Binding UserEmail}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
-                            </VerticalStackLayout>
-                            <Border
-                                Grid.Column="2"
-                                StrokeShape="RoundRectangle 16"
-                                Stroke="{StaticResource Neutral200}"
-                                BackgroundColor="Transparent"
-                                Padding="12,7"
-                                VerticalOptions="Center">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
-                                </Border.GestureRecognizers>
-                                <Label Text="Sair" TextColor="{StaticResource Neutral600}" FontSize="12.5" FontAttributes="Bold" />
-                            </Border>
-                        </Grid>
-
-                        <!-- Next duty: card branco com date-chip navy -->
-                        <Border
-                            Grid.Row="1"
-                            IsVisible="{Binding NextDuty, Converter={StaticResource IsNotNullConverter}}"
-                            StrokeShape="RoundRectangle 14"
-                            Stroke="{StaticResource BrandBorder}"
-                            BackgroundColor="White"
-                            Padding="14,12">
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                                <Border
-                                    Grid.Column="0"
-                                    StrokeShape="RoundRectangle 10"
-                                    Stroke="Transparent"
-                                    BackgroundColor="{StaticResource BrandPrimary}"
-                                    WidthRequest="48"
-                                    HeightRequest="48"
-                                    Padding="0">
-                                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                                        <Label
-                                            Text="{Binding NextDuty.Date, StringFormat='{0:dd}'}"
-                                            FontSize="18"
-                                            FontAttributes="Bold"
-                                            TextColor="White"
-                                            HorizontalTextAlignment="Center" />
-                                        <Label
-                                            Text="{Binding NextDuty.Date, StringFormat='{0:MMM}'}"
-                                            FontSize="10"
-                                            TextColor="{StaticResource BrandSurfaceStrong}"
-                                            HorizontalTextAlignment="Center" />
-                                    </VerticalStackLayout>
-                                </Border>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                    <Label Text="Meu próximo plantão" FontSize="9.5" FontAttributes="Bold" TextColor="{StaticResource Neutral500}">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsBusy}" Value="True">
-                                                <Setter Property="Text" Value="Carregando…" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="{Binding NextDuty.RosterName}" />
-                                                <Span Text=" · " />
-                                                <Span Text="{Binding NextDuty.OrganizationName}" />
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label FontSize="11.5" TextColor="{StaticResource Neutral600}">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="em " />
-                                                <Span Text="{Binding NextDuty.DaysUntil}" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                                <Span Text=" dia(s)" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                                </VerticalStackLayout>
-                            </Grid>
+    <!-- Left drawer = the web's SidebarComponent in "Over" mode (mobile): brand on top, the
+         "Operação" section, account + Sair at the bottom. Opens from the edge swipe or the
+         menu button; replaced the shortcut list that sat at the very end of the page. -->
+    <!-- TouchThreshold is wide on purpose: with Android gesture navigation the first ~30dp of the
+         left edge belong to the system back gesture (an edge swipe there leaves the app), so the
+         open-swipe has to be startable a bit further in. -->
+    <nav:SfNavigationDrawer x:Name="Drawer">
+        <nav:SfNavigationDrawer.DrawerSettings>
+            <nav:DrawerSettings
+                Position="Left"
+                Transition="SlideOnTop"
+                DrawerWidth="300"
+                EnableSwipeGesture="True"
+                TouchThreshold="90"
+                ContentBackground="White"
+                DrawerHeaderHeight="96"
+                DrawerFooterHeight="84">
+                <nav:DrawerSettings.DrawerHeaderView>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="20,40,20,8" BackgroundColor="White">
+                        <Border StrokeShape="RoundRectangle 9" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="34" HeightRequest="34" Padding="0">
+                            <Label Text="S" FontSize="17" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
-
-                        <!-- Stats: chips brancos, número em navy -->
-                        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="8">
-                            <Border Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
-                                <VerticalStackLayout Spacing="1">
-                                    <Label Text="{Binding OrganizationCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                    <Label Text="Organizações" FontSize="10" TextColor="{StaticResource Neutral600}" />
-                                </VerticalStackLayout>
-                            </Border>
-                            <Border Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
-                                <VerticalStackLayout Spacing="1">
-                                    <Label Text="{Binding RosterCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                    <Label Text="Escalas" FontSize="10" TextColor="{StaticResource Neutral600}" />
-                                </VerticalStackLayout>
-                            </Border>
-                            <Border Grid.Column="2" StrokeShape="RoundRectangle 12" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,10">
-                                <VerticalStackLayout Spacing="1">
-                                    <Label Text="{Binding MyUpcomingDutyCount}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                    <Label Text="Meus plantões (14d)" FontSize="10" TextColor="{StaticResource Neutral600}" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </Grid>
-
+                        <Label Grid.Column="1" Text="Servus" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
                     </Grid>
-                </Border>
+                </nav:DrawerSettings.DrawerHeaderView>
+                <nav:DrawerSettings.DrawerContentView>
+                    <ScrollView BackgroundColor="White">
+                        <VerticalStackLayout Padding="12,8,12,12" Spacing="2">
+                            <Label Text="OPERAÇÃO" Style="{StaticResource Eyebrow}" Margin="10,0,0,8" />
+                            <!-- "Início" mirrors the web's active Dashboard link: you are here. -->
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurfaceSubtle}" Padding="8,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnHomeItemTapped" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="38" HeightRequest="38" Padding="0">
+                                        <Path Data="{x:Static local:HomeIcons.LayoutGrid}" Stroke="White" Style="{StaticResource LineIcon}" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                        <Label Text="Início" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        <Label Text="Visão geral" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Shortcuts}" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:HomeShortcut">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="8,10">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnShortcutTapped" />
+                                            </Grid.GestureRecognizers>
+                                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="38" HeightRequest="38" Padding="0">
+                                                <Path Data="{Binding Icon}" Stroke="{StaticResource BrandPrimary}" Style="{StaticResource LineIcon}" />
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                                <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                <Label Text="{Binding Subtitle}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </nav:DrawerSettings.DrawerContentView>
+                <nav:DrawerSettings.DrawerFooterView>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="20,14,16,14" BackgroundColor="White">
+                        <BoxView Grid.ColumnSpan="3" Color="{StaticResource Neutral200}" HeightRequest="1" VerticalOptions="Start" Margin="0,-14,0,0" />
+                        <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="36" HeightRequest="36" Padding="0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnProfileTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding UserInitial}" FontSize="13" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                            <Label Text="{Binding UserEmail}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding ProfileLabel}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                        </VerticalStackLayout>
+                        <Border Grid.Column="2" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,6" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnLogoutTapped" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Sair" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </nav:DrawerSettings.DrawerFooterView>
+            </nav:DrawerSettings>
+        </nav:SfNavigationDrawer.DrawerSettings>
 
-                <!-- Corpo: cards brancos com traço sutil sob o hero -->
-                <VerticalStackLayout Grid.Row="1" Padding="20,18,20,28" Spacing="18">
+        <nav:SfNavigationDrawer.ContentView>
+    <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsRefreshing}">
+        <ScrollView VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16,44,16,32" Spacing="14">
 
-                <!-- Error state -->
+                <!-- Header: same "eyebrow + title + date" shape as the web PageHeader -->
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="0,0,0,4">
+                    <Border
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="{StaticResource Neutral200}"
+                        BackgroundColor="White"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        Padding="0"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Abrir menu">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnMenuTapped" />
+                        </Border.GestureRecognizers>
+                        <Path Data="{x:Static local:HomeIcons.Menu}" Stroke="{StaticResource Neutral900}" Style="{StaticResource LineIcon}" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="{Binding Greeting}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                            <ActivityIndicator
+                                IsRunning="{Binding IsBusy}"
+                                IsVisible="{Binding IsBusy}"
+                                Color="{StaticResource BrandPrimary}"
+                                WidthRequest="16"
+                                HeightRequest="16"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                        <Label FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding TodayLabel}" />
+                                    <Span Text=" · " />
+                                    <Span Text="{Binding ProfileLabel}" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                    <Border
+                        Grid.Column="2"
+                        StrokeShape="RoundRectangle 22"
+                        Stroke="Transparent"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        Padding="0"
+                        VerticalOptions="Center"
+                        SemanticProperties.Description="Meu perfil">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="{Binding UserInitial}"
+                            FontSize="17"
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- Error -->
                 <Border
                     IsVisible="{Binding HasError}"
                     StrokeShape="RoundRectangle 12"
@@ -173,324 +216,483 @@
                         FontSize="13" />
                 </Border>
 
-                <!-- Empty state -->
-                <Border
-                    IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsZeroConverter}}"
-                    StrokeShape="RoundRectangle 12"
-                    Stroke="{StaticResource BrandBorder}"
-                    BackgroundColor="White"
-                    Padding="18">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Você ainda não participa de nenhuma organização." FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                        <Label Text="Peça um código de convite ao administrador da sua unidade." FontSize="12.5" TextColor="{StaticResource Neutral600}" />
-                    </VerticalStackLayout>
+                <!-- First load: neither layout is known yet -->
+                <Border Style="{StaticResource Card}" IsVisible="{Binding ShowLoadingPlaceholder}" Padding="16,22">
+                    <Label Text="Carregando sua visão geral…" Style="{StaticResource CardSubtitle}" HorizontalTextAlignment="Center" />
                 </Border>
 
-                <!-- Swap trend card -->
-                <Border
-                    IsVisible="{Binding OrganizationCount, Converter={StaticResource IntIsNotZeroConverter}}"
-                    StrokeShape="RoundRectangle 14"
-                    Stroke="{StaticResource BrandBorder}"
-                    BackgroundColor="White"
-                    Padding="16,14">
-                    <VerticalStackLayout Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="Trocas de plantão" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                            <Label Grid.Column="1" FontSize="12.5" TextColor="{StaticResource Neutral600}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding SwapCountLastPeriod}" TextColor="{StaticResource BrandPrimary}" FontAttributes="Bold" />
-                                        <Span Text=" nas últimas 6 semanas" />
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                        </Grid>
-                        <chart:SfCartesianChart HeightRequest="120" IsVisible="{Binding SwapTrend.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                            <chart:SfCartesianChart.XAxes>
-                                <chart:CategoryAxis ShowMajorGridLines="False">
-                                    <chart:CategoryAxis.LabelStyle>
-                                        <chart:ChartAxisLabelStyle TextColor="{StaticResource Neutral600}" FontSize="10" />
-                                    </chart:CategoryAxis.LabelStyle>
-                                </chart:CategoryAxis>
-                            </chart:SfCartesianChart.XAxes>
-                            <chart:SfCartesianChart.YAxes>
-                                <chart:NumericalAxis IsVisible="False" ShowMajorGridLines="False" />
-                            </chart:SfCartesianChart.YAxes>
-                            <chart:SfCartesianChart.Series>
-                                <chart:ColumnSeries
-                                    ItemsSource="{Binding SwapTrend}"
-                                    XBindingPath="PeriodLabel"
-                                    YBindingPath="Count"
-                                    Fill="{StaticResource BrandPrimary}"
-                                    CornerRadius="4,4,0,0"
-                                    ShowDataLabels="True">
-                                    <chart:ColumnSeries.DataLabelSettings>
-                                        <chart:CartesianDataLabelSettings>
-                                            <chart:CartesianDataLabelSettings.LabelStyle>
-                                                <chart:ChartDataLabelStyle TextColor="{StaticResource Neutral900}" FontSize="10.5" FontAttributes="Bold" />
-                                            </chart:CartesianDataLabelSettings.LabelStyle>
-                                        </chart:CartesianDataLabelSettings>
-                                    </chart:ColumnSeries.DataLabelSettings>
-                                </chart:ColumnSeries>
-                            </chart:SfCartesianChart.Series>
-                        </chart:SfCartesianChart>
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- Member load distribution -->
-                <Border
-                    IsVisible="{Binding MemberLoad.Count, Converter={StaticResource IntIsNotZeroConverter}}"
-                    StrokeShape="RoundRectangle 14"
-                    Stroke="{StaticResource BrandBorder}"
-                    BackgroundColor="White"
-                    Padding="16,14">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="Distribuição de plantões por pessoa" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                        <chart:SfCircularChart HeightRequest="220">
-                            <chart:SfCircularChart.Legend>
-                                <chart:ChartLegend Placement="Right">
-                                    <chart:ChartLegend.LabelStyle>
-                                        <chart:ChartLegendLabelStyle TextColor="{StaticResource Neutral600}" FontSize="11" />
-                                    </chart:ChartLegend.LabelStyle>
-                                </chart:ChartLegend>
-                            </chart:SfCircularChart.Legend>
-                            <chart:SfCircularChart.Series>
-                                <chart:DoughnutSeries
-                                    ItemsSource="{Binding MemberLoad}"
-                                    XBindingPath="MemberName"
-                                    YBindingPath="AssignmentCount"
-                                    PaletteBrushes="{x:Static local:DashboardPalette.Brushes}"
-                                    EnableTooltip="True"
-                                    InnerRadius="0.6" />
-                            </chart:SfCircularChart.Series>
-                        </chart:SfCircularChart>
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- Coverage heatmap -->
-                <Border
-                    IsVisible="{Binding CoverageDays.Count, Converter={StaticResource IntIsNotZeroConverter}}"
-                    StrokeShape="RoundRectangle 14"
-                    Stroke="{StaticResource BrandBorder}"
-                    BackgroundColor="White"
-                    Padding="16,14">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="Cobertura dos próximos 14 dias" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                        </Grid>
-                        <CollectionView ItemsSource="{Binding CoverageDays}">
-                            <CollectionView.ItemsLayout>
-                                <GridItemsLayout Orientation="Vertical" Span="7" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="local:CoverageDayPoint">
-                                    <Border
-                                        StrokeShape="RoundRectangle 8"
-                                        Stroke="Transparent"
-                                        BackgroundColor="{Binding StatusColor}"
-                                        HeightRequest="42"
-                                        Padding="0">
-                                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                                            <Label
-                                                Text="{Binding WeekdayLabel}"
-                                                FontSize="8.5"
-                                                TextColor="White"
-                                                Opacity="0.85"
-                                                HorizontalTextAlignment="Center" />
-                                            <Label
-                                                Text="{Binding DayLabel}"
-                                                FontSize="13"
-                                                FontAttributes="Bold"
-                                                TextColor="White"
-                                                HorizontalTextAlignment="Center" />
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="6">
-                            <BoxView Grid.Column="0" Color="{StaticResource Success}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" />
-                            <Label Grid.Column="1" Text="Coberto" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
-                            <BoxView Grid.Column="2" Color="{StaticResource AccentOrange}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
-                            <Label Grid.Column="3" Text="Falta gente" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
-                            <BoxView Grid.Column="4" Color="{StaticResource Neutral200}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
-                            <Label Grid.Column="5" Text="Sem escala no dia" FontSize="10.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
-                        </Grid>
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- Quick actions -->
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Acesso rápido" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                        <Border Grid.Row="0" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Trocas de plantão" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="SwapRequestsPage" />
-                                </Label.GestureRecognizers>
-                            </Label>
+                <!-- No organization yet -->
+                <Border Style="{StaticResource Card}" IsVisible="{Binding ShowEmptyState}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Border Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="40" HeightRequest="40" Padding="0" VerticalOptions="Start">
+                            <Path Data="{x:Static local:HomeIcons.KeyRound}" Stroke="{StaticResource BrandPrimary}" Style="{StaticResource LineIcon}" />
                         </Border>
-                        <Border Grid.Row="0" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Indisponibilidade" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="UnavailabilityPage" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Perfil" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="ProfilePage" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Border>
-                        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Entrar em organização" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="JoinOrganizationPage" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Border>
-                        <Border Grid.Row="2" Grid.Column="0" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Gerenciar organizações" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="OrganizationListPage" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Border>
-                        <Border Grid.Row="2" Grid.Column="1" StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                            <Label Text="Membros" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" HorizontalTextAlignment="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="MembersPage" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Você ainda não participa de nenhuma organização" Style="{StaticResource CardTitle}" />
+                            <Label Text="Peça um código de convite ao coordenador da sua unidade e use “Entrar com código” abaixo." Style="{StaticResource CardSubtitle}" />
+                        </VerticalStackLayout>
                     </Grid>
-                </VerticalStackLayout>
+                </Border>
 
-                <!-- Organizations -->
-                <VerticalStackLayout Spacing="10" IsVisible="{Binding Organizations.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                    <Label Text="Minhas organizações" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <!-- ============ SERVIDOR (member) ============ -->
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsMemberView}">
 
-                    <CollectionView ItemsSource="{Binding Organizations}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:OrganizationSummary">
-                                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="{Binding Name}" FontSize="14.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                                            <Label FontSize="12" TextColor="{StaticResource Neutral600}">
-                                                <Label.FormattedText>
-                                                    <FormattedString>
-                                                        <Span Text="{Binding RosterCount}" />
-                                                        <Span Text=" escala(s) · " />
-                                                        <Span Text="{Binding UpcomingAssignmentCount}" />
-                                                        <Span Text=" plantão(ões) em 14 dias" />
-                                                    </FormattedString>
-                                                </Label.FormattedText>
-                                            </Label>
-                                        </VerticalStackLayout>
-                                        <Label
-                                            Grid.Column="1"
-                                            Text="›"
-                                            FontSize="20"
-                                            TextColor="{StaticResource Neutral600}"
-                                            VerticalOptions="Center" />
-                                    </Grid>
+                    <!-- Next shift: the one thing a member opens the app for -->
+                    <Border
+                        IsVisible="{Binding HasNextShift}"
+                        StrokeShape="RoundRectangle 16"
+                        Stroke="Transparent"
+                        BackgroundColor="{StaticResource BrandPrimary}"
+                        Padding="18,16">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenDayDetailCommand}" CommandParameter="{Binding NextShift.Date}" />
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="SEU PRÓXIMO PLANTÃO" Style="{StaticResource Eyebrow}" TextColor="{StaticResource BrandOnPrimarySubtle}" VerticalOptions="Center" />
+                                <Border Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource AccentOrange}" Padding="10,3">
+                                    <Label Text="{Binding NextShiftWhen}" FontSize="11.5" FontAttributes="Bold" TextColor="White" />
                                 </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                            </Grid>
+                            <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" WidthRequest="58" HeightRequest="62" Padding="0">
+                                    <VerticalStackLayout VerticalOptions="Center" Spacing="-2">
+                                        <Label Text="{Binding NextShiftDayLabel}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" HorizontalTextAlignment="Center" />
+                                        <Label Text="{Binding NextShiftMonthLabel}" FontSize="11" FontAttributes="Bold" TextColor="{StaticResource BrandOnPrimaryMuted}" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="{Binding NextShift.RosterName}" FontSize="16" FontAttributes="Bold" TextColor="White" LineBreakMode="TailTruncation" />
+                                    <Label FontSize="12.5" TextColor="{StaticResource BrandOnPrimarySubtle}" LineBreakMode="TailTruncation">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding NextShiftWeekdayLabel}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding NextShift.TimeRange}" FontAttributes="Bold" TextColor="White" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label
+                                        Text="{Binding NextShift.CompanionsText}"
+                                        IsVisible="{Binding NextShift.HasCompanions}"
+                                        FontSize="12"
+                                        TextColor="{StaticResource BrandOnPrimarySubtle}"
+                                        LineBreakMode="TailTruncation"
+                                        MaxLines="2" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding HasNoNextShift}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="40" HeightRequest="40" Padding="0">
+                                <Path Data="{x:Static local:HomeIcons.CalendarDays}" Stroke="{StaticResource BrandPrimary}" Style="{StaticResource LineIcon}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="Nenhum plantão futuro publicado" Style="{StaticResource CardTitle}" FontSize="14" />
+                                <Label Text="Quando a escala for publicada, seu próximo plantão aparece aqui." Style="{StaticResource CardSubtitle}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <controls:KpiTile Grid.Row="0" Grid.Column="0"
+                            Label="Plantões este mês"
+                            Value="{Binding MonthDutyCount, StringFormat='{0}'}"
+                            Hint="publicados"
+                            Icon="{x:Static local:HomeIcons.CalendarDays}" />
+                        <controls:KpiTile Grid.Row="0" Grid.Column="1"
+                            Label="Úteis / fins de semana"
+                            Value="{Binding MonthSplitLabel}"
+                            Hint="neste mês"
+                            Icon="{x:Static local:HomeIcons.Clock}" />
+                        <controls:KpiTile Grid.Row="1" Grid.Column="0"
+                            Label="Próximo dia de descanso"
+                            Value="{Binding NextRestDayLabel}"
+                            Hint="plantão em fim de semana"
+                            Icon="{x:Static local:HomeIcons.Moon}"
+                            Accent="{StaticResource Warning}"
+                            AccentSurface="{StaticResource WarningSurface}" />
+                        <controls:KpiTile Grid.Row="1" Grid.Column="1"
+                            Label="Trocas pendentes"
+                            Value="{Binding PendingSwapCount, StringFormat='{0}'}"
+                            Hint="aguardando resposta"
+                            Icon="{x:Static local:HomeIcons.Repeat}"
+                            Accent="{StaticResource Warning}"
+                            AccentSurface="{StaticResource WarningSurface}">
+                            <controls:KpiTile.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="SwapRequestsPage" />
+                            </controls:KpiTile.GestureRecognizers>
+                        </controls:KpiTile>
+                    </Grid>
+
+                    <!-- Upcoming shifts, like the web's UpcomingShiftsCard -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding MyUpcomingShifts.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Seus próximos plantões" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MyUpcomingShifts}" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:MyShift">
+                                        <Grid ColumnDefinitions="46,*" ColumnSpacing="12" Padding="0,8">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand, x:DataType=local:DashboardViewModel}"
+                                                    CommandParameter="{Binding Date}" />
+                                            </Grid.GestureRecognizers>
+                                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" HeightRequest="46" Padding="0">
+                                                <VerticalStackLayout VerticalOptions="Center" Spacing="-2">
+                                                    <Label Text="{Binding DayNumber}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" HorizontalTextAlignment="Center" />
+                                                    <Label Text="{Binding WeekdayShort}" FontSize="10" TextColor="{StaticResource BrandOnPrimaryMuted}" HorizontalTextAlignment="Center" />
+                                                </VerticalStackLayout>
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                    <Label Text="{Binding RosterName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                                    <Label Grid.Column="1" Text="{Binding TimeRange}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                                                </Grid>
+                                                <Label Text="{Binding CompanionsText}" IsVisible="{Binding HasCompanions}" FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Rosters the member belongs to: the full table is one tap away -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding MyRosters.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Minhas escalas" Style="{StaticResource CardTitle}" />
+                            <Label Text="Toque para ver a tabela completa" Style="{StaticResource CardSubtitle}" Margin="0,0,0,6" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MyRosters}" Spacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:MyRosterSummary">
+                                        <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurfaceSubtle}" Padding="12,10">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenRosterScheduleCommand, x:DataType=local:DashboardViewModel}"
+                                                    CommandParameter="{Binding RosterId}" />
+                                            </Border.GestureRecognizers>
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                <Path Data="{x:Static local:HomeIcons.CalendarDays}" Stroke="{StaticResource BrandPrimary}" Style="{StaticResource LineIcon}" />
+                                                <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                                    <Label Text="{Binding RosterName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                                    <Label Text="{Binding OrganizationName}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                                </VerticalStackLayout>
+                                                <Path Grid.Column="2" Data="{x:Static local:HomeIcons.ChevronRight}" Stroke="{StaticResource Neutral500}" Style="{StaticResource LineIcon}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
 
-                <!-- Upcoming duties, grouped by day -->
-                <VerticalStackLayout Spacing="10" IsVisible="{Binding DailyDuties.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                    <Label Text="Próximos plantões" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                <!-- ============ ADMINISTRADOR ============ -->
+                <VerticalStackLayout Spacing="14" IsVisible="{Binding IsAdminView}">
 
-                    <CollectionView ItemsSource="{Binding VisibleDailyDuties}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:DailyDutySummary">
-                                <Border StrokeShape="RoundRectangle 12" Stroke="{StaticResource BrandBorder}" BackgroundColor="White" Padding="14">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand}"
-                                            CommandParameter="{Binding Date}" />
-                                    </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12">
-                                        <Border
-                                            Grid.Column="0"
-                                            StrokeShape="RoundRectangle 10"
-                                            Stroke="Transparent"
-                                            BackgroundColor="{StaticResource BrandSurface}"
-                                            HeightRequest="56"
-                                            WidthRequest="56">
+                    <!-- Only takes space when there is something to fix (same rule as the web's
+                         conflict card: a permanent empty alert trains people to ignore it). -->
+                    <Border
+                        IsVisible="{Binding UnderstaffedDayCount, Converter={StaticResource IntIsNotZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="{StaticResource WarningSurface}"
+                        BackgroundColor="#FCF4E6"
+                        Padding="14,12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Path Data="{x:Static local:HomeIcons.TriangleAlert}" Stroke="{StaticResource Warning}" Style="{StaticResource LineIcon}" />
+                            <Label Grid.Column="1" Text="{Binding UnderstaffedText}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Warning}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <controls:KpiTile Grid.Row="0" Grid.Column="0"
+                            Label="Escalas ativas"
+                            Value="{Binding RosterCount, StringFormat='{0}'}"
+                            Hint="{Binding OrganizationHint}"
+                            Icon="{x:Static local:HomeIcons.CalendarDays}" />
+                        <controls:KpiTile Grid.Row="0" Grid.Column="1"
+                            Label="Membros nas filas"
+                            Value="{Binding MemberCount, StringFormat='{0}'}"
+                            Hint="que você administra"
+                            Icon="{x:Static local:HomeIcons.Users}" />
+                        <controls:KpiTile Grid.Row="1" Grid.Column="0"
+                            Label="Trocas pendentes"
+                            Value="{Binding PendingSwapCount, StringFormat='{0}'}"
+                            Hint="aguardando resposta"
+                            Icon="{x:Static local:HomeIcons.Repeat}"
+                            Accent="{StaticResource Warning}"
+                            AccentSurface="{StaticResource WarningSurface}">
+                            <controls:KpiTile.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding GoToQuickActionCommand}" CommandParameter="SwapRequestsPage" />
+                            </controls:KpiTile.GestureRecognizers>
+                        </controls:KpiTile>
+                        <controls:KpiTile Grid.Row="1" Grid.Column="1"
+                            Label="Cobertura (14 dias)"
+                            Value="{Binding CoverageLabel}"
+                            Hint="meta institucional: 98%"
+                            Icon="{x:Static local:HomeIcons.CircleCheck}"
+                            Accent="{StaticResource SuccessStrong}" />
+                    </Grid>
+
+                    <!-- On duty today, like the web's OnDutyTodayCard -->
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="10">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Plantão de hoje" Style="{StaticResource CardTitle}" />
+                                <Label Text="{Binding OnDutyTodaySubtitle}" Style="{StaticResource CardSubtitle}" />
+                            </VerticalStackLayout>
+                            <Label
+                                Text="Nenhum plantão publicado para hoje."
+                                IsVisible="{Binding OnDutyToday.Count, Converter={StaticResource IntIsZeroConverter}}"
+                                Style="{StaticResource CardSubtitle}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding OnDutyTodayPreview}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:OnDutyEntry">
+                                        <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurfaceSubtle}" Padding="10,8">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="36" HeightRequest="36" Padding="0">
+                                                    <Label Text="{Binding Initials}" FontSize="12" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                </Border>
+                                                <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                                    <Label Text="{Binding MemberName}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                                    <Label Text="{Binding Subtitle}" FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label
+                                Text="{Binding OnDutyTodayMoreText}"
+                                IsVisible="{Binding HasMoreOnDutyToday}"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource BrandPrimary}"
+                                HorizontalTextAlignment="Center"
+                                Padding="0,6,0,2">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenTodayDetailCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Coverage heatmap -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding CoverageDays.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Cobertura dos próximos 14 dias" Style="{StaticResource CardTitle}" />
+                            <CollectionView ItemsSource="{Binding CoverageDays}">
+                                <CollectionView.ItemsLayout>
+                                    <GridItemsLayout Orientation="Vertical" Span="7" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="local:CoverageDayPoint">
+                                        <Border StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{Binding StatusColor}" HeightRequest="44" Padding="0">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand, x:DataType=local:DashboardViewModel}"
+                                                    CommandParameter="{Binding Date}" />
+                                            </Border.GestureRecognizers>
                                             <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
-                                                <Label
-                                                    Text="{Binding Date, StringFormat='{0:dd}'}"
-                                                    FontSize="18"
-                                                    FontAttributes="Bold"
-                                                    TextColor="{StaticResource BrandPrimary}"
-                                                    HorizontalTextAlignment="Center" />
-                                                <Label
-                                                    Text="{Binding Date, StringFormat='{0:MMM}'}"
-                                                    FontSize="10.5"
-                                                    TextColor="{StaticResource BrandPrimary}"
-                                                    HorizontalTextAlignment="Center" />
+                                                <Label Text="{Binding WeekdayLabel}" FontSize="9.5" TextColor="White" HorizontalTextAlignment="Center" />
+                                                <Label Text="{Binding DayLabel}" FontSize="14" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" />
                                             </VerticalStackLayout>
                                         </Border>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                            <Label FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}">
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                            <HorizontalStackLayout Spacing="6">
+                                <BoxView Color="{StaticResource Success}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" />
+                                <Label Text="Coberto" FontSize="11" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                                <BoxView Color="{StaticResource AccentOrange}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
+                                <Label Text="Falta gente" FontSize="11" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                                <BoxView Color="{StaticResource Neutral200}" WidthRequest="10" HeightRequest="10" CornerRadius="2" VerticalOptions="Center" Margin="10,0,0,0" />
+                                <Label Text="Sem escala" FontSize="11" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Next days of the table, grouped by day -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding DailyDuties.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Próximos dias da escala" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding VisibleDailyDuties}" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:DailyDutySummary">
+                                        <Grid ColumnDefinitions="46,*,Auto" ColumnSpacing="12" Padding="0,8">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DashboardViewModel}}, Path=OpenDayDetailCommand, x:DataType=local:DashboardViewModel}"
+                                                    CommandParameter="{Binding Date}" />
+                                            </Grid.GestureRecognizers>
+                                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" HeightRequest="46" Padding="0">
+                                                <VerticalStackLayout VerticalOptions="Center" Spacing="-2">
+                                                    <Label Text="{Binding DayNumber}" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" HorizontalTextAlignment="Center" />
+                                                    <Label Text="{Binding WeekdayShort}" FontSize="10" TextColor="{StaticResource BrandOnPrimaryMuted}" HorizontalTextAlignment="Center" />
+                                                </VerticalStackLayout>
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding Headline}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                                <Label Text="{Binding PreviewNames, Converter={StaticResource StringJoinConverter}}" FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                            <Border Grid.Column="2" IsVisible="{Binding HasMine}" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" Padding="8,3" VerticalOptions="Center">
+                                                <Label Text="Eu" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <buttons:SfButton
+                                Text="Ver mais dias"
+                                IsVisible="{Binding HasMoreDailyDuties}"
+                                Background="{StaticResource BrandSurfaceSubtle}"
+                                TextColor="{StaticResource BrandPrimary}"
+                                CornerRadius="10"
+                                HeightRequest="40"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                Margin="0,6,0,0"
+                                Command="{Binding ShowMoreDailyDutiesCommand}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Load per member -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding MemberLoad.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                        <VerticalStackLayout Spacing="8">
+                            <VerticalStackLayout Spacing="1">
+                                <Label Text="Carga por membro" Style="{StaticResource CardTitle}" />
+                                <Label Text="Plantões acumulados por pessoa (8 maiores)" Style="{StaticResource CardSubtitle}" />
+                            </VerticalStackLayout>
+                            <chart:SfCircularChart HeightRequest="220">
+                                <chart:SfCircularChart.Series>
+                                    <chart:DoughnutSeries
+                                        ItemsSource="{Binding MemberLoad}"
+                                        XBindingPath="MemberName"
+                                        YBindingPath="AssignmentCount"
+                                        PaletteBrushes="{x:Static local:DashboardPalette.Brushes}"
+                                        EnableTooltip="True"
+                                        ShowDataLabels="True"
+                                        InnerRadius="0.6">
+                                        <chart:DoughnutSeries.DataLabelSettings>
+                                            <chart:CircularDataLabelSettings LabelPosition="Inside">
+                                                <chart:CircularDataLabelSettings.LabelStyle>
+                                                    <chart:ChartDataLabelStyle TextColor="White" FontSize="10.5" FontAttributes="Bold" />
+                                                </chart:CircularDataLabelSettings.LabelStyle>
+                                            </chart:CircularDataLabelSettings>
+                                        </chart:DoughnutSeries.DataLabelSettings>
+                                    </chart:DoughnutSeries>
+                                </chart:SfCircularChart.Series>
+                            </chart:SfCircularChart>
+                            <!-- Own legend instead of the chart's: Syncfusion's lays items on one row and
+                                 clipped the last name at the card edge; this one wraps. -->
+                            <FlexLayout BindableLayout.ItemsSource="{Binding MemberLoad}" Wrap="Wrap" JustifyContent="Start">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:MemberLoadSlice">
+                                        <HorizontalStackLayout Spacing="6" Margin="0,3,14,3">
+                                            <BoxView Color="{Binding Color}" WidthRequest="10" HeightRequest="10" CornerRadius="5" VerticalOptions="Center" />
+                                            <Label FontSize="11.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center">
                                                 <Label.FormattedText>
                                                     <FormattedString>
-                                                        <Span Text="{Binding TotalAssignments}" />
-                                                        <Span Text=" plantão(ões) em " />
-                                                        <Span Text="{Binding RosterCount}" />
-                                                        <Span Text=" escala(s)" />
+                                                        <Span Text="{Binding MemberName}" />
+                                                        <Span Text=" · " />
+                                                        <Span Text="{Binding AssignmentCount}" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                                                     </FormattedString>
                                                 </Label.FormattedText>
                                             </Label>
-                                            <Label
-                                                Text="{Binding PreviewNames, Converter={StaticResource StringJoinConverter}}"
-                                                FontSize="12.5"
-                                                TextColor="{StaticResource Neutral600}"
-                                                LineBreakMode="TailTruncation" />
-                                        </VerticalStackLayout>
-                                        <Border
-                                            Grid.Column="2"
-                                            IsVisible="{Binding HasMine}"
-                                            StrokeShape="RoundRectangle 8"
-                                            Stroke="Transparent"
-                                            BackgroundColor="{StaticResource BrandPrimary}"
-                                            Padding="8,4"
-                                            VerticalOptions="Center">
-                                            <Label Text="Eu" TextColor="White" FontSize="11" FontAttributes="Bold" />
-                                        </Border>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                    </Border>
 
-                    <buttons:SfButton
-                        Text="Carregar mais"
-                        IsVisible="{Binding HasMoreDailyDuties}"
-                        Background="{StaticResource Neutral100}"
-                        TextColor="{StaticResource Neutral900}"
-                        CornerRadius="8"
-                        HeightRequest="40"
-                        FontSize="12.5"
-                        Command="{Binding ShowMoreDailyDutiesCommand}" />
+                    <!-- Swap trend: a chart of six zero bars says nothing, so it collapses to one line -->
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Trocas de plantão" Style="{StaticResource CardTitle}" />
+                                <Label Grid.Column="1" FontSize="12" TextColor="{StaticResource Neutral600}" VerticalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding SwapCountLastPeriod}" TextColor="{StaticResource BrandPrimary}" FontAttributes="Bold" />
+                                            <Span Text=" em 6 semanas" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Grid>
+                            <Label
+                                Text="Nenhuma troca registrada nas últimas 6 semanas."
+                                IsVisible="{Binding SwapCountLastPeriod, Converter={StaticResource IntIsZeroConverter}}"
+                                Style="{StaticResource CardSubtitle}" />
+                            <chart:SfCartesianChart HeightRequest="120" IsVisible="{Binding SwapCountLastPeriod, Converter={StaticResource IntIsNotZeroConverter}}">
+                                <chart:SfCartesianChart.XAxes>
+                                    <chart:CategoryAxis ShowMajorGridLines="False">
+                                        <chart:CategoryAxis.LabelStyle>
+                                            <chart:ChartAxisLabelStyle TextColor="{StaticResource Neutral600}" FontSize="10" />
+                                        </chart:CategoryAxis.LabelStyle>
+                                    </chart:CategoryAxis>
+                                </chart:SfCartesianChart.XAxes>
+                                <chart:SfCartesianChart.YAxes>
+                                    <chart:NumericalAxis IsVisible="False" ShowMajorGridLines="False" />
+                                </chart:SfCartesianChart.YAxes>
+                                <chart:SfCartesianChart.Series>
+                                    <chart:ColumnSeries
+                                        ItemsSource="{Binding SwapTrend}"
+                                        XBindingPath="PeriodLabel"
+                                        YBindingPath="Count"
+                                        Fill="{StaticResource BrandPrimary}"
+                                        CornerRadius="4,4,0,0"
+                                        ShowDataLabels="True">
+                                        <chart:ColumnSeries.DataLabelSettings>
+                                            <chart:CartesianDataLabelSettings>
+                                                <chart:CartesianDataLabelSettings.LabelStyle>
+                                                    <chart:ChartDataLabelStyle TextColor="{StaticResource Neutral900}" FontSize="10.5" FontAttributes="Bold" />
+                                                </chart:CartesianDataLabelSettings.LabelStyle>
+                                            </chart:CartesianDataLabelSettings>
+                                        </chart:ColumnSeries.DataLabelSettings>
+                                    </chart:ColumnSeries>
+                                </chart:SfCartesianChart.Series>
+                            </chart:SfCartesianChart>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- The admin's own shifts, last like on the web ("Seus plantões") -->
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Seus plantões" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+                            <Label
+                                Text="Você não está escalado nos próximos dias."
+                                IsVisible="{Binding MyUpcomingShifts.Count, Converter={StaticResource IntIsZeroConverter}}"
+                                Style="{StaticResource CardSubtitle}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MyUpcomingShifts}" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:MyShift">
+                                        <Grid ColumnDefinitions="*,Auto" Padding="0,6">
+                                            <Label Text="{Binding RosterName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                            <Label Grid.Column="1" FontSize="12.5" TextColor="{StaticResource Neutral600}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding Date, StringFormat='{0:dd/MM}'}" FontAttributes="Bold" />
+                                                        <Span Text=" · " />
+                                                        <Span Text="{Binding TimeRange}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
                 </VerticalStackLayout>
 
-                </VerticalStackLayout>
-            </Grid>
+            </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
+        </nav:SfNavigationDrawer.ContentView>
+    </nav:SfNavigationDrawer>
 
 </ContentPage>
