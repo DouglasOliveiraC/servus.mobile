@@ -41,6 +41,9 @@ public partial class RosterSettingsViewModel : BaseViewModel
     public partial string MinDaysAfterReturnBeforeEligible { get; set; } = "0";
 
     [ObservableProperty]
+    public partial string MinDaysBeforeLeaveBlocked { get; set; } = "0";
+
+    [ObservableProperty]
     public partial bool FillShiftsEarliestFirst { get; set; } = true;
 
     [ObservableProperty]
@@ -77,6 +80,7 @@ public partial class RosterSettingsViewModel : BaseViewModel
             RestDayShiftSize = roster.RestDayShiftSize;
             RequiresAdminApproval = roster.RequiresAdminApproval;
             MinDaysAfterReturnBeforeEligible = roster.MinDaysAfterReturnBeforeEligible.ToString();
+            MinDaysBeforeLeaveBlocked = roster.MinDaysBeforeLeaveBlocked.ToString();
             FillShiftsEarliestFirst = roster.FillShiftsEarliestFirst;
             ServiceDayStartTime = roster.ServiceDayStartTime.ToTimeSpan();
             _workdayQueueDirection = roster.WorkdayQueueDirection;
@@ -115,6 +119,7 @@ public partial class RosterSettingsViewModel : BaseViewModel
 
         var minInterval = int.TryParse(MinIntervalDays, out var mi) ? mi : 0;
         var minDaysAfterReturn = int.TryParse(MinDaysAfterReturnBeforeEligible, out var mdr) ? mdr : 0;
+        var minDaysBeforeLeave = int.TryParse(MinDaysBeforeLeaveBlocked, out var mdl) ? mdl : 0;
         var serviceDayStartTime = TimeOnly.FromTimeSpan(ServiceDayStartTime);
 
         // Full replace: an admin who opened this screen sees and can edit every shift, so an
@@ -125,7 +130,7 @@ public partial class RosterSettingsViewModel : BaseViewModel
 
         try
         {
-            await _rosterService.UpdateRosterAsync(RosterId, Name.Trim(), minInterval, RequiresAdminApproval, minDaysAfterReturn, FillShiftsEarliestFirst, serviceDayStartTime, _workdayQueueDirection, _weekendQueueDirection, shifts);
+            await _rosterService.UpdateRosterAsync(RosterId, Name.Trim(), minInterval, RequiresAdminApproval, minDaysAfterReturn, minDaysBeforeLeave, FillShiftsEarliestFirst, serviceDayStartTime, _workdayQueueDirection, _weekendQueueDirection, shifts);
             await LoadAsync();
             await Shell.Current.DisplayAlertAsync("Configurações", "Alterações salvas.", "OK");
         }

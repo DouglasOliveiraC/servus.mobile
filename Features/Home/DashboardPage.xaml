@@ -7,11 +7,9 @@
     xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
     xmlns:controls="clr-namespace:Servus.Mobile.Controls"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Home"
-    xmlns:nav="clr-namespace:Syncfusion.Maui.NavigationDrawer;assembly=Syncfusion.Maui.NavigationDrawer"
     x:DataType="local:DashboardViewModel"
     BackgroundColor="#F4F6F9"
-    Shell.NavBarIsVisible="False"
-    Shell.FlyoutBehavior="Disabled">
+    Shell.NavBarIsVisible="False">
 
     <ContentPage.Resources>
         <Style x:Key="Card" TargetType="Border">
@@ -48,117 +46,13 @@
         </Style>
     </ContentPage.Resources>
 
-    <!-- Left drawer = the web's SidebarComponent in "Over" mode (mobile): brand on top, the
-         "Operação" section, account + Sair at the bottom. Opens from the edge swipe or the
-         menu button; replaced the shortcut list that sat at the very end of the page. -->
-    <!-- TouchThreshold is wide on purpose: with Android gesture navigation the first ~30dp of the
-         left edge belong to the system back gesture (an edge swipe there leaves the app), so the
-         open-swipe has to be startable a bit further in. -->
-    <nav:SfNavigationDrawer x:Name="Drawer">
-        <nav:SfNavigationDrawer.DrawerSettings>
-            <nav:DrawerSettings
-                Position="Left"
-                Transition="SlideOnTop"
-                DrawerWidth="300"
-                EnableSwipeGesture="True"
-                TouchThreshold="90"
-                ContentBackground="White"
-                DrawerHeaderHeight="96"
-                DrawerFooterHeight="84">
-                <nav:DrawerSettings.DrawerHeaderView>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="20,40,20,8" BackgroundColor="White">
-                        <Border StrokeShape="RoundRectangle 9" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="34" HeightRequest="34" Padding="0">
-                            <Label Text="S" FontSize="17" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                        <Label Grid.Column="1" Text="Servus" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
-                    </Grid>
-                </nav:DrawerSettings.DrawerHeaderView>
-                <nav:DrawerSettings.DrawerContentView>
-                    <ScrollView BackgroundColor="White">
-                        <VerticalStackLayout Padding="12,8,12,12" Spacing="2">
-                            <Label Text="OPERAÇÃO" Style="{StaticResource Eyebrow}" Margin="10,0,0,8" />
-                            <!-- "Início" mirrors the web's active Dashboard link: you are here. -->
-                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurfaceSubtle}" Padding="8,10">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnHomeItemTapped" />
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="38" HeightRequest="38" Padding="0">
-                                        <Path Data="{x:Static local:HomeIcons.LayoutGrid}" Stroke="White" Style="{StaticResource LineIcon}" />
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
-                                        <Label Text="Início" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                                        <Label Text="Visão geral" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Shortcuts}" Spacing="2">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="local:HomeShortcut">
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="8,10">
-                                            <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer Tapped="OnShortcutTapped" />
-                                            </Grid.GestureRecognizers>
-                                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="38" HeightRequest="38" Padding="0">
-                                                <Path Data="{Binding Icon}" Stroke="{StaticResource BrandPrimary}" Style="{StaticResource LineIcon}" />
-                                            </Border>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
-                                                <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                                                <Label Text="{Binding Subtitle}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
-                                            </VerticalStackLayout>
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
-                        </VerticalStackLayout>
-                    </ScrollView>
-                </nav:DrawerSettings.DrawerContentView>
-                <nav:DrawerSettings.DrawerFooterView>
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="20,14,16,14" BackgroundColor="White">
-                        <BoxView Grid.ColumnSpan="3" Color="{StaticResource Neutral200}" HeightRequest="1" VerticalOptions="Start" Margin="0,-14,0,0" />
-                        <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="36" HeightRequest="36" Padding="0">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnProfileTapped" />
-                            </Border.GestureRecognizers>
-                            <Label Text="{Binding UserInitial}" FontSize="13" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
-                        </Border>
-                        <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
-                            <Label Text="{Binding UserEmail}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
-                            <Label Text="{Binding ProfileLabel}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
-                        </VerticalStackLayout>
-                        <Border Grid.Column="2" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,6" VerticalOptions="Center">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnLogoutTapped" />
-                            </Border.GestureRecognizers>
-                            <Label Text="Sair" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
-                        </Border>
-                    </Grid>
-                </nav:DrawerSettings.DrawerFooterView>
-            </nav:DrawerSettings>
-        </nav:SfNavigationDrawer.DrawerSettings>
-
-        <nav:SfNavigationDrawer.ContentView>
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsRefreshing}">
         <ScrollView VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16,44,16,32" Spacing="14">
 
                 <!-- Header: same "eyebrow + title + date" shape as the web PageHeader -->
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Margin="0,0,0,4">
-                    <Border
-                        Grid.Column="0"
-                        StrokeShape="RoundRectangle 12"
-                        Stroke="{StaticResource Neutral200}"
-                        BackgroundColor="White"
-                        WidthRequest="44"
-                        HeightRequest="44"
-                        Padding="0"
-                        VerticalOptions="Center"
-                        SemanticProperties.Description="Abrir menu">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnMenuTapped" />
-                        </Border.GestureRecognizers>
-                        <Path Data="{x:Static local:HomeIcons.Menu}" Stroke="{StaticResource Neutral900}" Style="{StaticResource LineIcon}" />
-                    </Border>
+                <!-- Column 0 is left empty for the app-wide FloatingMenuButton, which floats over it. -->
+                <Grid ColumnDefinitions="46,*,Auto" ColumnSpacing="12" Margin="0,0,0,4">
                     <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
                         <HorizontalStackLayout Spacing="8">
                             <Label Text="{Binding Greeting}" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
@@ -692,7 +586,5 @@
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
-        </nav:SfNavigationDrawer.ContentView>
-    </nav:SfNavigationDrawer>
 
 </ContentPage>

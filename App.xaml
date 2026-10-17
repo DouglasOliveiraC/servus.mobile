@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Servus.Mobile"
              xmlns:converters="clr-namespace:Servus.Mobile.Converters"
+             xmlns:controls="clr-namespace:Servus.Mobile.Controls"
              x:Class="Servus.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -17,6 +18,23 @@
             <converters:IntAtLeastConverter x:Key="IntAtLeastConverter" />
             <converters:ChevronConverter x:Key="ChevronConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+
+            <!-- Every ContentPage gets the floating menu button through this template; pages
+                 that must not show it (Login, Register) set ControlTemplate="{x:Null}". -->
+            <ControlTemplate x:Key="AppPageTemplate">
+                <Grid>
+                    <ContentPresenter />
+                    <controls:FloatingMenuButton />
+                </Grid>
+            </ControlTemplate>
+
+            <!-- Repeats the Page style's setters from Styles.xaml: only the most specific implicit
+                 style applies, so this one would otherwise drop them for every ContentPage. -->
+            <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+                <Setter Property="ControlTemplate" Value="{StaticResource AppPageTemplate}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

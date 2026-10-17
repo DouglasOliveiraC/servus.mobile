@@ -2,6 +2,7 @@
 using Servus.Mobile.Features.CalendarOverrides;
 using Servus.Mobile.Features.Home;
 using Servus.Mobile.Features.JoinOrganization;
+using Servus.Mobile.Features.Menu;
 using Servus.Mobile.Features.Members;
 using Servus.Mobile.Features.Profile;
 using Servus.Mobile.Features.Register;
@@ -13,9 +14,16 @@ namespace Servus.Mobile;
 
 public partial class AppShell : Shell
 {
-	public AppShell()
+	public AppShell(AppMenuViewModel menu)
 	{
 		InitializeComponent();
+
+		// Set per flyout part, not on the Shell: a Shell BindingContext would flow down to any
+		// page that doesn't set its own.
+		MenuContent.BindingContext = menu;
+		MenuFooter.BindingContext = menu;
+		Navigated += (_, _) => menu.SyncActiveRoute(CurrentState.Location.OriginalString);
+
 		Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
 
 		Routing.RegisterRoute(nameof(DayDetailPage), typeof(DayDetailPage));
@@ -36,5 +44,17 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(nameof(RosterMemberProfilePage), typeof(RosterMemberProfilePage));
 		Routing.RegisterRoute(nameof(MembersPage), typeof(MembersPage));
 		Routing.RegisterRoute(nameof(MemberDetailPage), typeof(MemberDetailPage));
+	}
+
+	// Android back closes an open menu first, as on any native app, instead of popping the page.
+	protected override bool OnBackButtonPressed()
+	{
+		if (FlyoutIsPresented)
+		{
+			FlyoutIsPresented = false;
+			return true;
+		}
+
+		return base.OnBackButtonPressed();
 	}
 }

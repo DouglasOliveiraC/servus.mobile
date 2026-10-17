@@ -54,11 +54,18 @@ public partial class DayScheduleEditViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool HasError { get; set; }
 
-    [ObservableProperty]
-    public partial bool IsSwapFormVisible { get; set; }
+    // The row whose inline form is open. Forms open under their own row instead of at the end
+    // of the page: on a day with many people a form at the bottom opened off-screen, so tapping
+    // Trocar/Mover looked like it did nothing.
+    private AssignmentRow? _activeRow;
 
     [ObservableProperty]
-    public partial ScheduleAssignmentDto? SwapTarget { get; set; }
+    public partial bool IsSaving { get; set; }
+
+    // Mover only makes sense with somewhere else to go; with a single shift the button opened
+    // an empty form that could only be cancelled.
+    [ObservableProperty]
+    public partial bool HasMultipleShifts { get; set; }
 
     [ObservableProperty]
     public partial string MemberSearchText { get; set; } = string.Empty;
@@ -66,19 +73,13 @@ public partial class DayScheduleEditViewModel : BaseViewModel
     [ObservableProperty]
     public partial string? SwapWarningMessage { get; set; }
 
-    public ObservableCollection<ScheduleAssignmentDto> Assignments { get; } = [];
+    public ObservableCollection<AssignmentRow> Assignments { get; } = [];
 
     /// <summary>Assignments grouped by ServiceShift, ordered chronologically — what the page
     /// actually displays, so "which shift is this person in" is visible at a glance.</summary>
     public ObservableCollection<ShiftGroup> ShiftGroups { get; } = [];
 
     public ObservableCollection<MemberDto> MemberSearchResults { get; } = [];
-
-    [ObservableProperty]
-    public partial bool IsMoveShiftFormVisible { get; set; }
-
-    [ObservableProperty]
-    public partial ScheduleAssignmentDto? MoveShiftTarget { get; set; }
 
     public ObservableCollection<ServiceShiftDto> AvailableShiftsForMove { get; } = [];
 
@@ -105,19 +106,21 @@ public partial class DayScheduleEditViewModel : BaseViewModel
             RosterName = schedule.RosterName;
 
             var day = schedule.Days.FirstOrDefault(d => d.Date == Date);
+            _activeRow = null;
             Assignments.Clear();
             foreach (var assignment in day?.Assignments ?? [])
             {
-                Assignments.Add(assignment);
+                Assignments.Add(new AssignmentRow(assignment));
             }
 
             var roster = await _rosterService.GetRosterByIdAsync(RosterId);
             _shifts = roster.ServiceShifts.OrderBy(s => s.SortOrder).ToList();
+            HasMultipleShifts = _shifts.Count > 1;
 
             ShiftGroups.Clear();
             foreach (var shift in _shifts)
             {
-                var shiftAssignments = Assignments.Where(a => a.ServiceShiftId == shift.Id).ToList();
+                var shiftAssignments = Assignments.Where(a => a.Assignment.ServiceShiftId == shift.Id).ToList();
                 ShiftGroups.Add(new ShiftGroup(shift, shiftAssignments));
             }
 
@@ -134,21 +137,48 @@ public partial class DayScheduleEditViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void StartSwap(ScheduleAssignmentDto assignment)
+    private void StartSwap(AssignmentRow row)
     {
-        SwapTarget = assignment;
-        IsSwapFormVisible = true;
+        var reopening = _activeRow == row && row.IsSwapping;
+        CloseActiveForm();
+        if (reopening) return;
+
+        _activeRow = row;
+        row.IsSwapping = true;
         MemberSearchText = string.Empty;
         SwapWarningMessage = null;
         RefreshMemberSearchResults();
     }
 
     [RelayCommand]
-    private void CancelSwap()
+    private void StartMoveShift(AssignmentRow row)
     {
-        IsSwapFormVisible = false;
-        SwapTarget = null;
+        var reopening = _activeRow == row && row.IsMoving;
+        CloseActiveForm();
+        if (reopening) return;
+
+        _activeRow = row;
+        row.IsMoving = true;
+        foreach (var shift in _shifts.Where(s => s.Id != row.Assignment.ServiceShiftId))
+        {
+            AvailableShiftsForMove.Add(shift);
+        }
+    }
+
+    [RelayCommand]
+    private void CancelForm() => CloseActiveForm();
+
+    private void CloseActiveForm()
+    {
+        if (_activeRow is not null)
+        {
+            _activeRow.IsSwapping = false;
+            _activeRow.IsMoving = false;
+        }
+
+        _activeRow = null;
         MemberSearchResults.Clear();
+        AvailableShiftsForMove.Clear();
     }
 
     partial void OnMemberSearchTextChanged(string value) => RefreshMemberSearchResults();
@@ -158,9 +188,9 @@ public partial class DayScheduleEditViewModel : BaseViewModel
     private void RefreshMemberSearchResults()
     {
         MemberSearchResults.Clear();
-        if (SwapTarget is null) return;
+        if (_activeRow is not { IsSwapping: true }) return;
 
-        var alreadyAssignedToday = Assignments.Select(a => a.MemberId).ToHashSet();
+        var alreadyAssignedToday = Assignments.Select(a => a.Assignment.MemberId).ToHashSet();
         var search = MemberSearchText.Trim();
 
         var matches = _queue
@@ -177,63 +207,62 @@ public partial class DayScheduleEditViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmSwapAsync(MemberDto newMember)
     {
-        if (SwapTarget is null) return;
+        if (_activeRow is not { IsSwapping: true } row || IsSaving) return;
 
+        IsSaving = true;
         try
         {
-            var result = await _rosterService.SwapDutyAssignmentAsync(SwapTarget.DutyAssignmentId, newMember.Id);
+            var result = await _rosterService.SwapDutyAssignmentAsync(row.Assignment.DutyAssignmentId, newMember.Id);
             SwapWarningMessage = result.MinIntervalWarning ? result.MinIntervalWarningMessage : null;
-            IsSwapFormVisible = false;
-            SwapTarget = null;
-            MemberSearchResults.Clear();
+            CloseActiveForm();
             await LoadAsync();
         }
         catch (Exception)
         {
             await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível trocar o membro escalado.", "OK");
         }
-    }
-
-    [RelayCommand]
-    private void StartMoveShift(ScheduleAssignmentDto assignment)
-    {
-        MoveShiftTarget = assignment;
-        IsMoveShiftFormVisible = true;
-
-        AvailableShiftsForMove.Clear();
-        foreach (var shift in _shifts.Where(s => s.Id != assignment.ServiceShiftId))
+        finally
         {
-            AvailableShiftsForMove.Add(shift);
+            IsSaving = false;
         }
-    }
-
-    [RelayCommand]
-    private void CancelMoveShift()
-    {
-        IsMoveShiftFormVisible = false;
-        MoveShiftTarget = null;
-        AvailableShiftsForMove.Clear();
     }
 
     [RelayCommand]
     private async Task ConfirmMoveShiftAsync(ServiceShiftDto targetShift)
     {
-        if (MoveShiftTarget is null) return;
+        if (_activeRow is not { IsMoving: true } row || IsSaving) return;
 
+        IsSaving = true;
         try
         {
-            await _rosterService.MoveDutyAssignmentToShiftAsync(MoveShiftTarget.DutyAssignmentId, targetShift.Id);
-            IsMoveShiftFormVisible = false;
-            MoveShiftTarget = null;
-            AvailableShiftsForMove.Clear();
+            await _rosterService.MoveDutyAssignmentToShiftAsync(row.Assignment.DutyAssignmentId, targetShift.Id);
+            CloseActiveForm();
             await LoadAsync();
         }
         catch (Exception)
         {
             await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível mover para este turno — pode estar sem vaga.", "OK");
         }
+        finally
+        {
+            IsSaving = false;
+        }
     }
 }
 
+/// <summary>One assignment on the edited day, plus which of its inline forms is open.</summary>
+public partial class AssignmentRow(ScheduleAssignmentDto assignment) : ObservableObject
+{
+    public ScheduleAssignmentDto Assignment { get; } = assignment;
+
+    public string MemberName => Assignment.MemberName;
+
+    [ObservableProperty]
+    public partial bool IsSwapping { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsMoving { get; set; }
+}
+
 /// <summary>One ServiceShift and who occupies it on the day being edited.</summary>
-public record ShiftGroup(ServiceShiftDto Shift, IReadOnlyList<ScheduleAssignmentDto> Assignments);
+public record ShiftGroup(ServiceShiftDto Shift, IReadOnlyList<AssignmentRow> Assignments);

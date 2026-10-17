@@ -75,8 +75,6 @@ public record OnDutyEntry(string MemberName, string RosterName, TimeOnly ShiftSt
 
 public record MyRosterSummary(Guid RosterId, string RosterName, string OrganizationName);
 
-public record HomeShortcut(string Title, string Subtitle, Microsoft.Maui.Controls.Shapes.Geometry Icon, string Route);
-
 // The app sets no culture, so "ddd" in a XAML StringFormat follows the device language
 // (English on the emulator); pinned to pt-BR here like the rest of the UI text.
 internal static class DateLabels

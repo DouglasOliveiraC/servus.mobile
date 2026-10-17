@@ -8,7 +8,9 @@
     xmlns:local="clr-namespace:Servus.Mobile.Features.Register"
     x:DataType="local:RegisterViewModel"
     BackgroundColor="{StaticResource White}"
-    Shell.NavBarIsVisible="False">
+    Shell.NavBarIsVisible="False"
+    Shell.FlyoutBehavior="Disabled"
+    ControlTemplate="{x:Null}">
 
     <ScrollView>
         <VerticalStackLayout Padding="28,52,28,28" Spacing="0">

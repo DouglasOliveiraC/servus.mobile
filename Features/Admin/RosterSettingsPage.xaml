@@ -45,6 +45,13 @@
                                 Text="Quantos dias após o fim do período fora o membro fica de fora da escala antes de voltar a ser elegível. Se a vez dele já tiver passado nesse meio tempo, ele é priorizado assim que esse respiro terminar."
                                 FontSize="11"
                                 TextColor="{StaticResource Neutral600}" />
+                            <sf:SfTextInputLayout Hint="Dias de antecedência antes de uma ausência" ContainerType="Outlined">
+                                <Entry Text="{Binding MinDaysBeforeLeaveBlocked}" Keyboard="Numeric" />
+                            </sf:SfTextInputLayout>
+                            <Label
+                                Text="Quantos dias antes do início de uma ausência o membro já deixa de ser escalado."
+                                FontSize="11"
+                                TextColor="{StaticResource Neutral600}" />
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Grid.Column="0" Text="Requer aprovação do admin" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
                                 <Switch Grid.Column="1" IsToggled="{Binding RequiresAdminApproval}" />

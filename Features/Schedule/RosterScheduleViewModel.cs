@@ -12,7 +12,7 @@ using Servus.Mobile.Services.Telemetry;
 namespace Servus.Mobile.Features.Schedule;
 
 [QueryProperty(nameof(RosterId), "rosterId")]
-public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpdatedMessage>, IRecipient<SchedulePublishedMessage>
+public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpdatedMessage>, IRecipient<ScheduleUpdatedMessage>
 {
     private readonly IRosterService _rosterService;
     private readonly ISwapRequestService _swapRequestService;
@@ -40,7 +40,7 @@ public partial class RosterScheduleViewModel : BaseViewModel, IRecipient<SwapUpd
         }
     }
 
-    public void Receive(SchedulePublishedMessage message)
+    public void Receive(ScheduleUpdatedMessage message)
     {
         if (message.Update.RosterId == RosterId)
         {

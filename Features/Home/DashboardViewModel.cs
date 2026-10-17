@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Common;
+using Servus.Mobile.Features.Menu;
 using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
@@ -36,6 +37,7 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly ISwapHistoryService _swapHistoryService;
     private readonly ISwapRequestService _swapRequestService;
     private readonly IRealtimeClient _realtimeClient;
+    private readonly AppMenuViewModel _appMenu;
 
     public DashboardViewModel(
         IOrganizationService organizationService,
@@ -45,6 +47,7 @@ public partial class DashboardViewModel : BaseViewModel
         ISwapHistoryService swapHistoryService,
         ISwapRequestService swapRequestService,
         IRealtimeClient realtimeClient,
+        AppMenuViewModel appMenu,
         INavigationService navigationService,
         ITelemetryService telemetry)
         : base(navigationService, telemetry)
@@ -56,6 +59,7 @@ public partial class DashboardViewModel : BaseViewModel
         _swapHistoryService = swapHistoryService;
         _swapRequestService = swapRequestService;
         _realtimeClient = realtimeClient;
+        _appMenu = appMenu;
     }
 
     [ObservableProperty]
@@ -184,8 +188,6 @@ public partial class DashboardViewModel : BaseViewModel
 
     public ObservableCollection<MyShift> MyUpcomingShifts { get; } = [];
 
-    public ObservableCollection<HomeShortcut> Shortcuts { get; } = [];
-
     // --- Member ("servidor") ---
 
     [ObservableProperty]
@@ -313,9 +315,13 @@ public partial class DashboardViewModel : BaseViewModel
 
                     foreach (var day in schedule.Days)
                     {
+                        // The roster schedule also returns drafts, even to plain members. A shift
+                        // only counts as "mine" once published, matching the web's /api/me/schedule;
+                        // the admin panels below still see drafts on purpose.
+                        var published = day.Assignments.Where(a => a.Status == DutyAssignmentStatus.Published).ToList();
                         var mine = myMemberId is null
                             ? null
-                            : day.Assignments.FirstOrDefault(a => a.MemberId == myMemberId);
+                            : published.FirstOrDefault(a => a.MemberId == myMemberId);
                         if (mine is not null)
                         {
                             myShifts.Add(new MyShift(
@@ -325,7 +331,7 @@ public partial class DashboardViewModel : BaseViewModel
                                 mine.ShiftStartTime,
                                 mine.ShiftEndTime,
                                 day.IsRestDay,
-                                day.Assignments.Where(a => a.MemberId != myMemberId).Select(a => a.MemberName).ToList()));
+                                published.Where(a => a.MemberId != myMemberId).Select(a => a.MemberName).ToList()));
                         }
 
                         if (!organization.IsAdmin || day.Date < today || day.Date > windowEnd) continue;
@@ -380,7 +386,7 @@ public partial class DashboardViewModel : BaseViewModel
                 BuildSwapTrend(swapEntries, today);
             }
 
-            BuildShortcuts();
+            _appMenu.SetUser(UserEmail, UserInitial, IsAdminOfAnyOrganization);
             HasLoaded = true;
         }
         catch (Exception)
@@ -456,23 +462,6 @@ public partial class DashboardViewModel : BaseViewModel
             : $"{Math.Round(CoverageDays.Sum(c => Math.Min(c.Assigned, c.Required)) * 100.0 / required)}%";
     }
 
-    private void BuildShortcuts()
-    {
-        var shortcuts = new List<HomeShortcut>();
-        if (IsAdminOfAnyOrganization)
-        {
-            shortcuts.Add(new HomeShortcut("Minhas organizações", "Escalas, filas, turnos e publicação", HomeIcons.Building, Routes.OrganizationList));
-            shortcuts.Add(new HomeShortcut("Membros", "Cadastro e vínculo às filas", HomeIcons.Users, Routes.Members));
-        }
-
-        shortcuts.Add(new HomeShortcut("Trocas de plantão", "Pedidos enviados e recebidos", HomeIcons.Repeat, Routes.SwapRequests));
-        shortcuts.Add(new HomeShortcut("Minhas ausências", "Quando não posso ser escalado", HomeIcons.CalendarOff, Routes.Unavailability));
-        shortcuts.Add(new HomeShortcut("Entrar com código", "Vincular-me a uma organização", HomeIcons.KeyRound, Routes.JoinOrganization));
-        shortcuts.Add(new HomeShortcut("Meu perfil", "Dados da conta e histórico", HomeIcons.User, Routes.Profile));
-
-        ReplaceAll(Shortcuts, shortcuts);
-    }
-
     private static Color PaletteColor(int index) =>
         ((SolidColorBrush)DashboardPalette.Brushes[index % DashboardPalette.Brushes.Count]).Color;
 
@@ -534,13 +523,6 @@ public partial class DashboardViewModel : BaseViewModel
         }
 
         SwapCountLastPeriod = total;
-    }
-
-    [RelayCommand]
-    private async Task LogoutAsync()
-    {
-        await _authService.LogoutAsync();
-        await NavigationService.GoToRootAsync(Routes.Login);
     }
 
     [RelayCommand]

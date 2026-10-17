@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Servus.Mobile.Services.Http;
 
 namespace Servus.Mobile.Services.MemberClaimCodes;
 
@@ -14,7 +15,7 @@ public class MemberClaimCodeService : IMemberClaimCodeService
     public async Task<ClaimMemberResultDto> RedeemAsync(string code, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync("api/member-claim-codes/redeem", new { Code = code }, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessWithProblemAsync(cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<ClaimMemberResultDto>(cancellationToken: cancellationToken);
         return result!;
     }

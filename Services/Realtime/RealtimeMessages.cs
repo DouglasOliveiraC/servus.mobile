@@ -5,7 +5,9 @@ namespace Servus.Mobile.Services.Realtime;
 /// mobile app has no reference to Servus.Application.</summary>
 public record SwapRequestUpdate(Guid SwapRequestId, Guid RosterId, string Status);
 
-public record SchedulePublishedUpdate(Guid RosterId, int AssignmentsPublished);
+// Common shape of SchedulePublished, ScheduleUnpublished and ScheduleChanged: every screen
+// reacts the same way (reload the roster), so only the roster id is read.
+public record ScheduleUpdate(Guid RosterId);
 
 public sealed class SwapUpdatedMessage
 {
@@ -14,9 +16,9 @@ public sealed class SwapUpdatedMessage
     public SwapRequestUpdate Update { get; }
 }
 
-public sealed class SchedulePublishedMessage
+public sealed class ScheduleUpdatedMessage
 {
-    public SchedulePublishedMessage(SchedulePublishedUpdate update) => Update = update;
+    public ScheduleUpdatedMessage(ScheduleUpdate update) => Update = update;
 
-    public SchedulePublishedUpdate Update { get; }
+    public ScheduleUpdate Update { get; }
 }

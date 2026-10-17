@@ -24,7 +24,7 @@ public class RosterService : IRosterService
         return result!;
     }
 
-    public async Task<Guid> CreateRosterAsync(Guid organizationId, string name, int minIntervalDays, bool requiresAdminApproval, bool creatorIsMember, int minDaysAfterReturnBeforeEligible, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateRosterAsync(Guid organizationId, string name, int minIntervalDays, bool requiresAdminApproval, bool creatorIsMember, int minDaysAfterReturnBeforeEligible, int minDaysBeforeLeaveBlocked, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync("api/roster", new
         {
@@ -34,6 +34,7 @@ public class RosterService : IRosterService
             RequiresAdminApproval = requiresAdminApproval,
             CreatorIsMember = creatorIsMember,
             MinDaysAfterReturnBeforeEligible = minDaysAfterReturnBeforeEligible,
+            MinDaysBeforeLeaveBlocked = minDaysBeforeLeaveBlocked,
             FillShiftsEarliestFirst = fillShiftsEarliestFirst,
             ServiceDayStartTime = serviceDayStartTime,
             WorkdayQueueDirection = workdayQueueDirection,
@@ -45,7 +46,7 @@ public class RosterService : IRosterService
         return result!.Id;
     }
 
-    public async Task UpdateRosterAsync(Guid id, string name, int minIntervalDays, bool requiresAdminApproval, int minDaysAfterReturnBeforeEligible, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default)
+    public async Task UpdateRosterAsync(Guid id, string name, int minIntervalDays, bool requiresAdminApproval, int minDaysAfterReturnBeforeEligible, int minDaysBeforeLeaveBlocked, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PutAsJsonAsync($"api/roster/{id}", new
         {
@@ -53,6 +54,7 @@ public class RosterService : IRosterService
             MinIntervalDays = minIntervalDays,
             RequiresAdminApproval = requiresAdminApproval,
             MinDaysAfterReturnBeforeEligible = minDaysAfterReturnBeforeEligible,
+            MinDaysBeforeLeaveBlocked = minDaysBeforeLeaveBlocked,
             FillShiftsEarliestFirst = fillShiftsEarliestFirst,
             ServiceDayStartTime = serviceDayStartTime,
             WorkdayQueueDirection = workdayQueueDirection,
@@ -77,11 +79,11 @@ public class RosterService : IRosterService
         return result ?? new RosterScheduleDto(rosterId, string.Empty, []);
     }
 
-    public async Task<RosterScheduleDto> GenerateScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    public async Task<GenerateScheduleResultDto> GenerateScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/generate", new { From = from, To = to }, cancellationToken);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<RosterScheduleDto>(cancellationToken: cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<GenerateScheduleResultDto>(cancellationToken: cancellationToken);
         return result!;
     }
 
@@ -109,6 +111,14 @@ public class RosterService : IRosterService
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<CreatedResult>(cancellationToken: cancellationToken);
         return result!.Id;
+    }
+
+    public async Task<Guid> CreateMemberInRosterAsync(Guid rosterId, string name, string? email, string? phone, int rank, CancellationToken cancellationToken = default)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"api/roster/{rosterId}/members/new", new { Name = name, Email = email, Phone = phone, Rank = rank }, cancellationToken);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<CreatedMemberInRosterResult>(cancellationToken: cancellationToken);
+        return result!.MemberId;
     }
 
     public async Task RemoveRosterMemberAsync(Guid rosterMemberId, CancellationToken cancellationToken = default)
@@ -200,4 +210,6 @@ public class RosterService : IRosterService
     }
 
     private record CreatedResult(Guid Id);
+
+    private record CreatedMemberInRosterResult(Guid MemberId, Guid RosterMemberId);
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Common;
@@ -47,7 +48,28 @@ public partial class RosterDetailViewModel : BaseViewModel
     [ObservableProperty]
     public partial bool CanManage { get; set; }
 
+    // Sections: the queue, schedule generation and access used to be stacked on one page, and a
+    // 30-person queue plus a 30-row duty count list made everything below them unreachable.
+    public const string QueueSection = "queue";
+    public const string ScheduleSection = "schedule";
+    public const string AccessSection = "access";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsQueueSection), nameof(IsScheduleSection), nameof(IsAccessSection))]
+    public partial string SelectedSection { get; set; } = QueueSection;
+
+    public bool IsQueueSection => SelectedSection == QueueSection;
+
+    public bool IsScheduleSection => SelectedSection == ScheduleSection;
+
+    public bool IsAccessSection => SelectedSection == AccessSection;
+
+    [RelayCommand]
+    private void SelectSection(string section) => SelectedSection = section;
+
     // Members
+    private const int QueuePreviewCount = 8;
+
     [ObservableProperty]
     public partial bool IsAddMemberFormVisible { get; set; }
 
@@ -58,6 +80,63 @@ public partial class RosterDetailViewModel : BaseViewModel
     public partial string NewMemberPosition { get; set; } = "1";
 
     public ObservableCollection<RosterMemberRow> Members { get; } = [];
+
+    // What the list renders: the first QueuePreviewCount by rank until expanded, or every match
+    // while searching (a search hit hidden behind "ver fila completa" would read as "not found").
+    public ObservableCollection<RosterMemberRow> VisibleMembers { get; } = [];
+
+    [ObservableProperty]
+    public partial string QueueSearchText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsQueueExpanded { get; set; }
+
+    public bool IsSearchingQueue => !string.IsNullOrWhiteSpace(QueueSearchText);
+
+    public bool ShowQueueSearch => Members.Count > QueuePreviewCount;
+
+    public bool ShowQueueToggle => !IsSearchingQueue && Members.Count > QueuePreviewCount;
+
+    public string QueueToggleText => IsQueueExpanded ? "Mostrar menos" : $"Ver fila completa ({Members.Count})";
+
+    public bool ShowNoQueueMatch => IsSearchingQueue && VisibleMembers.Count == 0;
+
+    public string QueueTabLabel => Members.Count == 0 ? "Fila" : $"Fila · {Members.Count}";
+
+    partial void OnQueueSearchTextChanged(string value) => RefreshVisibleMembers();
+
+    partial void OnIsQueueExpandedChanged(bool value) => RefreshVisibleMembers();
+
+    [RelayCommand]
+    private void ToggleQueueExpanded() => IsQueueExpanded = !IsQueueExpanded;
+
+    private void RefreshVisibleMembers()
+    {
+        IEnumerable<RosterMemberRow> rows = Members;
+        if (IsSearchingQueue)
+        {
+            var term = QueueSearchText.Trim();
+            var compare = CultureInfo.GetCultureInfo("pt-BR").CompareInfo;
+            rows = rows.Where(r => compare.IndexOf(r.MemberName, term, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
+        }
+        else if (!IsQueueExpanded)
+        {
+            rows = rows.Take(QueuePreviewCount);
+        }
+
+        VisibleMembers.Clear();
+        foreach (var row in rows)
+        {
+            VisibleMembers.Add(row);
+        }
+
+        OnPropertyChanged(nameof(IsSearchingQueue));
+        OnPropertyChanged(nameof(ShowQueueSearch));
+        OnPropertyChanged(nameof(ShowQueueToggle));
+        OnPropertyChanged(nameof(QueueToggleText));
+        OnPropertyChanged(nameof(ShowNoQueueMatch));
+        OnPropertyChanged(nameof(QueueTabLabel));
+    }
 
     public ObservableCollection<MemberDto> MemberSearchResults { get; } = [];
 
@@ -97,9 +176,6 @@ public partial class RosterDetailViewModel : BaseViewModel
     [ObservableProperty]
     public partial string? GenerateResultMessage { get; set; }
 
-    // Duty counts
-    public ObservableCollection<MemberDutyCountDto> DutyCounts { get; } = [];
-
     // Access
     [ObservableProperty]
     public partial bool IsGrantAccessFormVisible { get; set; }
@@ -127,24 +203,26 @@ public partial class RosterDetailViewModel : BaseViewModel
             CanManage = roster.CanManage;
 
             var members = await _rosterService.GetRosterMembersAsync(RosterId);
+
+            // Duty counts ride on the queue rows instead of a second list of the same people.
+            var dutyCounts = (await _rosterService.GetDutyCountsAsync(RosterId))
+                .ToDictionary(c => c.MemberId, c => c.AssignmentCount);
+
             Members.Clear();
             foreach (var member in members.OrderBy(m => m.Rank))
             {
-                Members.Add(new RosterMemberRow(member));
+                Members.Add(new RosterMemberRow(member) { DutyCount = dutyCounts.GetValueOrDefault(member.MemberId) });
             }
 
-            var dutyCounts = await _rosterService.GetDutyCountsAsync(RosterId);
-            DutyCounts.Clear();
-            foreach (var count in dutyCounts.OrderByDescending(c => c.AssignmentCount))
-            {
-                DutyCounts.Add(count);
-            }
+            RefreshVisibleMembers();
 
-            // RosterAccessDto só traz MemberId (o endpoint da API não resolve nome);
-            // usa a lista de membros da escala, já carregada acima, para exibir o nome.
+            // RosterAccessDto only carries MemberId (the API does not resolve names), so the
+            // roster members loaded above supply the display name.
             var memberNamesById = members.ToDictionary(m => m.MemberId, m => m.MemberName);
 
-            var accesses = await _rosterService.GetRosterAccessesAsync(RosterId);
+            // The access list is admin-only (403 otherwise); requesting it unconditionally would
+            // turn the whole screen into an error for anyone who can only view the roster.
+            var accesses = CanManage ? await _rosterService.GetRosterAccessesAsync(RosterId) : [];
             Accesses.Clear();
             foreach (var access in accesses)
             {
@@ -315,20 +393,29 @@ public partial class RosterDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task GenerateScheduleAsync()
     {
+        GenerateScheduleResultDto result;
         try
         {
             var from = DateOnly.FromDateTime(GenerateFrom);
             var to = DateOnly.FromDateTime(GenerateTo);
-            var schedule = await _rosterService.GenerateScheduleAsync(RosterId, from, to);
-            var assignmentCount = schedule.Days.Sum(d => d.Assignments.Count);
-            GenerateResultMessage = $"Plantões gerados: {schedule.Days.Count} dia(s), {assignmentCount} plantão(ões).";
-            await LoadAsync();
+            result = await _rosterService.GenerateScheduleAsync(RosterId, from, to);
         }
         catch (Exception)
         {
             GenerateResultMessage = null;
             await Shell.Current.DisplayAlertAsync("Erro", "Não foi possível gerar os plantões.", "OK");
+            return;
         }
+
+        GenerateResultMessage = $"{result.AssignmentsCreated} plantão(ões) criado(s) em {result.DaysProcessed} dia(s).";
+        if (result.UnderstaffedDates.Count > 0)
+        {
+            GenerateResultMessage += $" {result.UnderstaffedDates.Count} dia(s) ficaram sem gente suficiente.";
+        }
+
+        // Outside the try above: a failed reload must not be reported as a failed generation,
+        // since the assignments are already committed by then.
+        await LoadAsync();
     }
 
     [RelayCommand]
@@ -445,6 +532,10 @@ public record RosterMemberRow(RosterMemberDto Dto)
     public Guid MemberId => Dto.MemberId;
     public int Rank => Dto.Rank;
     public string MemberName => Dto.MemberName;
+
+    public int DutyCount { get; init; }
+
+    public string DutyCountText => DutyCount == 1 ? "1 plantão" : $"{DutyCount} plantões";
 
     // A prioridade é por rotação: exibimos as duas juntas porque a linha é uma só.
     public string? PendingReturnPriorityReason =>

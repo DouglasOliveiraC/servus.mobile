@@ -11,9 +11,19 @@
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
 
+    <ContentPage.Resources>
+        <Style x:Key="RowAction" TargetType="Border">
+            <Setter Property="StrokeShape" Value="RoundRectangle 8" />
+            <Setter Property="Stroke" Value="{StaticResource Neutral200}" />
+            <Setter Property="BackgroundColor" Value="White" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
         <ScrollView>
-            <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
+            <VerticalStackLayout Padding="20,4,20,28" Spacing="14">
 
                 <VerticalStackLayout Spacing="1">
                     <Label Text="{Binding RosterName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
@@ -47,11 +57,11 @@
                     <Label Text="Nenhum plantão neste dia." FontSize="13" TextColor="{StaticResource Neutral600}" />
                 </Border>
 
-                <CollectionView ItemsSource="{Binding ShiftGroups}">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
-                    </CollectionView.ItemsLayout>
-                    <CollectionView.ItemTemplate>
+                <!-- BindableLayout, not nested CollectionViews: the page already scrolls, and a
+                     CollectionView inside a ScrollView (let alone inside another one) measures and
+                     scrolls unreliably on Android. -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ShiftGroups}" Spacing="16">
+                    <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:ShiftGroup">
                             <VerticalStackLayout Spacing="6">
                                 <Label FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral600}">
@@ -64,134 +74,107 @@
                                     </Label.FormattedText>
                                 </Label>
 
-                                <CollectionView ItemsSource="{Binding Assignments}">
-                                    <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="rosters:ScheduleAssignmentDto">
-                                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
-                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="14">
-                                                    <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
-                                                    <Label
-                                                        Grid.Column="1"
-                                                        Text="Mover"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{StaticResource Neutral700}"
-                                                        VerticalOptions="Center">
-                                                        <Label.GestureRecognizers>
-                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=StartMoveShiftCommand}" CommandParameter="{Binding .}" />
-                                                        </Label.GestureRecognizers>
-                                                    </Label>
-                                                    <Label
-                                                        Grid.Column="2"
-                                                        Text="Trocar"
-                                                        FontSize="12"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{StaticResource BrandPrimary}"
-                                                        VerticalOptions="Center">
-                                                        <Label.GestureRecognizers>
-                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=StartSwapCommand}" CommandParameter="{Binding .}" />
-                                                        </Label.GestureRecognizers>
-                                                    </Label>
-                                                </Grid>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assignments}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:AssignmentRow">
+                                            <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" StrokeThickness="1.5" BackgroundColor="White" Padding="14,10">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSwapping}" Value="True">
+                                                        <Setter Property="Stroke" Value="{StaticResource BrandPrimary}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsMoving}" Value="True">
+                                                        <Setter Property="Stroke" Value="{StaticResource BrandPrimary}" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <VerticalStackLayout Spacing="10">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                        <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="14" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                                        <Border
+                                                            Grid.Column="1"
+                                                            Style="{StaticResource RowAction}"
+                                                            IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=HasMultipleShifts, x:DataType=local:DayScheduleEditViewModel}">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=StartMoveShiftCommand, x:DataType=local:DayScheduleEditViewModel}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Border.GestureRecognizers>
+                                                            <Label Text="Mover" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral700}" />
+                                                        </Border>
+                                                        <Border Grid.Column="2" Style="{StaticResource RowAction}" BackgroundColor="{StaticResource BrandSurface}" Stroke="Transparent">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=StartSwapCommand, x:DataType=local:DayScheduleEditViewModel}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Border.GestureRecognizers>
+                                                            <Label Text="Trocar" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                                                        </Border>
+                                                    </Grid>
+
+                                                    <!-- Inline swap: opens under the tapped person, so it's always on screen. -->
+                                                    <VerticalStackLayout IsVisible="{Binding IsSwapping}" Spacing="8">
+                                                        <BoxView Color="{StaticResource Neutral100}" HeightRequest="1" />
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <Label Text="{Binding MemberName, StringFormat='Colocar no lugar de {0}:'}" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                                            <Label Grid.Column="1" Text="Cancelar" FontSize="12.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" Padding="8,4">
+                                                                <Label.GestureRecognizers>
+                                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=CancelFormCommand, x:DataType=local:DayScheduleEditViewModel}" />
+                                                                </Label.GestureRecognizers>
+                                                            </Label>
+                                                        </Grid>
+                                                        <controls:MemberSearchPicker
+                                                            Hint="Buscar na fila desta escala"
+                                                            SearchText="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=MemberSearchText, Mode=TwoWay, x:DataType=local:DayScheduleEditViewModel}"
+                                                            Results="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=MemberSearchResults, x:DataType=local:DayScheduleEditViewModel}"
+                                                            SelectCommand="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=ConfirmSwapCommand, x:DataType=local:DayScheduleEditViewModel}" />
+                                                    </VerticalStackLayout>
+
+                                                    <!-- Inline move to another shift of the same day. -->
+                                                    <VerticalStackLayout IsVisible="{Binding IsMoving}" Spacing="8">
+                                                        <BoxView Color="{StaticResource Neutral100}" HeightRequest="1" />
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <Label Text="Mover para o turno:" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                                            <Label Grid.Column="1" Text="Cancelar" FontSize="12.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" Padding="8,4">
+                                                                <Label.GestureRecognizers>
+                                                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=CancelFormCommand, x:DataType=local:DayScheduleEditViewModel}" />
+                                                                </Label.GestureRecognizers>
+                                                            </Label>
+                                                        </Grid>
+                                                        <VerticalStackLayout
+                                                            BindableLayout.ItemsSource="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=AvailableShiftsForMove, x:DataType=local:DayScheduleEditViewModel}"
+                                                            Spacing="4">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate x:DataType="rosters:ServiceShiftDto">
+                                                                    <Border StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Neutral100}" Padding="12,10">
+                                                                        <Border.GestureRecognizers>
+                                                                            <TapGestureRecognizer
+                                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=ConfirmMoveShiftCommand, x:DataType=local:DayScheduleEditViewModel}"
+                                                                                CommandParameter="{Binding .}" />
+                                                                        </Border.GestureRecognizers>
+                                                                        <Label FontSize="13.5" TextColor="{StaticResource Neutral900}">
+                                                                            <Label.FormattedText>
+                                                                                <FormattedString>
+                                                                                    <Span Text="{Binding StartTime, StringFormat='{0:HH:mm}'}" />
+                                                                                    <Span Text=" – " />
+                                                                                    <Span Text="{Binding EndTime, StringFormat='{0:HH:mm}'}" />
+                                                                                </FormattedString>
+                                                                            </Label.FormattedText>
+                                                                        </Label>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                        </VerticalStackLayout>
+                                                    </VerticalStackLayout>
+                                                </VerticalStackLayout>
                                             </Border>
                                         </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
 
-                <Border
-                    IsVisible="{Binding IsMoveShiftFormVisible}"
-                    StrokeShape="RoundRectangle 12"
-                    Stroke="Transparent"
-                    BackgroundColor="White"
-                    Padding="14">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label
-                                Grid.Column="0"
-                                Text="{Binding MoveShiftTarget.MemberName, StringFormat='Mover {0} para:'}"
-                                FontSize="13.5"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource Neutral900}"
-                                VerticalOptions="Center" />
-                            <Label
-                                Grid.Column="1"
-                                Text="Cancelar"
-                                FontSize="12"
-                                TextColor="{StaticResource Neutral600}"
-                                VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CancelMoveShiftCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
-                        <CollectionView ItemsSource="{Binding AvailableShiftsForMove}">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="4" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="rosters:ServiceShiftDto">
-                                    <Border StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource Neutral100}" Padding="10,8">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:DayScheduleEditViewModel}}, Path=ConfirmMoveShiftCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </Border.GestureRecognizers>
-                                        <Label FontSize="13.5" TextColor="{StaticResource Neutral900}">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding StartTime, StringFormat='{0:HH:mm}'}" />
-                                                    <Span Text=" – " />
-                                                    <Span Text="{Binding EndTime, StringFormat='{0:HH:mm}'}" />
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                    </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border
-                    IsVisible="{Binding IsSwapFormVisible}"
-                    StrokeShape="RoundRectangle 12"
-                    Stroke="Transparent"
-                    BackgroundColor="White"
-                    Padding="14">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label
-                                Grid.Column="0"
-                                Text="{Binding SwapTarget.MemberName, StringFormat='Trocar {0} por:'}"
-                                FontSize="13.5"
-                                FontAttributes="Bold"
-                                TextColor="{StaticResource Neutral900}"
-                                VerticalOptions="Center" />
-                            <Label
-                                Grid.Column="1"
-                                Text="Cancelar"
-                                FontSize="12"
-                                TextColor="{StaticResource Neutral600}"
-                                VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CancelSwapCommand}" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
-                        <controls:MemberSearchPicker
-                            Hint="Buscar na fila desta escala"
-                            SearchText="{Binding MemberSearchText}"
-                            Results="{Binding MemberSearchResults}"
-                            SelectCommand="{Binding ConfirmSwapCommand}" />
-                    </VerticalStackLayout>
-                </Border>
+                <ActivityIndicator IsRunning="{Binding IsSaving}" IsVisible="{Binding IsSaving}" Color="{StaticResource BrandPrimary}" HorizontalOptions="Center" />
 
             </VerticalStackLayout>
         </ScrollView>

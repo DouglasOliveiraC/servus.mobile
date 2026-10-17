@@ -49,6 +49,8 @@ public static class HomeIcons
     // Lucide's pre-2024 moon: the same crescent drawn with two arcs.
     public static Geometry Moon { get; } = Parse("M12 3A6 6 0 0 0 21 12A9 9 0 1 1 12 3Z");
 
+    public static Geometry Search { get; } = Parse("M3 11a8 8 0 1 0 16 0a8 8 0 1 0 -16 0 M21 21l-4.3 -4.3");
+
     public static Geometry ChevronRight { get; } = Parse("M9 18l6 -6 -6 -6");
 
     public static Geometry Menu { get; } = Parse("M4 6h16 M4 12h16 M4 18h16");

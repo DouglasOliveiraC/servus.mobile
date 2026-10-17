@@ -268,7 +268,8 @@ public partial class ProfileViewModel : BaseViewModel
             EmailChangeMessage = ex.StatusCode switch
             {
                 HttpStatusCode.Unauthorized => "Senha atual incorreta.",
-                HttpStatusCode.BadRequest => "Esse e-mail já está em uso ou é inválido.",
+                HttpStatusCode.Conflict => "Esse e-mail já está em uso.",
+                HttpStatusCode.BadRequest => "E-mail inválido.",
                 HttpStatusCode.TooManyRequests => "Muitas tentativas. Aguarde um momento antes de tentar novamente.",
                 _ => "Não foi possível solicitar a troca de e-mail."
             };

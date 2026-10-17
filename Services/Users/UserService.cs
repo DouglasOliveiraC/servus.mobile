@@ -19,7 +19,7 @@ public class UserService : IUserService
 
     public async Task UpdateDisplayNameAsync(Guid id, string displayName, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/users/{id}/display-name", new { DisplayName = displayName }, cancellationToken);
+        var response = await _httpClient.PutAsJsonAsync($"api/users/{id}", new { DisplayName = displayName }, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 

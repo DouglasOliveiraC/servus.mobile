@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ContentView
+    x:Class="Servus.Mobile.Controls.FloatingMenuButton"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:home="clr-namespace:Servus.Mobile.Features.Home"
+    HorizontalOptions="Start"
+    VerticalOptions="Start">
+
+    <!-- White, not brand-filled: it floats over every screen, so it has to read as chrome and
+         not compete with each page's own primary buttons. -->
+    <Border
+        x:Name="Button"
+        WidthRequest="46"
+        HeightRequest="46"
+        Padding="0"
+        StrokeShape="RoundRectangle 23"
+        Stroke="{StaticResource Neutral200}"
+        StrokeThickness="1"
+        BackgroundColor="White"
+        SemanticProperties.Description="Abrir menu">
+        <Border.Shadow>
+            <Shadow Brush="#152943" Opacity="0.16" Radius="12" Offset="0,4" />
+        </Border.Shadow>
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnTapped" />
+        </Border.GestureRecognizers>
+        <Path
+            Data="{x:Static home:HomeIcons.Menu}"
+            Stroke="{StaticResource BrandPrimary}"
+            StrokeThickness="2"
+            StrokeLineCap="Round"
+            StrokeLineJoin="Round"
+            Aspect="None"
+            WidthRequest="24"
+            HeightRequest="24"
+            Scale="0.8"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+    </Border>
+</ContentView>

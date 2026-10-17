@@ -54,6 +54,9 @@ public partial class RosterListViewModel : BaseViewModel
     public partial string NewMinDaysAfterReturnBeforeEligible { get; set; } = "0";
 
     [ObservableProperty]
+    public partial string NewMinDaysBeforeLeaveBlocked { get; set; } = "0";
+
+    [ObservableProperty]
     public partial bool NewRequiresAdminApproval { get; set; }
 
     [ObservableProperty]
@@ -97,6 +100,7 @@ public partial class RosterListViewModel : BaseViewModel
 
         var minInterval = int.TryParse(NewMinIntervalDays, out var mi) ? mi : 1;
         var minDaysAfterReturn = int.TryParse(NewMinDaysAfterReturnBeforeEligible, out var md) ? md : 0;
+        var minDaysBeforeLeave = int.TryParse(NewMinDaysBeforeLeaveBlocked, out var mdl) ? mdl : 0;
         var serviceDayStartTime = TimeOnly.FromTimeSpan(NewServiceDayStartTime);
 
         try
@@ -104,11 +108,12 @@ public partial class RosterListViewModel : BaseViewModel
             // serviceShifts: null auto-generates the default set (six 4-hour shifts) seeded
             // from serviceDayStartTime — fine-tuning shift count/duration/capacity happens in
             // RosterSettingsPage after creation, not here.
-            await _rosterService.CreateRosterAsync(OrganizationId, NewName.Trim(), minInterval, NewRequiresAdminApproval, NewCreatorIsMember, minDaysAfterReturn, fillShiftsEarliestFirst: true, serviceDayStartTime, QueueDirection.TopToBottom, QueueDirection.TopToBottom, serviceShifts: null);
+            await _rosterService.CreateRosterAsync(OrganizationId, NewName.Trim(), minInterval, NewRequiresAdminApproval, NewCreatorIsMember, minDaysAfterReturn, minDaysBeforeLeave, fillShiftsEarliestFirst: true, serviceDayStartTime, QueueDirection.TopToBottom, QueueDirection.TopToBottom, serviceShifts: null);
             NewName = string.Empty;
             NewMinIntervalDays = "1";
             NewServiceDayStartTime = new TimeSpan(8, 0, 0);
             NewMinDaysAfterReturnBeforeEligible = "0";
+            NewMinDaysBeforeLeaveBlocked = "0";
             NewRequiresAdminApproval = false;
             NewCreatorIsMember = true;
             IsFormVisible = false;

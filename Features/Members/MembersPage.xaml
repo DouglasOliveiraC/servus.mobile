@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
+    xmlns:controls="clr-namespace:Servus.Mobile.Controls"
     xmlns:buttons="clr-namespace:Syncfusion.Maui.Buttons;assembly=Syncfusion.Maui.Buttons"
     xmlns:inputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
     xmlns:local="clr-namespace:Servus.Mobile.Features.Members"
@@ -18,9 +19,7 @@
 
                 <Label Text="Membros cadastrados aqui continuam no sistema mesmo que sejam removidos ou uma escala inteira seja excluída." FontSize="12" TextColor="{StaticResource Neutral600}" />
 
-                <sf:SfTextInputLayout Hint="Buscar membro" ContainerType="Outlined">
-                    <Entry Text="{Binding SearchText}" ReturnType="Search" />
-                </sf:SfTextInputLayout>
+                <controls:SearchField Placeholder="Buscar membro" Text="{Binding SearchText}" />
 
                 <buttons:SfButton
                     Text="+ Novo membro"

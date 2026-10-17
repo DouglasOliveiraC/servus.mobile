@@ -9,6 +9,7 @@ public record RosterDto(
     int RestDayShiftSize,
     bool RequiresAdminApproval,
     int MinDaysAfterReturnBeforeEligible,
+    int MinDaysBeforeLeaveBlocked,
     bool FillShiftsEarliestFirst,
     TimeOnly ServiceDayStartTime,
     QueueDirection WorkdayQueueDirection,
@@ -44,6 +45,8 @@ public enum DutyAssignmentStatus
 public record ScheduleDayDto(DateOnly Date, bool IsRestDay, int RequiredShiftSize, IReadOnlyList<ScheduleAssignmentDto> Assignments);
 
 public record RosterScheduleDto(Guid RosterId, string RosterName, IReadOnlyList<ScheduleDayDto> Days);
+
+public record GenerateScheduleResultDto(int DaysProcessed, int AssignmentsCreated, IReadOnlyList<DateOnly> UnderstaffedDates);
 
 /// <summary>
 /// Rank é a posição 1-based do membro na ordem institucional da fila — a mesma para as duas

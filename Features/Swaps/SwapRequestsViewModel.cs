@@ -30,9 +30,9 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
-    // Qualquer evento de swap (solicitado/respondido/aprovado/cancelado/expirado) invalida
-    // as duas listas por igual — mais simples e seguro do que tentar decidir, a partir só do
-    // Status recebido, se a mudança afeta "aguardando minha resposta" ou "solicitadas por mim".
+    // Any swap event (requested/responded/approved/cancelled/expired) invalidates both lists
+    // alike — simpler and safer than deciding, from the received Status alone, whether the
+    // change affects "awaiting my response" or "requested by me".
     public void Receive(SwapUpdatedMessage message) => MainThread.BeginInvokeOnMainThread(() => _ = LoadAsync());
 
     [ObservableProperty]
@@ -64,6 +64,7 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
 
             _myMemberId = myMemberId.Value;
             var pending = await _swapRequestService.GetPendingAsync(_myMemberId);
+            var manageableRosterIds = await GetManageableRosterIdsAsync(pending);
 
             AwaitingMyResponse.Clear();
             RequestedByMe.Clear();
@@ -76,7 +77,11 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
                 }
                 else if (request.RequestingMemberId == _myMemberId)
                 {
-                    RequestedByMe.Add(request);
+                    RequestedByMe.Add(request with
+                    {
+                        CanApprove = request.Status == SwapRequestStatusDto.AwaitingAdminApproval
+                            && manageableRosterIds.Contains(request.RosterId)
+                    });
                 }
             }
         }
@@ -88,6 +93,29 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
         {
             IsBusy = false;
         }
+    }
+
+    // Only rosters with a request waiting for approval are looked up. CanManage means
+    // organization admin, a subset of who the API lets approve (a full roster admin also can),
+    // so such a roster admin does not get the button here.
+    private async Task<HashSet<Guid>> GetManageableRosterIdsAsync(IEnumerable<SwapRequestDto> requests)
+    {
+        var rosterIds = requests
+            .Where(r => r.Status == SwapRequestStatusDto.AwaitingAdminApproval)
+            .Select(r => r.RosterId)
+            .Distinct();
+
+        var manageable = new HashSet<Guid>();
+        foreach (var rosterId in rosterIds)
+        {
+            var roster = await _rosterService.GetRosterByIdAsync(rosterId);
+            if (roster.CanManage)
+            {
+                manageable.Add(rosterId);
+            }
+        }
+
+        return manageable;
     }
 
     [RelayCommand]

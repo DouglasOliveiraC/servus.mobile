@@ -7,16 +7,16 @@ public interface IRosterService
     Task<RosterDto> GetRosterByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>Null/empty serviceShifts auto-generates the default set (six 4-hour shifts).</summary>
-    Task<Guid> CreateRosterAsync(Guid organizationId, string name, int minIntervalDays, bool requiresAdminApproval, bool creatorIsMember, int minDaysAfterReturnBeforeEligible, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default);
+    Task<Guid> CreateRosterAsync(Guid organizationId, string name, int minIntervalDays, bool requiresAdminApproval, bool creatorIsMember, int minDaysAfterReturnBeforeEligible, int minDaysBeforeLeaveBlocked, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default);
 
     /// <summary>Null serviceShifts leaves the existing shift set untouched.</summary>
-    Task UpdateRosterAsync(Guid id, string name, int minIntervalDays, bool requiresAdminApproval, int minDaysAfterReturnBeforeEligible, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default);
+    Task UpdateRosterAsync(Guid id, string name, int minIntervalDays, bool requiresAdminApproval, int minDaysAfterReturnBeforeEligible, int minDaysBeforeLeaveBlocked, bool fillShiftsEarliestFirst, TimeOnly serviceDayStartTime, QueueDirection workdayQueueDirection, QueueDirection weekendQueueDirection, IReadOnlyList<ServiceShiftInputDto>? serviceShifts, CancellationToken cancellationToken = default);
 
     Task DeleteRosterAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<RosterScheduleDto> GetScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 
-    Task<RosterScheduleDto> GenerateScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
+    Task<GenerateScheduleResultDto> GenerateScheduleAsync(Guid rosterId, DateOnly from, DateOnly to, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<MemberDutyCountDto>> GetDutyCountsAsync(Guid rosterId, CancellationToken cancellationToken = default);
 
@@ -33,6 +33,12 @@ public interface IRosterService
     /// duas rotações —, então não há fila a escolher.
     /// </summary>
     Task<Guid> AddRosterMemberAsync(Guid rosterId, Guid memberId, int rank, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// One call instead of create-member + add-to-roster: the API does both in one transaction,
+    /// so a failure cannot leave a member that belongs to no roster.
+    /// </summary>
+    Task<Guid> CreateMemberInRosterAsync(Guid rosterId, string name, string? email, string? phone, int rank, CancellationToken cancellationToken = default);
 
     Task RemoveRosterMemberAsync(Guid rosterMemberId, CancellationToken cancellationToken = default);
 

@@ -6,7 +6,107 @@
     xmlns:local="clr-namespace:Servus.Mobile"
     xmlns:login="clr-namespace:Servus.Mobile.Features.Login"
     xmlns:home="clr-namespace:Servus.Mobile.Features.Home"
-    Title="Servus.Mobile">
+    xmlns:menu="clr-namespace:Servus.Mobile.Features.Menu"
+    Title="Servus.Mobile"
+    FlyoutBehavior="Flyout"
+    FlyoutWidth="300"
+    FlyoutBackgroundColor="White"
+    FlyoutBackdrop="#66152943"
+    FlyoutHeaderBehavior="Fixed">
+
+    <Shell.Resources>
+        <Style x:Key="MenuIcon" TargetType="Path">
+            <Setter Property="StrokeThickness" Value="2" />
+            <Setter Property="StrokeLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="Aspect" Value="None" />
+            <Setter Property="WidthRequest" Value="24" />
+            <Setter Property="HeightRequest" Value="24" />
+            <Setter Property="Scale" Value="0.75" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </Shell.Resources>
+
+    <!-- The menu is the Shell flyout (one native drawer for the whole app) opened by the
+         FloatingMenuButton every page carries; it mirrors the web's SidebarComponent in "Over"
+         mode: brand on top, the "Operação" section, account + Sair at the bottom. -->
+    <Shell.FlyoutHeader>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="20,44,20,12" BackgroundColor="White">
+            <Border StrokeShape="RoundRectangle 9" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="34" HeightRequest="34" Padding="0">
+                <Label Text="S" FontSize="17" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Label Grid.Column="1" Text="Servus" FontSize="19" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <Shell.FlyoutContent>
+        <ScrollView x:Name="MenuContent" x:DataType="menu:AppMenuViewModel" BackgroundColor="White" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="12,8,12,12" Spacing="2">
+                <Label Text="OPERAÇÃO" FontSize="11" FontAttributes="Bold" CharacterSpacing="1" TextColor="{StaticResource Neutral500}" Margin="10,0,0,8" />
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}" Spacing="2">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="menu:AppMenuItem">
+                            <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="Transparent" Padding="8,10">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsActive}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource BrandSurfaceSubtle}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type menu:AppMenuViewModel}}, Path=OpenCommand, x:DataType=menu:AppMenuViewModel}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="38" HeightRequest="38" Padding="0">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsActive}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{StaticResource BrandPrimary}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Path Data="{Binding Icon}" Stroke="#1F3A5F" Style="{StaticResource MenuIcon}">
+                                            <Path.Triggers>
+                                                <DataTrigger TargetType="Path" Binding="{Binding IsActive}" Value="True">
+                                                    <Setter Property="Stroke" Value="White" />
+                                                </DataTrigger>
+                                            </Path.Triggers>
+                                        </Path>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                        <Label Text="{Binding Subtitle}" FontSize="11.5" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Shell.FlyoutContent>
+
+    <Shell.FlyoutFooter>
+        <Grid x:Name="MenuFooter" x:DataType="menu:AppMenuViewModel" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="20,14,16,22" BackgroundColor="White">
+            <BoxView Grid.ColumnSpan="3" Color="{StaticResource Neutral200}" HeightRequest="1" VerticalOptions="Start" Margin="0,-14,0,0" />
+            <Border StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="{StaticResource BrandPrimary}" WidthRequest="36" HeightRequest="36" Padding="0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenProfileCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="{Binding UserInitial}" FontSize="13" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                <Label Text="{Binding UserEmail}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                <Label Text="{Binding ProfileLabel}" FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+            </VerticalStackLayout>
+            <Border Grid.Column="2" StrokeShape="RoundRectangle 10" Stroke="{StaticResource Neutral200}" BackgroundColor="White" Padding="10,6" VerticalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                </Border.GestureRecognizers>
+                <Label Text="Sair" FontSize="12.5" FontAttributes="Bold" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
+            </Border>
+        </Grid>
+    </Shell.FlyoutFooter>
 
     <ShellContent
         Title="Login"

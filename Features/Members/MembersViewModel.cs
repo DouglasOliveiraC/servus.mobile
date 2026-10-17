@@ -271,8 +271,7 @@ public partial class MembersViewModel : BaseViewModel
         try
         {
             var position = int.TryParse(NewMemberPosition, out var p) ? p : 1;
-            var created = await _memberService.CreateMemberAsync(name, email, phone);
-            await _rosterService.AddRosterMemberAsync(SelectedRoster.Id, created.Id, position);
+            await _rosterService.CreateMemberInRosterAsync(SelectedRoster.Id, name, email, phone, position);
 
             ResetForm();
             await LoadAsync();

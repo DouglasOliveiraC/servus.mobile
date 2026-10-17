@@ -1,11 +1,12 @@
 namespace Servus.Mobile.Services.SwapRequests;
 
+// Must keep Servus.Domain.Enums.SwapRequestStatus's order: the API sends the numeric value.
 public enum SwapRequestStatusDto
 {
     Pending = 0,
-    Accepted = 1,
-    Rejected = 2,
-    Approved = 3,
+    AwaitingAdminApproval = 1,
+    Accepted = 2,
+    Declined = 3,
     Cancelled = 4,
     Expired = 5
 }
@@ -21,4 +22,9 @@ public record SwapRequestDto(
     DateTime CreatedAt,
     DateTime? RespondedAt,
     DateTime? ApprovedAt,
-    DateTime ExpiresAt);
+    DateTime ExpiresAt)
+{
+    // Filled by the client, not the API: approving takes roster/organization admin rights,
+    // which the request itself does not carry.
+    public bool CanApprove { get; init; }
+}

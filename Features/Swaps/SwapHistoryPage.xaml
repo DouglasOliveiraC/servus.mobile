@@ -9,6 +9,10 @@
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
 
+    <ContentPage.Resources>
+        <local:SwapCauseLabelConverter x:Key="SwapCauseLabelConverter" />
+    </ContentPage.Resources>
+
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
         <ScrollView>
             <VerticalStackLayout Padding="20,16,20,28" Spacing="14">
@@ -58,7 +62,7 @@
                                         BackgroundColor="{StaticResource BrandSurface}"
                                         Padding="8,4"
                                         VerticalOptions="Center">
-                                        <Label Text="{Binding Cause}" TextColor="{StaticResource BrandPrimary}" FontSize="11" FontAttributes="Bold" />
+                                        <Label Text="{Binding Cause, Converter={StaticResource SwapCauseLabelConverter}}" TextColor="{StaticResource BrandPrimary}" FontSize="11" FontAttributes="Bold" />
                                     </Border>
                                 </Grid>
                             </Border>

@@ -9,14 +9,14 @@ namespace Servus.Mobile.Services.Realtime;
 
 public class RealtimeClient : IRealtimeClient, IAsyncDisposable
 {
-    private readonly ITokenStore _tokenStore;
+    private readonly ISessionManager _sessionManager;
     private readonly ITelemetryService _telemetry;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private HubConnection? _connection;
 
-    public RealtimeClient(ITokenStore tokenStore, ITelemetryService telemetry)
+    public RealtimeClient(ISessionManager sessionManager, ITelemetryService telemetry)
     {
-        _tokenStore = tokenStore;
+        _sessionManager = sessionManager;
         _telemetry = telemetry;
     }
 
@@ -30,7 +30,7 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
                 return;
             }
 
-            var token = await _tokenStore.GetTokenAsync();
+            var token = await _sessionManager.GetValidAccessTokenAsync();
             if (string.IsNullOrWhiteSpace(token))
             {
                 return;
@@ -41,10 +41,10 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
             var connection = new HubConnectionBuilder()
                 .WithUrl(hubUrl, options =>
                 {
-                    // AccessTokenProvider é reavaliado a cada (re)conexão automática do
-                    // HubConnection, então uma renovação de token no TokenStore é pega
-                    // sem precisar recriar a connection manualmente.
-                    options.AccessTokenProvider = () => _tokenStore.GetTokenAsync();
+                    // AccessTokenProvider is evaluated again on every automatic reconnect, and
+                    // going through the session manager refreshes an expired token first —
+                    // reading the stored token directly would reconnect with a dead one.
+                    options.AccessTokenProvider = () => _sessionManager.GetValidAccessTokenAsync();
                 })
                 .WithAutomaticReconnect()
                 .Build();
@@ -54,8 +54,9 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
             connection.On<SwapRequestUpdate>("SwapApproved", update => Broadcast(update));
             connection.On<SwapRequestUpdate>("SwapCancelled", update => Broadcast(update));
             connection.On<SwapRequestUpdate>("SwapExpired", update => Broadcast(update));
-            connection.On<SchedulePublishedUpdate>("SchedulePublished", update =>
-                WeakReferenceMessenger.Default.Send(new SchedulePublishedMessage(update)));
+            connection.On<ScheduleUpdate>("SchedulePublished", update => BroadcastSchedule(update));
+            connection.On<ScheduleUpdate>("ScheduleUnpublished", update => BroadcastSchedule(update));
+            connection.On<ScheduleUpdate>("ScheduleChanged", update => BroadcastSchedule(update));
 
             connection.Closed += ex =>
             {
@@ -72,9 +73,9 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
             }
             catch (Exception ex)
             {
-                // Falha de conexão em tempo real não pode derrubar o app nem o fluxo de
-                // login — o usuário continua funcionando via HTTP normal, só sem os
-                // alertas ao vivo até a próxima tentativa (ex. próximo ConnectAsync).
+                // A realtime failure must not break the app or the login flow: the user keeps
+                // working over plain HTTP, just without live alerts until the next
+                // ConnectAsync.
                 _telemetry.TrackException(ex);
                 await connection.DisposeAsync();
                 return;
@@ -109,6 +110,9 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
 
     private static void Broadcast(SwapRequestUpdate update) =>
         WeakReferenceMessenger.Default.Send(new SwapUpdatedMessage(update));
+
+    private static void BroadcastSchedule(ScheduleUpdate update) =>
+        WeakReferenceMessenger.Default.Send(new ScheduleUpdatedMessage(update));
 
     public async ValueTask DisposeAsync()
     {

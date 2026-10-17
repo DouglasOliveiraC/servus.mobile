@@ -45,12 +45,62 @@ public partial class LoginViewModel : BaseViewModel
 
     public event EventHandler? LoginSucceeded;
 
+    private bool _restoreAttempted;
+
+    // Only on the first appearance: after a logout or an expired session the Login page shows
+    // again, and restoring there would sign straight back in.
+    public async Task TryRestoreSessionAsync()
+    {
+        if (_restoreAttempted)
+        {
+            return;
+        }
+
+        _restoreAttempted = true;
+        IsBusy = true;
+        try
+        {
+            if (await _authService.TryRestoreSessionAsync())
+            {
+                LoginSucceeded?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     [RelayCommand]
-    private Task ForgotPasswordAsync()
-        => Shell.Current.DisplayAlertAsync(
+    private async Task ForgotPasswordAsync()
+    {
+        var email = await Shell.Current.DisplayPromptAsync(
             "Recuperar senha",
-            "Fale com o administrador da sua unidade para redefinir sua senha.",
+            "Informe o e-mail da sua conta. Enviaremos um link para redefinir a senha.",
+            "Enviar",
+            "Cancelar",
+            keyboard: Keyboard.Email,
+            initialValue: Email.Trim());
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return;
+        }
+
+        if (!EmailRegex.IsMatch(email.Trim()))
+        {
+            await Shell.Current.DisplayAlertAsync("Recuperar senha", "Informe um e-mail válido.", "OK");
+            return;
+        }
+
+        var result = await _authService.RequestPasswordResetAsync(email.Trim());
+        await Shell.Current.DisplayAlertAsync(
+            "Recuperar senha",
+            result.Success
+                ? "Se houver uma conta com esse e-mail, você vai receber o link em instantes. Verifique também a caixa de spam."
+                : result.ErrorMessage,
             "OK");
+    }
 
     [RelayCommand]
     private Task ContinueWithGoogleAsync()

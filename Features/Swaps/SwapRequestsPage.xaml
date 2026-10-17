@@ -15,7 +15,7 @@
         <ResourceDictionary>
             <local:StatusBadgeColorConverter x:Key="StatusBadgeColorConverter" />
             <local:IsPendingConverter x:Key="IsPendingConverter" />
-            <local:IsAcceptedConverter x:Key="IsAcceptedConverter" />
+            <local:SwapStatusLabelConverter x:Key="SwapStatusLabelConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -116,7 +116,7 @@
                                         <Grid ColumnDefinitions="*,Auto">
                                             <Label Grid.Column="0" Text="Troca solicitada" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                                             <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{Binding Status, Converter={StaticResource StatusBadgeColorConverter}}" Padding="8,3">
-                                                <Label Text="{Binding Status}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                                <Label Text="{Binding Status, Converter={StaticResource SwapStatusLabelConverter}}" TextColor="White" FontSize="11" FontAttributes="Bold" />
                                             </Border>
                                         </Grid>
                                         <buttons:SfButton
@@ -130,7 +130,7 @@
                                             CommandParameter="{Binding .}" />
                                         <buttons:SfButton
                                             Text="Aprovar"
-                                            IsVisible="{Binding Status, Converter={StaticResource IsAcceptedConverter}}"
+                                            IsVisible="{Binding CanApprove}"
                                             Background="{StaticResource BrandPrimary}"
                                             TextColor="White"
                                             CornerRadius="8"

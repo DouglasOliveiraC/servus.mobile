@@ -48,10 +48,18 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+		ConfigureBorderlessEntry();
 		ConfigureTelemetry(builder);
 		builder.Services.AddSingleton<INavigationService, NavigationService>();
 
 		builder.Services.AddSingleton<ITokenStore, SecureTokenStore>();
+		builder.Services.AddSingleton<ISessionManager, SessionManager>();
+		// No AuthHeaderHandler here: the refresh call must not recurse into the handler that
+		// triggered it.
+		builder.Services.AddHttpClient(SessionManager.HttpClientName, client =>
+		{
+			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
+		});
 		builder.Services.AddTransient<AuthHeaderHandler>();
 		builder.Services.AddSingleton<IRealtimeClient, RealtimeClient>();
 
@@ -109,6 +117,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<RegisterViewModel>();
 		builder.Services.AddTransient<RegisterPage>();
+		builder.Services.AddSingleton<Servus.Mobile.Features.Menu.AppMenuViewModel>();
 		builder.Services.AddTransient<DashboardViewModel>();
 		builder.Services.AddTransient<DashboardPage>();
 		builder.Services.AddTransient<DayDetailViewModel>();
@@ -168,6 +177,25 @@ public static class MauiProgram
 		{
 			Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(licenseKey);
 		}
+	}
+
+	// Only Controls.BorderlessEntry loses the native chrome (Android underline, iOS border); it is
+	// what SearchField draws inside its own pill. Plain Entry elsewhere is untouched.
+	private static void ConfigureBorderlessEntry()
+	{
+		Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("Borderless", (handler, view) =>
+		{
+			if (view is not Controls.BorderlessEntry) return;
+#if ANDROID
+			handler.PlatformView.Background = null;
+			handler.PlatformView.SetPadding(0, handler.PlatformView.PaddingTop, 0, handler.PlatformView.PaddingBottom);
+#elif IOS || MACCATALYST
+			handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.None;
+#elif WINDOWS
+			handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+			handler.PlatformView.Background = null;
+#endif
+		});
 	}
 
 	// Sem connection string, ITelemetryService fica em modo no-op (ILogger<T> null) em vez de

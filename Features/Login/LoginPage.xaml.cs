@@ -16,6 +16,12 @@ public partial class LoginPage : ContentPage
         _viewModel.LoginSucceeded += OnLoginSucceeded;
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await _viewModel.TryRestoreSessionAsync();
+    }
+
     private async void OnLoginSucceeded(object? sender, EventArgs e)
     {
         await _navigationService.GoToRootAsync(Routes.Dashboard);

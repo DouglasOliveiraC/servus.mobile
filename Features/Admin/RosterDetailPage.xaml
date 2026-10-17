@@ -13,13 +13,28 @@
     BackgroundColor="{StaticResource Neutral100}"
     Shell.NavBarIsVisible="True">
 
+    <ContentPage.Resources>
+        <Style x:Key="SegmentStyle" TargetType="Border">
+            <Setter Property="StrokeShape" Value="RoundRectangle 9" />
+            <Setter Property="Stroke" Value="Transparent" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="Padding" Value="0,9" />
+        </Style>
+        <Style x:Key="SegmentLabelStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="{StaticResource Neutral900}" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Configurações" Command="{Binding OpenSettingsCommand}" IsEnabled="{Binding CanManage}" />
     </ContentPage.ToolbarItems>
 
     <RefreshView Command="{Binding LoadCommand}" IsRefreshing="{Binding IsBusy}">
         <ScrollView>
-            <VerticalStackLayout Padding="20,16,20,28" Spacing="22">
+            <VerticalStackLayout Padding="20,4,20,28" Spacing="16">
 
                 <Border
                     IsVisible="{Binding HasError}"
@@ -33,33 +48,56 @@
                         FontSize="13" />
                 </Border>
 
+                <!-- Section switcher: queue / generation / access no longer stack on one endless page. -->
+                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="{StaticResource Neutral200}" Padding="4">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                        <Border Grid.Column="0" Style="{StaticResource SegmentStyle}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsQueueSection}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="White" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSectionCommand}" CommandParameter="queue" />
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding QueueTabLabel}" Style="{StaticResource SegmentLabelStyle}" />
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentStyle}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsScheduleSection}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="White" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSectionCommand}" CommandParameter="schedule" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Plantões" Style="{StaticResource SegmentLabelStyle}" />
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource SegmentStyle}" IsVisible="{Binding CanManage}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsAccessSection}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="White" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectSectionCommand}" CommandParameter="access" />
+                            </Border.GestureRecognizers>
+                            <Label Text="Acessos" Style="{StaticResource SegmentLabelStyle}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
                 <!-- Membros -->
-                <VerticalStackLayout Spacing="10">
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                        <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
-                            <Label Text="Fila desta escala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                            <Label Text="A ordem abaixo define quem é escalado primeiro." FontSize="11" TextColor="{StaticResource Neutral600}" />
-                        </VerticalStackLayout>
-                        <buttons:SfButton
-                            Grid.Column="1"
-                            Text="Importar"
-                            IsVisible="{Binding CanManage}"
-                            Background="{StaticResource Neutral100}"
-                            TextColor="{StaticResource Neutral900}"
-                            CornerRadius="8"
-                            HeightRequest="36"
-                            FontSize="12.5"
-                            Command="{Binding ToggleImportFormCommand}" />
-                        <buttons:SfButton
-                            Grid.Column="2"
-                            Text="Adicionar"
-                            IsVisible="{Binding CanManage}"
-                            Background="{StaticResource BrandPrimary}"
-                            TextColor="White"
-                            CornerRadius="8"
-                            HeightRequest="36"
-                            FontSize="12.5"
-                            Command="{Binding ToggleAddMemberFormCommand}" />
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueSection}">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Fila desta escala" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                        <Label Text="A ordem abaixo define quem é escalado primeiro." FontSize="11.5" TextColor="{StaticResource Neutral600}" />
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8" IsVisible="{Binding CanManage}">
+                        <buttons:SfButton Grid.Column="0" Text="+ Adicionar" Background="{StaticResource BrandPrimary}" TextColor="White" CornerRadius="8" HeightRequest="34" FontSize="12" Padding="4,0" Command="{Binding ToggleAddMemberFormCommand}" />
+                        <buttons:SfButton Grid.Column="1" Text="Importar" Background="White" Stroke="{StaticResource Neutral200}" StrokeThickness="1" TextColor="{StaticResource Neutral900}" CornerRadius="8" HeightRequest="34" FontSize="12" Padding="4,0" Command="{Binding ToggleImportFormCommand}" />
+                        <buttons:SfButton Grid.Column="2" Text="Ponto de partida" Background="White" Stroke="{StaticResource Neutral200}" StrokeThickness="1" TextColor="{StaticResource Neutral900}" CornerRadius="8" HeightRequest="34" FontSize="12" Padding="4,0" Command="{Binding ToggleStartingPointFormCommand}" />
                     </Grid>
 
                     <Border
@@ -115,19 +153,6 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding CanManage}">
-                        <Label Grid.Column="0" />
-                        <buttons:SfButton
-                            Grid.Column="1"
-                            Text="De onde continuar"
-                            Background="{StaticResource Neutral100}"
-                            TextColor="{StaticResource Neutral900}"
-                            CornerRadius="8"
-                            HeightRequest="36"
-                            FontSize="12.5"
-                            Command="{Binding ToggleStartingPointFormCommand}" />
-                    </Grid>
-
                     <Border
                         IsVisible="{Binding IsStartingPointFormVisible}"
                         StrokeShape="RoundRectangle 12"
@@ -174,50 +199,79 @@
                         <Label Text="Nenhum membro nesta escala." FontSize="13" TextColor="{StaticResource Neutral600}" />
                     </Border>
 
-                    <CollectionView ItemsSource="{Binding Members}" IsVisible="{Binding Members.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="local:RosterMemberRow">
-                                <SwipeView IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage}">
-                                    <SwipeView.RightItems>
-                                        <SwipeItems>
-                                            <SwipeItem
-                                                Text="Remover"
-                                                BackgroundColor="{StaticResource Danger}"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=RemoveMemberCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </SwipeItems>
-                                    </SwipeView.RightItems>
-                                    <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=OpenMemberProfileCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        </Border.GestureRecognizers>
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-                                            <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" Padding="8,4" Margin="0,0,10,0">
-                                                <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
+                    <controls:SearchField Placeholder="Buscar na fila" Text="{Binding QueueSearchText}" IsVisible="{Binding ShowQueueSearch}" />
+
+                    <Label Text="Ninguém na fila com esse nome." IsVisible="{Binding ShowNoQueueMatch}" FontSize="13" TextColor="{StaticResource Neutral600}" Margin="4,0" />
+
+                    <!-- One card with divided rows instead of a floating card per person: a long queue
+                         reads as a single ordered list. -->
+                    <Border
+                        IsVisible="{Binding VisibleMembers.Count, Converter={StaticResource IntIsNotZeroConverter}}"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent"
+                        BackgroundColor="White"
+                        Padding="0">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding VisibleMembers}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:RosterMemberRow">
+                                    <SwipeView IsEnabled="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage, x:DataType=local:RosterDetailViewModel}">
+                                        <SwipeView.RightItems>
+                                            <SwipeItems>
+                                                <SwipeItem
+                                                    Text="Remover"
+                                                    BackgroundColor="{StaticResource Danger}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=RemoveMemberCommand, x:DataType=local:RosterDetailViewModel}"
+                                                    CommandParameter="{Binding .}" />
+                                            </SwipeItems>
+                                        </SwipeView.RightItems>
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12" Padding="14,11" BackgroundColor="White">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=OpenMemberProfileCommand, x:DataType=local:RosterDetailViewModel}"
+                                                    CommandParameter="{Binding .}" />
+                                            </Grid.GestureRecognizers>
+                                            <BoxView Grid.ColumnSpan="4" Color="{StaticResource Neutral100}" HeightRequest="1" VerticalOptions="Start" Margin="-14,-11,-14,0" />
+                                            <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{StaticResource BrandSurface}" WidthRequest="34" HeightRequest="28" Padding="0" VerticalOptions="Center">
+                                                <Label Text="{Binding Rank}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" HorizontalOptions="Center" VerticalOptions="Center" />
                                             </Border>
-                                            <Label Grid.Column="1" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" LineBreakMode="TailTruncation" />
+                                                <Label
+                                                    Text="{Binding PendingReturnPriorityReason, StringFormat='Prioridade de retorno · {0}'}"
+                                                    IsVisible="{Binding PendingReturnPriorityReason, Converter={StaticResource StringNotEmptyConverter}}"
+                                                    FontSize="11"
+                                                    TextColor="{StaticResource AccentOrange}"
+                                                    LineBreakMode="TailTruncation" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="2" Text="{Binding DutyCountText}" FontSize="11.5" TextColor="{StaticResource Neutral600}" VerticalOptions="Center" />
                                             <Label
-                                                Grid.Column="2"
+                                                Grid.Column="3"
                                                 Text="›"
-                                                IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage}"
+                                                IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:RosterDetailViewModel}}, Path=CanManage, x:DataType=local:RosterDetailViewModel}"
                                                 FontSize="18"
-                                                TextColor="{StaticResource Neutral600}"
+                                                TextColor="{StaticResource Neutral500}"
                                                 VerticalOptions="Center" />
                                         </Grid>
-                                    </Border>
-                                </SwipeView>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                                    </SwipeView>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <buttons:SfButton
+                        Text="{Binding QueueToggleText}"
+                        IsVisible="{Binding ShowQueueToggle}"
+                        Background="{StaticResource BrandSurfaceSubtle}"
+                        TextColor="{StaticResource BrandPrimary}"
+                        CornerRadius="10"
+                        HeightRequest="42"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        Command="{Binding ToggleQueueExpandedCommand}" />
                 </VerticalStackLayout>
 
                 <!-- Gerar plantões -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding IsScheduleSection}">
                     <Label Text="Gerar plantões" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                     <Border IsVisible="{Binding CanManage}" StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
                         <VerticalStackLayout Spacing="10">
@@ -272,36 +326,8 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- Contagem de plantões -->
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Contagem de plantões" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                    <Border
-                        IsVisible="{Binding DutyCounts.Count, Converter={StaticResource IntIsZeroConverter}}"
-                        StrokeShape="RoundRectangle 12"
-                        Stroke="Transparent"
-                        BackgroundColor="White"
-                        Padding="16">
-                        <Label Text="Sem dados de plantões ainda." FontSize="13" TextColor="{StaticResource Neutral600}" />
-                    </Border>
-                    <CollectionView ItemsSource="{Binding DutyCounts}" IsVisible="{Binding DutyCounts.Count, Converter={StaticResource IntIsNotZeroConverter}}">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
-                        </CollectionView.ItemsLayout>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="rosterModels:MemberDutyCountDto">
-                                <Border StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="White" Padding="12,10">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="{Binding MemberName}" FontSize="13.5" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
-                                        <Label Grid.Column="1" Text="{Binding AssignmentCount}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" VerticalOptions="Center" />
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-
                 <!-- Acessos -->
-                <VerticalStackLayout Spacing="10" IsVisible="{Binding CanManage}">
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding IsAccessSection}">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="Acessos de gestão" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" VerticalOptions="Center" />
                         <buttons:SfButton

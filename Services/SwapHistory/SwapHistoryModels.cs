@@ -1,10 +1,10 @@
 namespace Servus.Mobile.Services.SwapHistory;
 
+// Must keep Servus.Domain.Enums.SwapCause's order: the API sends the numeric value.
 public enum SwapCauseDto
 {
-    Manual = 0,
-    Approved = 1,
-    Automatic = 2
+    PeerSwap = 0,
+    AdminSwap = 1
 }
 
 public record SwapHistoryEntryDto(
