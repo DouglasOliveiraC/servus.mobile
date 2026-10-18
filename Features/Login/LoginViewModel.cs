@@ -167,6 +167,49 @@ public partial class LoginViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanLogin))]
+    private async Task TryDemoAsync()
+    {
+        ServerError = null;
+
+        // Same shape as LoginAsync: the service reports refusal through the result, not an
+        // exception, so the outcome is read from it.
+        using var _ = _telemetry.StartOperation("auth.demo");
+        var stopwatch = Stopwatch.StartNew();
+        var outcome = ClientOutcome.Failed;
+
+        IsBusy = true;
+        try
+        {
+            var result = await _authService.LoginAsDemoAsync();
+            if (result.Success)
+            {
+                outcome = ClientOutcome.Succeeded;
+                LoginSucceeded?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                ServerError = result.ErrorMessage;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            outcome = ClientOutcome.Cancelled;
+            throw;
+        }
+        finally
+        {
+            IsBusy = false;
+            stopwatch.Stop();
+
+            _telemetry.TrackEvent(
+                ClientEventNames.UiActionCompleted,
+                outcome,
+                stopwatch.Elapsed,
+                extra: new Dictionary<string, string> { ["Action"] = "auth.demo" });
+        }
+    }
+
     private bool CanLogin() => !IsBusy;
 
     private bool Validate()
@@ -184,5 +227,9 @@ public partial class LoginViewModel : BaseViewModel
         return EmailError is null && PasswordError is null;
     }
 
-    partial void OnIsBusyChanged(bool value) => LoginCommand.NotifyCanExecuteChanged();
+    partial void OnIsBusyChanged(bool value)
+    {
+        LoginCommand.NotifyCanExecuteChanged();
+        TryDemoCommand.NotifyCanExecuteChanged();
+    }
 }

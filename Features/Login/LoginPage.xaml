@@ -122,6 +122,25 @@
                     Command="{Binding ContinueWithGoogleCommand}"
                     Margin="0,14,0,0" />
 
+                <buttons:SfButton
+                    Text="Testar sem cadastro"
+                    Background="White"
+                    TextColor="{StaticResource BrandPrimary}"
+                    Stroke="{StaticResource BrandPrimary}"
+                    StrokeThickness="1"
+                    CornerRadius="9"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    Command="{Binding TryDemoCommand}"
+                    Margin="0,14,0,0" />
+
+                <Label
+                    Text="Sem e-mail: abre uma conta de exemplo com dados prontos, apagada em 24 h."
+                    FontSize="12"
+                    TextColor="{StaticResource Neutral600}"
+                    HorizontalTextAlignment="Center"
+                    Margin="0,6,0,0" />
+
                 <Label
                     FontSize="13"
                     HorizontalOptions="Center"

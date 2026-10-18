@@ -51,6 +51,39 @@ public class AuthService : IAuthService
         return AuthResult.Fail(errorMessage);
     }
 
+    public async Task<AuthResult> LoginAsDemoAsync(CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response;
+        try
+        {
+            response = await _httpClient.PostAsync("api/auth/demo", content: null, cancellationToken);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return AuthResult.Fail("Não foi possível conectar ao servidor. Verifique sua conexão.");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return AuthResult.Fail(response.StatusCode switch
+            {
+                HttpStatusCode.TooManyRequests => "Você já abriu algumas demonstrações há pouco. Tente de novo mais tarde.",
+                HttpStatusCode.ServiceUnavailable => "A demonstração está indisponível no momento. Tente de novo mais tarde.",
+                _ => "Não foi possível abrir a demonstração. Tente novamente."
+            });
+        }
+
+        var body = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: cancellationToken);
+        if (body is null || string.IsNullOrWhiteSpace(body.Token) || string.IsNullOrWhiteSpace(body.RefreshToken))
+        {
+            return AuthResult.Fail("Resposta inválida do servidor.");
+        }
+
+        await _tokenStore.SaveTokensAsync(body.Token, body.RefreshToken);
+        await _realtimeClient.ConnectAsync();
+        return AuthResult.Ok();
+    }
+
     public async Task<AuthResult> RegisterAsync(string name, string email, string password, CancellationToken cancellationToken = default)
     {
         HttpResponseMessage response;
@@ -134,7 +167,13 @@ public class AuthService : IAuthService
         }
 
         claims.TryGetValue("email", out var email);
-        return new CurrentUser(userId, email ?? string.Empty);
+
+        var isDemo = claims.TryGetValue("servus_demo", out var demo) && demo == "true";
+        DateTime? demoExpiresAt = claims.TryGetValue("servus_demo_exp", out var demoExp) && long.TryParse(demoExp, out var seconds)
+            ? DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime
+            : null;
+
+        return new CurrentUser(userId, email ?? string.Empty, isDemo, demoExpiresAt);
     }
 
     public async Task LogoutAsync()

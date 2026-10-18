@@ -50,6 +50,13 @@ public partial class ProfileViewModel : BaseViewModel
     [ObservableProperty]
     public partial string? LinkedMemberName { get; set; }
 
+    // Demo sandboxes have no password or real email, and the API refuses these changes anyway.
+    [ObservableProperty]
+    public partial bool CanManageAccount { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string? DemoNotice { get; set; }
+
     [ObservableProperty]
     public partial string? DisplayNameMessage { get; set; }
 
@@ -103,6 +110,12 @@ public partial class ProfileViewModel : BaseViewModel
             }
 
             _userId = user.Id;
+            CanManageAccount = !user.IsDemo;
+            DemoNotice = !user.IsDemo
+                ? null
+                : user.DemoExpiresAt is { } expiresAt && expiresAt > DateTime.UtcNow
+                    ? $"Conta de demonstração: esta conta e os dados de exemplo são apagados em {FormatRemaining(expiresAt - DateTime.UtcNow)}."
+                    : "Conta de demonstração: esta conta e os dados de exemplo são apagados automaticamente.";
             var userDetails = await _userService.GetByIdAsync(_userId);
             Email = userDetails.Email;
             DisplayName = userDetails.DisplayName;
@@ -316,4 +329,7 @@ public partial class ProfileViewModel : BaseViewModel
         await _authService.LogoutAsync();
         await NavigationService.GoToRootAsync(Routes.Login);
     }
+
+    private static string FormatRemaining(TimeSpan remaining) =>
+        remaining.TotalHours >= 1 ? $"{(int)remaining.TotalHours} h {remaining.Minutes} min" : $"{remaining.Minutes} min";
 }

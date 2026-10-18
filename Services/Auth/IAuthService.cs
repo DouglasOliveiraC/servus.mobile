@@ -4,6 +4,12 @@ public interface IAuthService
 {
     Task<AuthResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Opens a throwaway sandbox pre-filled with sample data, without an account. The API deletes
+    /// it when it expires, after which the session simply stops refreshing.
+    /// </summary>
+    Task<AuthResult> LoginAsDemoAsync(CancellationToken cancellationToken = default);
+
     Task<AuthResult> RegisterAsync(string name, string email, string password, CancellationToken cancellationToken = default);
 
     Task<AuthResult> RequestPasswordResetAsync(string email, CancellationToken cancellationToken = default);
