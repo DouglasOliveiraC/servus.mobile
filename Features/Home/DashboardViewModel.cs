@@ -149,6 +149,16 @@ public partial class DashboardViewModel : BaseViewModel
         OnPropertyChanged(nameof(Greeting));
     }
 
+    // Greeting/TodayLabel/NextShiftWhen read the clock on get, but Shell caches this page and
+    // keeps it alive across days in the background — without re-notifying, the binding keeps
+    // whatever was computed when the page was first built (e.g. "Boa madrugada" at 21h).
+    public void RefreshClockLabels()
+    {
+        OnPropertyChanged(nameof(Greeting));
+        OnPropertyChanged(nameof(TodayLabel));
+        OnPropertyChanged(nameof(NextShiftWhen));
+    }
+
     // --- Shared ---
 
     [ObservableProperty]
@@ -255,6 +265,7 @@ public partial class DashboardViewModel : BaseViewModel
     [RelayCommand]
     public async Task LoadAsync()
     {
+        RefreshClockLabels();
         if (IsBusy) return;
 
         IsBusy = true;
