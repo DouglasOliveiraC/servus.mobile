@@ -98,13 +98,13 @@
                     </expander:SfExpander.Header>
                     <expander:SfExpander.Content>
                         <VerticalStackLayout Padding="16,0,16,16" Spacing="10">
-                            <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Nome">
                                 <Entry Text="{Binding Name}" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="E-mail (opcional)" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="E-mail (opcional)">
                                 <Entry Text="{Binding Email}" Keyboard="Email" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Telefone (opcional)" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Telefone (opcional)">
                                 <Entry Text="{Binding Phone}" Keyboard="Telephone" />
                             </sf:SfTextInputLayout>
                             <buttons:SfButton
@@ -222,7 +222,7 @@
                                     Text="Escolha primeiro a organização; as escalas em que o membro já está não aparecem na lista."
                                     Style="{StaticResource SectionHint}" />
 
-                                <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
+                                <sf:SfTextInputLayout Hint="Organização">
                                     <inputs:SfComboBox
                                         ItemsSource="{Binding Organizations}"
                                         DisplayMemberPath="Name"
@@ -231,7 +231,7 @@
 
                                 <sf:SfTextInputLayout
                                     Hint="Escala"
-                                    ContainerType="Outlined"
+                                   
                                     IsEnabled="{Binding SelectedOrganization, Converter={StaticResource IsNotNullConverter}}">
                                     <inputs:SfComboBox
                                         ItemsSource="{Binding AvailableRosters}"
@@ -241,7 +241,7 @@
 
                                 <sf:SfTextInputLayout
                                     Hint="Posição na fila (vazio = fim da fila)"
-                                    ContainerType="Outlined">
+                                   >
                                     <Entry Text="{Binding NewMembershipPosition}" Keyboard="Numeric" />
                                 </sf:SfTextInputLayout>
 
@@ -312,10 +312,10 @@
                                 BackgroundColor="{StaticResource BrandSurfaceSubtle}"
                                 Padding="14">
                                 <VerticalStackLayout Spacing="10">
-                                    <sf:SfTextInputLayout Hint="Início" ContainerType="Outlined">
+                                    <sf:SfTextInputLayout Hint="Início">
                                         <DatePicker Date="{Binding UnavailabilityStart}" Format="dd/MM/yyyy" />
                                     </sf:SfTextInputLayout>
-                                    <sf:SfTextInputLayout Hint="Fim" ContainerType="Outlined">
+                                    <sf:SfTextInputLayout Hint="Fim">
                                         <DatePicker Date="{Binding UnavailabilityEnd}" Format="dd/MM/yyyy" />
                                     </sf:SfTextInputLayout>
                                     <buttons:SfButton

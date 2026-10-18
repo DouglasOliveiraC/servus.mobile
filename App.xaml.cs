@@ -31,6 +31,13 @@ public partial class App : Application
 		_services.GetService<TracerProvider>()?.ForceFlush(2000);
 	}
 
+	// ConnectAsync is a no-op while the hub is live and without a session, so this only acts
+	// when the connection was lost while the app was in the background.
+	protected override void OnResume()
+	{
+		_ = _services.GetRequiredService<IRealtimeClient>().ConnectAsync();
+	}
+
 	// Raised from whatever background request found the refresh token rejected; the tokens are
 	// already cleared, so all that is left is leaving the authenticated screens.
 	private void OnSessionExpired(object? sender, EventArgs e)

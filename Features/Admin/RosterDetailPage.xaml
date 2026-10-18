@@ -111,7 +111,7 @@
                                 Text="Cole os nomes (um por linha). Colunas opcionais de e-mail e telefone podem vir separadas por ; , ou tabulação. A ordem das linhas vira a ordem da fila, que vale para dias úteis e fins de semana."
                                 FontSize="11.5"
                                 TextColor="{StaticResource Neutral600}" />
-                            <sf:SfTextInputLayout Hint="Lista de membros" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Lista de membros">
                                 <Editor Text="{Binding ImportText}" AutoSize="TextChanges" MinimumHeightRequest="120" />
                             </sf:SfTextInputLayout>
                             <Label
@@ -142,7 +142,7 @@
                         BackgroundColor="White"
                         Padding="14">
                         <VerticalStackLayout Spacing="10">
-                            <sf:SfTextInputLayout Hint="Posição" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Posição">
                                 <Entry Text="{Binding NewMemberPosition}" Keyboard="Numeric" />
                             </sf:SfTextInputLayout>
                             <controls:MemberSearchPicker

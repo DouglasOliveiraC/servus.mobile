@@ -32,20 +32,20 @@
                     <Label Text="Dados gerais" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                     <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="16">
                         <VerticalStackLayout Spacing="10">
-                            <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Nome">
                                 <Entry Text="{Binding Name}" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Intervalo mínimo (dias)" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Intervalo mínimo (dias)">
                                 <Entry Text="{Binding MinIntervalDays}" Keyboard="Numeric" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Dias de respiro após retorno" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Dias de respiro após retorno">
                                 <Entry Text="{Binding MinDaysAfterReturnBeforeEligible}" Keyboard="Numeric" />
                             </sf:SfTextInputLayout>
                             <Label
                                 Text="Quantos dias após o fim do período fora o membro fica de fora da escala antes de voltar a ser elegível. Se a vez dele já tiver passado nesse meio tempo, ele é priorizado assim que esse respiro terminar."
                                 FontSize="11"
                                 TextColor="{StaticResource Neutral600}" />
-                            <sf:SfTextInputLayout Hint="Dias de antecedência antes de uma ausência" ContainerType="Outlined">
+                            <sf:SfTextInputLayout Hint="Dias de antecedência antes de uma ausência">
                                 <Entry Text="{Binding MinDaysBeforeLeaveBlocked}" Keyboard="Numeric" />
                             </sf:SfTextInputLayout>
                             <Label
@@ -120,10 +120,10 @@
                                                     </Label>
                                                 </Grid>
                                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                                                    <sf:SfTextInputLayout Grid.Column="0" Hint="Vagas (dia útil)" ContainerType="Outlined">
+                                                    <sf:SfTextInputLayout Grid.Column="0" Hint="Vagas (dia útil)">
                                                         <Entry Text="{Binding WorkdayCapacity}" Keyboard="Numeric" FontSize="13" />
                                                     </sf:SfTextInputLayout>
-                                                    <sf:SfTextInputLayout Grid.Column="1" Hint="Vagas (folga)" ContainerType="Outlined">
+                                                    <sf:SfTextInputLayout Grid.Column="1" Hint="Vagas (folga)">
                                                         <Entry Text="{Binding RestDayCapacity}" Keyboard="Numeric" FontSize="13" />
                                                     </sf:SfTextInputLayout>
                                                 </Grid>

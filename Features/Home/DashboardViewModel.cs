@@ -6,6 +6,7 @@ using Servus.Mobile.Common;
 using Servus.Mobile.Features.Menu;
 using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Navigation;
+using Servus.Mobile.Services.Notifications;
 using Servus.Mobile.Services.Organizations;
 using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
@@ -37,6 +38,7 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly ISwapHistoryService _swapHistoryService;
     private readonly ISwapRequestService _swapRequestService;
     private readonly IRealtimeClient _realtimeClient;
+    private readonly ILocalNotifier _notifier;
     private readonly AppMenuViewModel _appMenu;
 
     public DashboardViewModel(
@@ -47,6 +49,7 @@ public partial class DashboardViewModel : BaseViewModel
         ISwapHistoryService swapHistoryService,
         ISwapRequestService swapRequestService,
         IRealtimeClient realtimeClient,
+        ILocalNotifier notifier,
         AppMenuViewModel appMenu,
         INavigationService navigationService,
         ITelemetryService telemetry)
@@ -59,6 +62,7 @@ public partial class DashboardViewModel : BaseViewModel
         _swapHistoryService = swapHistoryService;
         _swapRequestService = swapRequestService;
         _realtimeClient = realtimeClient;
+        _notifier = notifier;
         _appMenu = appMenu;
     }
 
@@ -134,13 +138,9 @@ public partial class DashboardViewModel : BaseViewModel
         }
     }
 
-    public string ProfileLabel => IsAdminOfAnyOrganization ? "Administrador" : "Servidor";
-
     partial void OnUserDisplayNameChanged(string? value) => NotifyIdentityChanged();
 
     partial void OnUserEmailChanged(string? value) => NotifyIdentityChanged();
-
-    partial void OnIsAdminOfAnyOrganizationChanged(bool value) => OnPropertyChanged(nameof(ProfileLabel));
 
     private void NotifyIdentityChanged()
     {
@@ -277,6 +277,9 @@ public partial class DashboardViewModel : BaseViewModel
                 }
             }
             await _realtimeClient.ConnectAsync();
+            // Not awaited: the system dialog would otherwise hold the dashboard load until
+            // the user answers it.
+            _ = _notifier.EnsurePermissionAsync();
 
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
             var organizations = await _organizationService.GetMyOrganizationsAsync();

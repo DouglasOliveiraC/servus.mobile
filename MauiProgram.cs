@@ -61,6 +61,7 @@ public static class MauiProgram
 			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
 		});
 		builder.Services.AddTransient<AuthHeaderHandler>();
+		builder.Services.AddSingleton<Servus.Mobile.Services.Notifications.ILocalNotifier, Servus.Mobile.Services.Notifications.LocalNotifier>();
 		builder.Services.AddSingleton<IRealtimeClient, RealtimeClient>();
 
 		builder.Services.AddHttpClient<IAuthService, AuthService>(client =>

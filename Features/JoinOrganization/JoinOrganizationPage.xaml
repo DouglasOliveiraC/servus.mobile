@@ -20,7 +20,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="14">
-                <sf:SfTextInputLayout Hint="Código de convite" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                <sf:SfTextInputLayout Hint="Código de convite">
                     <Entry Text="{Binding Code}" ReturnType="Done" />
                 </sf:SfTextInputLayout>
 

@@ -44,16 +44,12 @@ public partial class AppMenuViewModel : ObservableObject
     [ObservableProperty]
     public partial string UserInitial { get; set; } = "?";
 
-    [ObservableProperty]
-    public partial string ProfileLabel { get; set; } = "Servidor";
-
     public ObservableCollection<AppMenuItem> Items { get; } = [];
 
     public void SetUser(string? email, string initial, bool isAdmin)
     {
         UserEmail = email;
         UserInitial = initial;
-        ProfileLabel = isAdmin ? "Administrador" : "Servidor";
         BuildItems(isAdmin);
     }
 

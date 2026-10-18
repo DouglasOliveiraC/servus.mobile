@@ -27,7 +27,7 @@
                 <Border StrokeShape="RoundRectangle 14" Stroke="Transparent" BackgroundColor="White" Padding="16">
                     <VerticalStackLayout Spacing="10">
                         <Label Text="{Binding Email}" FontSize="13" TextColor="{StaticResource Neutral600}" />
-                        <sf:SfTextInputLayout Hint="Nome de exibição" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                        <sf:SfTextInputLayout Hint="Nome de exibição">
                             <Entry Text="{Binding DisplayName}" />
                         </sf:SfTextInputLayout>
                         <Label
@@ -83,10 +83,10 @@
                         </Grid>
 
                         <VerticalStackLayout Spacing="10" IsVisible="{Binding IsChangeEmailExpanded}">
-                            <sf:SfTextInputLayout Hint="Novo e-mail" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}">
+                            <sf:SfTextInputLayout Hint="Novo e-mail">
                                 <Entry Text="{Binding NewEmail}" Keyboard="Email" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Senha atual" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                            <sf:SfTextInputLayout Hint="Senha atual" EnablePasswordVisibilityToggle="True">
                                 <Entry Text="{Binding EmailChangePassword}" IsPassword="True" />
                             </sf:SfTextInputLayout>
 
@@ -125,13 +125,13 @@
                         </Grid>
 
                         <VerticalStackLayout Spacing="10" IsVisible="{Binding IsChangePasswordExpanded}">
-                            <sf:SfTextInputLayout Hint="Senha atual" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                            <sf:SfTextInputLayout Hint="Senha atual" EnablePasswordVisibilityToggle="True">
                                 <Entry Text="{Binding CurrentPassword}" IsPassword="True" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Nova senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                            <sf:SfTextInputLayout Hint="Nova senha" EnablePasswordVisibilityToggle="True">
                                 <Entry Text="{Binding NewPassword}" IsPassword="True" />
                             </sf:SfTextInputLayout>
-                            <sf:SfTextInputLayout Hint="Confirmar nova senha" ContainerType="Outlined" ContainerBackground="{StaticResource Neutral50}" EnablePasswordVisibilityToggle="True">
+                            <sf:SfTextInputLayout Hint="Confirmar nova senha" EnablePasswordVisibilityToggle="True">
                                 <Entry Text="{Binding ConfirmNewPassword}" IsPassword="True" />
                             </sf:SfTextInputLayout>
 

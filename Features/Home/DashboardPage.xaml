@@ -64,15 +64,7 @@
                                 HeightRequest="16"
                                 VerticalOptions="Center" />
                         </HorizontalStackLayout>
-                        <Label FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="{Binding TodayLabel}" />
-                                    <Span Text=" · " />
-                                    <Span Text="{Binding ProfileLabel}" FontAttributes="Bold" TextColor="{StaticResource BrandPrimary}" />
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
+                        <Label Text="{Binding TodayLabel}" FontSize="12" TextColor="{StaticResource Neutral600}" LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
                     <Border
                         Grid.Column="2"

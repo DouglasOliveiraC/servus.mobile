@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:Servus.Mobile"
              xmlns:converters="clr-namespace:Servus.Mobile.Converters"
              xmlns:controls="clr-namespace:Servus.Mobile.Controls"
+             xmlns:sf="clr-namespace:Syncfusion.Maui.Core;assembly=Syncfusion.Maui.Core"
              x:Class="Servus.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -27,6 +28,17 @@
                     <controls:FloatingMenuButton />
                 </Grid>
             </ControlTemplate>
+
+            <!-- Single look for every form field. No page sets HelperText/ErrorText, so the space
+                 SfTextInputLayout reserves below the outline for them by default was only dead
+                 height; the default input padding added more on top of the native Entry's own. -->
+            <Style TargetType="sf:SfTextInputLayout">
+                <Setter Property="ContainerType" Value="Outlined" />
+                <Setter Property="ContainerBackground" Value="{StaticResource Neutral50}" />
+                <Setter Property="OutlineCornerRadius" Value="9" />
+                <Setter Property="ReserveSpaceForAssistiveLabels" Value="False" />
+                <Setter Property="InputViewPadding" Value="12,0,12,0" />
+            </Style>
 
             <!-- Repeats the Page style's setters from Styles.xaml: only the most specific implicit
                  style applies, so this one would otherwise drop them for every ContentPage. -->

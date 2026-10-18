@@ -38,13 +38,13 @@
                     Padding="16">
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Novo membro" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
-                        <sf:SfTextInputLayout Hint="Nome" ContainerType="Outlined">
+                        <sf:SfTextInputLayout Hint="Nome">
                             <Entry Text="{Binding NewName}" />
                         </sf:SfTextInputLayout>
-                        <sf:SfTextInputLayout Hint="E-mail (opcional)" ContainerType="Outlined">
+                        <sf:SfTextInputLayout Hint="E-mail (opcional)">
                             <Entry Text="{Binding NewEmail}" Keyboard="Email" />
                         </sf:SfTextInputLayout>
-                        <sf:SfTextInputLayout Hint="Telefone (opcional)" ContainerType="Outlined">
+                        <sf:SfTextInputLayout Hint="Telefone (opcional)">
                             <Entry Text="{Binding NewPhone}" Keyboard="Telephone" />
                         </sf:SfTextInputLayout>
                         <Label
@@ -56,13 +56,13 @@
 
                         <Label Text="Organização e escala" FontSize="13.5" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
                         <Label Text="Todo membro precisa já entrar em uma escala — não é possível cadastrar um membro solto." FontSize="11" TextColor="{StaticResource Neutral600}" />
-                        <sf:SfTextInputLayout Hint="Organização" ContainerType="Outlined">
+                        <sf:SfTextInputLayout Hint="Organização">
                             <inputs:SfComboBox ItemsSource="{Binding Organizations}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedOrganization}" />
                         </sf:SfTextInputLayout>
-                        <sf:SfTextInputLayout Hint="Escala" ContainerType="Outlined" IsEnabled="{Binding SelectedOrganization, Converter={StaticResource IsNotNullConverter}}">
+                        <sf:SfTextInputLayout Hint="Escala" IsEnabled="{Binding SelectedOrganization, Converter={StaticResource IsNotNullConverter}}">
                             <inputs:SfComboBox ItemsSource="{Binding Rosters}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedRoster}" />
                         </sf:SfTextInputLayout>
-                        <sf:SfTextInputLayout Hint="Posição na fila" ContainerType="Outlined">
+                        <sf:SfTextInputLayout Hint="Posição na fila">
                             <Entry Text="{Binding NewMemberPosition}" Keyboard="Numeric" />
                         </sf:SfTextInputLayout>
 
