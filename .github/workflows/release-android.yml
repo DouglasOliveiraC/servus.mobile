@@ -1,0 +1,50 @@
+name: Release Android APK
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Restore signing keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/servus.keystore"
+
+      # The Syncfusion key and the Application Insights connection string reach the build only
+      # as environment variables; GenerateBuildSecrets in the csproj compiles them in.
+      - name: Publish signed APK
+        env:
+          SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
+          APPINSIGHTS_CONNECTION_STRING: ${{ secrets.APPINSIGHTS_CONNECTION_STRING }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet publish Servus.Mobile.csproj -f net10.0-android -c Release \
+            -p:AndroidPackageFormats=apk \
+            -p:ApplicationDisplayVersion="$VERSION" \
+            -p:ApplicationVersion=${{ github.run_number }} \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="$RUNNER_TEMP/servus.keystore" \
+            -p:AndroidSigningKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }} \
+            -p:AndroidSigningStorePass=env:ANDROID_KEYSTORE_PASSWORD \
+            -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD \
+            -o out
+          cp out/*-Signed.apk "servus-$VERSION.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: servus-*.apk

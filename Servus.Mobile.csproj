@@ -28,7 +28,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>Servus.Mobile</ApplicationTitle>
+		<ApplicationTitle>Servus</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.servus.mobile</ApplicationId>
