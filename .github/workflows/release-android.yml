@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   build:
@@ -44,7 +46,16 @@ jobs:
             -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD \
             -o out
           cp out/*-Signed.apk "servus-$VERSION.apk"
+          sha256sum "servus-$VERSION.apk" > "servus-$VERSION.apk.sha256"
+
+      # Signed statement, verifiable with `gh attestation verify`, that this exact APK was built
+      # by this workflow from the tagged commit — the point of publishing the source at all.
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: servus-*.apk
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: servus-*.apk
+          files: |
+            servus-*.apk
+            servus-*.apk.sha256
