@@ -8,6 +8,9 @@ public interface ISwapRequestService
 
     Task<IReadOnlyList<SwapRequestDto>> GetPendingAsync(Guid memberId, CancellationToken cancellationToken = default);
 
+    /// <summary>Swaps between other members that the current user can approve as roster or organization admin.</summary>
+    Task<IReadOnlyList<SwapRequestDto>> GetAwaitingMyApprovalAsync(CancellationToken cancellationToken = default);
+
     Task RespondAsync(Guid id, Guid respondingMemberId, bool accept, CancellationToken cancellationToken = default);
 
     Task ApproveAsync(Guid id, CancellationToken cancellationToken = default);

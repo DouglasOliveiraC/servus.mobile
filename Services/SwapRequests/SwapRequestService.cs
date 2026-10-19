@@ -36,6 +36,12 @@ public class SwapRequestService : ISwapRequestService
         return result ?? [];
     }
 
+    public async Task<IReadOnlyList<SwapRequestDto>> GetAwaitingMyApprovalAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _httpClient.GetFromJsonAsync<List<SwapRequestDto>>("api/swap-request/awaiting-approval", cancellationToken);
+        return result ?? [];
+    }
+
     public async Task RespondAsync(Guid id, Guid respondingMemberId, bool accept, CancellationToken cancellationToken = default)
     {
         var response = await _httpClient.PutAsJsonAsync($"api/swap-request/{id}/respond", new

@@ -40,8 +40,8 @@ public record SwapRequestDto(
     private static string Describe(SwapDutySummaryDto? duty) =>
         duty is null ? "plantão não encontrado" : $"{duty.Date:dd/MM/yyyy} · {duty.ShiftStartTime:HH:mm}–{duty.ShiftEndTime:HH:mm}";
 
-    // Filled by the client, not the API: approving takes roster/organization admin rights,
-    // which the request itself does not carry.
+    // Filled by the client, not the API: true for the items that came from the
+    // awaiting-approval list, which only holds swaps the user is allowed to approve.
     public bool CanApprove { get; init; }
 }
 

@@ -32,6 +32,51 @@
                     <Label Text="Não foi possível carregar suas trocas agora. Puxe para atualizar." TextColor="{StaticResource Danger}" FontSize="13" />
                 </Border>
 
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding AwaitingMyApproval.Count, Converter={StaticResource IntIsNotZeroConverter}}">
+                    <Label Text="Aguardando sua aprovação" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+
+                    <CollectionView ItemsSource="{Binding AwaitingMyApproval}">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="swaps:SwapRequestDto">
+                                <Border StrokeShape="RoundRectangle 12" Stroke="Transparent" BackgroundColor="White" Padding="14">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="Troca aguardando aprovação" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Stroke="Transparent" BackgroundColor="{Binding Status, Converter={StaticResource StatusBadgeColorConverter}}" Padding="8,3">
+                                                <Label Text="{Binding Status, Converter={StaticResource SwapStatusLabelConverter}}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                            </Border>
+                                        </Grid>
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding Summary}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
+                                            <Label Text="{Binding RequestingDutyText}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                                            <Label Text="{Binding TargetDutyText}" FontSize="12.5" TextColor="{StaticResource Neutral600}" />
+                                        </VerticalStackLayout>
+                                        <Label FontSize="12" TextColor="{StaticResource Neutral600}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Expira em " />
+                                                    <Span Text="{Binding ExpiresAt, StringFormat='{0:dd/MM/yyyy HH:mm}'}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <buttons:SfButton
+                                            Text="Aprovar"
+                                            Background="{StaticResource BrandPrimary}"
+                                            TextColor="White"
+                                            CornerRadius="8"
+                                            HeightRequest="40"
+                                            Command="{Binding ApproveCommand, Source={RelativeSource AncestorType={x:Type local:SwapRequestsViewModel}}}"
+                                            CommandParameter="{Binding .}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Aguardando sua resposta" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Neutral900}" />
 

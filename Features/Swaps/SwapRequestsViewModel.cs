@@ -41,6 +41,8 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
     [ObservableProperty]
     public partial bool HasError { get; set; }
 
+    public ObservableCollection<SwapRequestDto> AwaitingMyApproval { get; } = [];
+
     public ObservableCollection<SwapRequestDto> AwaitingMyResponse { get; } = [];
 
     public ObservableCollection<SwapRequestDto> RequestedByMe { get; } = [];
@@ -54,22 +56,30 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
         HasError = false;
         try
         {
+            // Loaded first and independently of the member: approving is an admin right, and the
+            // swaps it covers are usually between two other people.
+            var awaitingApproval = await _swapRequestService.GetAwaitingMyApprovalAsync();
+            var approvalIds = awaitingApproval.Select(r => r.Id).ToHashSet();
+
+            AwaitingMyApproval.Clear();
+            foreach (var request in awaitingApproval)
+            {
+                AwaitingMyApproval.Add(request with { CanApprove = true });
+            }
+
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
+            AwaitingMyResponse.Clear();
+            RequestedByMe.Clear();
             if (myMemberId is null)
             {
-                AwaitingMyResponse.Clear();
-                RequestedByMe.Clear();
                 return;
             }
 
             _myMemberId = myMemberId.Value;
             var pending = await _swapRequestService.GetPendingAsync(_myMemberId);
-            var manageableRosterIds = await GetManageableRosterIdsAsync(pending);
 
-            AwaitingMyResponse.Clear();
-            RequestedByMe.Clear();
-
-            foreach (var request in pending)
+            // A swap the user is a party to and can also approve is shown once, under approval.
+            foreach (var request in pending.Where(r => !approvalIds.Contains(r.Id)))
             {
                 if (request.TargetMemberId == _myMemberId && request.Status == SwapRequestStatusDto.Pending)
                 {
@@ -77,11 +87,7 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
                 }
                 else if (request.RequestingMemberId == _myMemberId)
                 {
-                    RequestedByMe.Add(request with
-                    {
-                        CanApprove = request.Status == SwapRequestStatusDto.AwaitingAdminApproval
-                            && manageableRosterIds.Contains(request.RosterId)
-                    });
+                    RequestedByMe.Add(request);
                 }
             }
         }
@@ -93,29 +99,6 @@ public partial class SwapRequestsViewModel : BaseViewModel, IRecipient<SwapUpdat
         {
             IsBusy = false;
         }
-    }
-
-    // Only rosters with a request waiting for approval are looked up. CanManage means
-    // organization admin, a subset of who the API lets approve (a full roster admin also can),
-    // so such a roster admin does not get the button here.
-    private async Task<HashSet<Guid>> GetManageableRosterIdsAsync(IEnumerable<SwapRequestDto> requests)
-    {
-        var rosterIds = requests
-            .Where(r => r.Status == SwapRequestStatusDto.AwaitingAdminApproval)
-            .Select(r => r.RosterId)
-            .Distinct();
-
-        var manageable = new HashSet<Guid>();
-        foreach (var rosterId in rosterIds)
-        {
-            var roster = await _rosterService.GetRosterByIdAsync(rosterId);
-            if (roster.CanManage)
-            {
-                manageable.Add(rosterId);
-            }
-        }
-
-        return manageable;
     }
 
     [RelayCommand]
