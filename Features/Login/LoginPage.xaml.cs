@@ -19,6 +19,9 @@ public partial class LoginPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // Not awaited: it must never hold up the session restore or the form.
+        _ = _viewModel.WarmUpAsync();
         await _viewModel.TryRestoreSessionAsync();
     }
 

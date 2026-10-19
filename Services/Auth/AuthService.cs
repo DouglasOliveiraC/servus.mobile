@@ -176,6 +176,17 @@ public class AuthService : IAuthService
         return new CurrentUser(userId, email ?? string.Empty, isDemo, demoExpiresAt);
     }
 
+    public async Task WarmUpAsync()
+    {
+        try
+        {
+            using var _ = await _httpClient.GetAsync("health/warm");
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+        }
+    }
+
     public async Task LogoutAsync()
     {
         var refreshToken = await _tokenStore.GetRefreshTokenAsync();

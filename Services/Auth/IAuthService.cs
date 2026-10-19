@@ -22,5 +22,11 @@ public interface IAuthService
 
     Task<CurrentUser?> GetCurrentUserAsync();
 
+    /// <summary>
+    /// Best effort, never throws: wakes the API and its database while the person is still on the
+    /// login screen, so signing in does not pay for both cold starts.
+    /// </summary>
+    Task WarmUpAsync();
+
     Task LogoutAsync();
 }

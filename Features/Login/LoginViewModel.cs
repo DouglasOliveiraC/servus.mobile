@@ -71,6 +71,8 @@ public partial class LoginViewModel : BaseViewModel
         }
     }
 
+    public Task WarmUpAsync() => _authService.WarmUpAsync();
+
     [RelayCommand]
     private async Task ForgotPasswordAsync()
     {
