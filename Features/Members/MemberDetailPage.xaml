@@ -329,7 +329,7 @@
                 </expander:SfExpander>
 
                 <!-- Código de vinculação -->
-                <expander:SfExpander BackgroundColor="White" HeaderBackground="White">
+                <expander:SfExpander BackgroundColor="White" HeaderBackground="White" IsVisible="{Binding CanShareClaimCode}">
                     <expander:SfExpander.Header>
                         <Grid Padding="16,14" ColumnDefinitions="*">
                             <VerticalStackLayout Spacing="1">

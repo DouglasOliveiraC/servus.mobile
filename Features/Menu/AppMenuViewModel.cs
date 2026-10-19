@@ -35,7 +35,7 @@ public partial class AppMenuViewModel : ObservableObject
     {
         _authService = authService;
         _navigationService = navigationService;
-        BuildItems(isAdmin: false);
+        BuildItems(isAdmin: false, isDemo: false);
     }
 
     [ObservableProperty]
@@ -46,11 +46,12 @@ public partial class AppMenuViewModel : ObservableObject
 
     public ObservableCollection<AppMenuItem> Items { get; } = [];
 
-    public void SetUser(string? email, string initial, bool isAdmin)
+    public void SetUser(string? email, string initial, bool isAdmin, bool isDemo)
     {
-        UserEmail = email;
+        // A demo account's address is a generated placeholder nobody should read as theirs.
+        UserEmail = isDemo ? "Conta de demonstração" : email;
         UserInitial = initial;
-        BuildItems(isAdmin);
+        BuildItems(isAdmin, isDemo);
     }
 
     // The deepest top-level destination in the stack is the active one, so MemberDetailPage
@@ -66,7 +67,7 @@ public partial class AppMenuViewModel : ObservableObject
         }
     }
 
-    private void BuildItems(bool isAdmin)
+    private void BuildItems(bool isAdmin, bool isDemo)
     {
         Items.Clear();
         Items.Add(new AppMenuItem("Início", "Visão geral", HomeIcons.LayoutGrid, Routes.Dashboard));
@@ -78,7 +79,12 @@ public partial class AppMenuViewModel : ObservableObject
 
         Items.Add(new AppMenuItem("Trocas de plantão", "Pedidos enviados e recebidos", HomeIcons.Repeat, Routes.SwapRequests));
         Items.Add(new AppMenuItem("Minhas ausências", "Quando não posso ser escalado", HomeIcons.CalendarOff, Routes.Unavailability));
-        Items.Add(new AppMenuItem("Entrar com código", "Vincular-me a uma organização", HomeIcons.KeyRound, Routes.JoinOrganization));
+        // Invite codes are closed to demo accounts in both directions (the API answers 403):
+        // that is what keeps a sandbox from ever joining, or being joined by, a real organization.
+        if (!isDemo)
+        {
+            Items.Add(new AppMenuItem("Entrar com código", "Vincular-me a uma organização", HomeIcons.KeyRound, Routes.JoinOrganization));
+        }
         Items.Add(new AppMenuItem("Meu perfil", "Dados da conta e histórico", HomeIcons.User, Routes.Profile));
 
         SyncActiveRoute(string.Join('/', _locationSegments));

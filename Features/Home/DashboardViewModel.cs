@@ -274,6 +274,7 @@ public partial class DashboardViewModel : BaseViewModel
         {
             var user = await _authService.GetCurrentUserAsync();
             UserEmail = user?.Email;
+            var isDemo = user?.IsDemo == true;
             if (user is not null)
             {
                 // A failing profile endpoint must not take the dashboard down — the greeting
@@ -400,7 +401,7 @@ public partial class DashboardViewModel : BaseViewModel
                 BuildSwapTrend(swapEntries, today);
             }
 
-            _appMenu.SetUser(UserEmail, UserInitial, IsAdminOfAnyOrganization);
+            _appMenu.SetUser(UserEmail, UserInitial, IsAdminOfAnyOrganization, isDemo);
             HasLoaded = true;
         }
         catch (Exception)

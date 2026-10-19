@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Servus.Mobile.Common;
+using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.MemberClaimCodes;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
@@ -22,6 +23,7 @@ public partial class MemberDetailViewModel : BaseViewModel
     private readonly IRosterService _rosterService;
     private readonly IMemberClaimCodeService _claimCodeService;
     private readonly IMemberUnavailabilityService _unavailabilityService;
+    private readonly IAuthService _authService;
 
     public MemberDetailViewModel(
         IMemberService memberService,
@@ -29,6 +31,7 @@ public partial class MemberDetailViewModel : BaseViewModel
         IRosterService rosterService,
         IMemberClaimCodeService claimCodeService,
         IMemberUnavailabilityService unavailabilityService,
+        IAuthService authService,
         INavigationService navigationService,
         ITelemetryService telemetry)
         : base(navigationService, telemetry)
@@ -38,7 +41,13 @@ public partial class MemberDetailViewModel : BaseViewModel
         _rosterService = rosterService;
         _claimCodeService = claimCodeService;
         _unavailabilityService = unavailabilityService;
+        _authService = authService;
     }
+
+    // False for demo accounts: claim codes are refused to them by the API, so the section
+    // would only lead to an error.
+    [ObservableProperty]
+    public partial bool CanShareClaimCode { get; set; }
 
     [ObservableProperty]
     public partial Guid MemberId { get; set; }
@@ -117,6 +126,8 @@ public partial class MemberDetailViewModel : BaseViewModel
         HasError = false;
         try
         {
+            CanShareClaimCode = (await _authService.GetCurrentUserAsync())?.IsDemo != true;
+
             var members = await _memberService.SearchMembersAsync(null);
             var member = members.FirstOrDefault(m => m.Id == MemberId);
             if (member is null)
