@@ -86,6 +86,14 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
                 Broadcast(update);
                 _notifier.Show("Troca expirada", "Uma solicitação de troca expirou sem resposta.");
             });
+            connection.On<SwapRequestUpdate>("SwapAwaitingApproval", update =>
+            {
+                Broadcast(update);
+                _notifier.Show("Troca para aprovar", "Uma troca de plantão aguarda sua aprovação.");
+            });
+            // No system notification: another approver already handled it (or it expired);
+            // this only drops it from the approval list on screen.
+            connection.On<SwapRequestUpdate>("SwapApprovalClosed", update => Broadcast(update));
             connection.On<ScheduleUpdate>("SchedulePublished", update =>
             {
                 BroadcastSchedule(update);
