@@ -10,12 +10,17 @@ namespace Servus.Mobile.Services.Notifications;
 public class LocalNotifier : ILocalNotifier
 {
 #if ANDROID
+    // Same id the API sends in AndroidNotification.ChannelId (FirebasePushSender).
     private const string ChannelId = "servus_alerts";
     private int _nextNotificationId;
 #endif
 
     public async Task EnsurePermissionAsync()
     {
+#if ANDROID
+        EnsureChannel(Platform.AppContext);
+#endif
+
         // Runtime grant only exists from Android 13; below that CheckStatus already reports
         // Granted and nothing is shown to the user. A refusal is final for this call: the
         // app works the same without notifications.
@@ -35,7 +40,7 @@ public class LocalNotifier : ILocalNotifier
         }
     }
 
-    public void Show(string title, string message)
+    public void Show(string title, string message, string? eventName = null)
     {
 #if ANDROID
         var context = Platform.AppContext;
@@ -45,15 +50,15 @@ public class LocalNotifier : ILocalNotifier
             return;
         }
 
-        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-        {
-            var channel = new NotificationChannel(ChannelId, "Escalas e trocas", NotificationImportance.High);
-            ((NotificationManager)context.GetSystemService(Context.NotificationService)!).CreateNotificationChannel(channel);
-        }
+        EnsureChannel(context);
 
         var launchIntent = context.PackageManager!.GetLaunchIntentForPackage(context.PackageName!)!;
         launchIntent.SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
-        var contentIntent = PendingIntent.GetActivity(context, 0, launchIntent, PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
+        launchIntent.PutExtra("event", eventName);
+        var notificationId = Interlocked.Increment(ref _nextNotificationId);
+        // Request code per notification: with a shared one, UpdateCurrent would rewrite the
+        // extras of every pending notification to the latest event.
+        var contentIntent = PendingIntent.GetActivity(context, notificationId, launchIntent, PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
 
         var notification = new NotificationCompat.Builder(context, ChannelId)
             .SetSmallIcon(Resource.Mipmap.appicon)!
@@ -65,7 +70,20 @@ public class LocalNotifier : ILocalNotifier
             .SetContentIntent(contentIntent)!
             .Build();
 
-        manager.Notify(Interlocked.Increment(ref _nextNotificationId), notification);
+        manager.Notify(notificationId, notification);
 #endif
     }
+
+#if ANDROID
+    private static void EnsureChannel(Context context)
+    {
+        if (Build.VERSION.SdkInt < BuildVersionCodes.O)
+        {
+            return;
+        }
+
+        var channel = new NotificationChannel(ChannelId, "Escalas e trocas", NotificationImportance.High);
+        ((NotificationManager)context.GetSystemService(Context.NotificationService)!).CreateNotificationChannel(channel);
+    }
+#endif
 }

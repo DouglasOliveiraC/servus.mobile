@@ -21,6 +21,7 @@ using Servus.Mobile.Services.MemberClaimCodes;
 using Servus.Mobile.Services.Members;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Organizations;
+using Servus.Mobile.Services.Push;
 using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
@@ -110,6 +111,11 @@ public static class MauiProgram
 		}).AddHttpMessageHandler<AuthHeaderHandler>();
 
 		builder.Services.AddHttpClient<IUserService, UserService>(client =>
+		{
+			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
+		}).AddHttpMessageHandler<AuthHeaderHandler>();
+
+		builder.Services.AddHttpClient<IPushRegistrationService, PushRegistrationService>(client =>
 		{
 			client.BaseAddress = new Uri(ApiConfig.BaseUrl);
 		}).AddHttpMessageHandler<AuthHeaderHandler>();

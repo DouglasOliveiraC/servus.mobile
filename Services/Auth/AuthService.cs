@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Servus.Mobile.Services.Push;
 using Servus.Mobile.Services.Realtime;
 
 namespace Servus.Mobile.Services.Auth;
@@ -10,13 +11,15 @@ public class AuthService : IAuthService
     private readonly ITokenStore _tokenStore;
     private readonly IRealtimeClient _realtimeClient;
     private readonly ISessionManager _sessionManager;
+    private readonly IPushRegistrationService _pushRegistration;
 
-    public AuthService(HttpClient httpClient, ITokenStore tokenStore, IRealtimeClient realtimeClient, ISessionManager sessionManager)
+    public AuthService(HttpClient httpClient, ITokenStore tokenStore, IRealtimeClient realtimeClient, ISessionManager sessionManager, IPushRegistrationService pushRegistration)
     {
         _httpClient = httpClient;
         _tokenStore = tokenStore;
         _realtimeClient = realtimeClient;
         _sessionManager = sessionManager;
+        _pushRegistration = pushRegistration;
     }
 
     public async Task<AuthResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -190,6 +193,7 @@ public class AuthService : IAuthService
     public async Task LogoutAsync()
     {
         var refreshToken = await _tokenStore.GetRefreshTokenAsync();
+        await _pushRegistration.UnregisterAsync();
         await _realtimeClient.DisconnectAsync();
         await _tokenStore.ClearAsync();
 

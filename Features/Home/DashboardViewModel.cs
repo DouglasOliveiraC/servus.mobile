@@ -8,6 +8,7 @@ using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Navigation;
 using Servus.Mobile.Services.Notifications;
 using Servus.Mobile.Services.Organizations;
+using Servus.Mobile.Services.Push;
 using Servus.Mobile.Services.Realtime;
 using Servus.Mobile.Services.Rosters;
 using Servus.Mobile.Services.SwapHistory;
@@ -39,6 +40,7 @@ public partial class DashboardViewModel : BaseViewModel
     private readonly ISwapRequestService _swapRequestService;
     private readonly IRealtimeClient _realtimeClient;
     private readonly ILocalNotifier _notifier;
+    private readonly IPushRegistrationService _pushRegistration;
     private readonly AppMenuViewModel _appMenu;
 
     public DashboardViewModel(
@@ -50,6 +52,7 @@ public partial class DashboardViewModel : BaseViewModel
         ISwapRequestService swapRequestService,
         IRealtimeClient realtimeClient,
         ILocalNotifier notifier,
+        IPushRegistrationService pushRegistration,
         AppMenuViewModel appMenu,
         INavigationService navigationService,
         ITelemetryService telemetry)
@@ -63,6 +66,7 @@ public partial class DashboardViewModel : BaseViewModel
         _swapRequestService = swapRequestService;
         _realtimeClient = realtimeClient;
         _notifier = notifier;
+        _pushRegistration = pushRegistration;
         _appMenu = appMenu;
     }
 
@@ -292,6 +296,11 @@ public partial class DashboardViewModel : BaseViewModel
             // Not awaited: the system dialog would otherwise hold the dashboard load until
             // the user answers it.
             _ = _notifier.EnsurePermissionAsync();
+            // Demo accounts are refused by the API: a throwaway sandbox has no phone to reach.
+            if (user is not null && !isDemo)
+            {
+                _ = _pushRegistration.RegisterAsync();
+            }
 
             var myMemberId = await _rosterService.GetMyMemberIdAsync();
             var organizations = await _organizationService.GetMyOrganizationsAsync();
@@ -412,6 +421,13 @@ public partial class DashboardViewModel : BaseViewModel
         {
             IsBusy = false;
             IsRefreshing = false;
+        }
+
+        // A notification tapped with the app closed only gets here once login and this load are
+        // done; navigating earlier would land on a screen without a session behind it.
+        if (NotificationLaunch.TakePendingRoute() is { } pendingRoute)
+        {
+            await NavigationService.GoToAsync(pendingRoute);
         }
     }
 

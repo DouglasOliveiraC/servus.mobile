@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Messaging;
 using Servus.Mobile.Services.Auth;
 using Servus.Mobile.Services.Http;
-using Servus.Mobile.Services.Notifications;
 using Servus.Mobile.Services.Telemetry;
 
 namespace Servus.Mobile.Services.Realtime;
@@ -12,15 +11,13 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
 {
     private readonly ISessionManager _sessionManager;
     private readonly ITelemetryService _telemetry;
-    private readonly ILocalNotifier _notifier;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private HubConnection? _connection;
 
-    public RealtimeClient(ISessionManager sessionManager, ITelemetryService telemetry, ILocalNotifier notifier)
+    public RealtimeClient(ISessionManager sessionManager, ITelemetryService telemetry)
     {
         _sessionManager = sessionManager;
         _telemetry = telemetry;
-        _notifier = notifier;
     }
 
     public async Task ConnectAsync()
@@ -61,52 +58,17 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
                 .WithAutomaticReconnect()
                 .Build();
 
-            connection.On<SwapRequestUpdate>("SwapRequested", update =>
+            // Only refreshes what is on screen. The system notification for the same event comes
+            // from the API as a push (FCM), which also reaches the phone with the app closed;
+            // showing one here too would notify every event twice.
+            foreach (var swapEvent in new[] { "SwapRequested", "SwapResponded", "SwapApproved", "SwapCancelled", "SwapExpired", "SwapAwaitingApproval", "SwapApprovalClosed" })
             {
-                Broadcast(update);
-                _notifier.Show("Nova solicitação de troca", "Um colega pediu para trocar um plantão com você.");
-            });
-            connection.On<SwapRequestUpdate>("SwapResponded", update =>
+                connection.On<SwapRequestUpdate>(swapEvent, Broadcast);
+            }
+            foreach (var scheduleEvent in new[] { "SchedulePublished", "ScheduleUnpublished", "ScheduleChanged" })
             {
-                Broadcast(update);
-                NotifySwapResponded(update.Status);
-            });
-            connection.On<SwapRequestUpdate>("SwapApproved", update =>
-            {
-                Broadcast(update);
-                _notifier.Show("Troca aprovada", "A troca de plantão foi aprovada e a escala já está atualizada.");
-            });
-            connection.On<SwapRequestUpdate>("SwapCancelled", update =>
-            {
-                Broadcast(update);
-                _notifier.Show("Troca cancelada", "O colega cancelou a solicitação de troca.");
-            });
-            connection.On<SwapRequestUpdate>("SwapExpired", update =>
-            {
-                Broadcast(update);
-                _notifier.Show("Troca expirada", "Uma solicitação de troca expirou sem resposta.");
-            });
-            connection.On<SwapRequestUpdate>("SwapAwaitingApproval", update =>
-            {
-                Broadcast(update);
-                _notifier.Show("Troca para aprovar", "Uma troca de plantão aguarda sua aprovação.");
-            });
-            // No system notification: another approver already handled it (or it expired);
-            // this only drops it from the approval list on screen.
-            connection.On<SwapRequestUpdate>("SwapApprovalClosed", update => Broadcast(update));
-            connection.On<ScheduleUpdate>("SchedulePublished", update =>
-            {
-                BroadcastSchedule(update);
-                _notifier.Show("Escala publicada", "Seus plantões foram publicados. Toque para conferir.");
-            });
-            connection.On<ScheduleUpdate>("ScheduleUnpublished", update =>
-            {
-                BroadcastSchedule(update);
-                _notifier.Show("Escala retirada", "Uma escala com plantões seus deixou de estar publicada.");
-            });
-            // No system notification: this one goes to the whole organization on every edit,
-            // and only refreshes what is on screen.
-            connection.On<ScheduleUpdate>("ScheduleChanged", update => BroadcastSchedule(update));
+                connection.On<ScheduleUpdate>(scheduleEvent, BroadcastSchedule);
+            }
 
             connection.Closed += ex =>
             {
@@ -138,22 +100,6 @@ public class RealtimeClient : IRealtimeClient, IAsyncDisposable
         finally
         {
             _connectionLock.Release();
-        }
-    }
-
-    private void NotifySwapResponded(string status)
-    {
-        switch (status)
-        {
-            case "Accepted":
-                _notifier.Show("Troca aceita", "Seu colega aceitou a troca e a escala já está atualizada.");
-                break;
-            case "AwaitingAdminApproval":
-                _notifier.Show("Troca aceita", "Seu colega aceitou a troca. Falta a aprovação do administrador.");
-                break;
-            case "Declined":
-                _notifier.Show("Troca recusada", "Seu colega recusou a solicitação de troca.");
-                break;
         }
     }
 

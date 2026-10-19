@@ -25,6 +25,13 @@ jobs:
       - name: Restore signing keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/servus.keystore"
 
+      # Kept out of the repository like the other secrets; without it the APK builds but never
+      # receives push notifications, so a missing secret fails the release instead.
+      - name: Restore Firebase config
+        run: |
+          test -n "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" || { echo "GOOGLE_SERVICES_JSON_BASE64 is not set"; exit 1; }
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > google-services.json
+
       # The Syncfusion key and the Application Insights connection string reach the build only
       # as environment variables; GenerateBuildSecrets in the csproj compiles them in.
       - name: Publish signed APK

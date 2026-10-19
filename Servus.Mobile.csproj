@@ -31,7 +31,7 @@
 		<ApplicationTitle>Servus</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.servus.mobile</ApplicationId>
+		<ApplicationId>br.com.newsight.servus</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -42,7 +42,7 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
@@ -88,6 +88,19 @@
 		<PackageReference Include="Syncfusion.Maui.Expander" Version="34.2.5" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="125.1.3" />
+
+		<!-- Firebase pulls Fragment 1.9.0, which absorbed the -ktx classes, while MAUI still
+		     brings Fragment.Ktx 1.8.x; with both, D8 fails on duplicate types. Pinning the ktx
+		     package to the same version leaves only one copy. -->
+		<PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
+
+		<!-- Optional so the app still builds from a fresh clone; without it there is no push,
+		     and PushRegistrationService gives up quietly. -->
+		<GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json')" />
+	</ItemGroup>
+
 	<!--
 	  Grava os segredos lidos do ambiente DA MÁQUINA DE BUILD dentro do assembly. Sem este
 	  passo, MauiProgram lia Environment.GetEnvironmentVariable em RUNTIME: no emulador e no
@@ -102,11 +115,7 @@
 			<SyncfusionLicenseKeyValue>$(SYNCFUSION_LICENSE_KEY)</SyncfusionLicenseKeyValue>
 		</PropertyGroup>
 
-		<WriteLinesToFile
-			File="$(BuildSecretsFile)"
-			Lines="// &lt;auto-generated /&gt; Gerado pelo target GenerateBuildSecrets (Servus.Mobile.csproj).;namespace Servus.Mobile%3B;internal static class BuildSecrets;{;    public const string ApplicationInsightsConnectionString = %22$(AppInsightsConnectionStringValue)%22%3B;    public const string SyncfusionLicenseKey = %22$(SyncfusionLicenseKeyValue)%22%3B;}"
-			Overwrite="true"
-			WriteOnlyWhenDifferent="true" />
+		<WriteLinesToFile File="$(BuildSecretsFile)" Lines="// &lt;auto-generated /&gt; Gerado pelo target GenerateBuildSecrets (Servus.Mobile.csproj).;namespace Servus.Mobile%3B;internal static class BuildSecrets;{;    public const string ApplicationInsightsConnectionString = %22$(AppInsightsConnectionStringValue)%22%3B;    public const string SyncfusionLicenseKey = %22$(SyncfusionLicenseKeyValue)%22%3B;}" Overwrite="true" WriteOnlyWhenDifferent="true" />
 
 		<ItemGroup>
 			<Compile Include="$(BuildSecretsFile)" />

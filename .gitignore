@@ -272,3 +272,6 @@ __pycache__/
 *.p12
 *.pfx
 keystore.properties
+
+# Firebase client config: restored from a CI secret at build time, never committed
+google-services.json
