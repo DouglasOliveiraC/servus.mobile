@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/assets/servus-logo.png" alt="Servus" width="112" />
+<img src=".github/assets/servus-logo.svg" alt="Servus" width="112" />
 
 # Servus
 
