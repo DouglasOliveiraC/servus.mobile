@@ -33,6 +33,18 @@ a escala uma vez; o sistema distribui os plantões pela fila, respeita ausência
 mantém a divisão justa ao longo do tempo. Quem está na escala acompanha os próprios plantões,
 pede trocas e é avisado do que muda.
 
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src=".github/assets/screens/painel.png" alt="Painel do dia" width="200" /><br /><sub><b>Painel do dia</b></sub></td>
+<td align="center"><img src=".github/assets/screens/fila.png" alt="Fila da escala" width="200" /><br /><sub><b>Fila da escala</b></sub></td>
+<td align="center"><img src=".github/assets/screens/trocas.png" alt="Trocas de plantão" width="200" /><br /><sub><b>Trocas de plantão</b></sub></td>
+<td align="center"><img src=".github/assets/screens/menu.png" alt="Menu" width="200" /><br /><sub><b>Tudo a um toque</b></sub></td>
+</tr>
+</table>
+<sub>Telas da conta de demonstração — nomes e dados fictícios.</sub>
+</div>
+
 ## Funcionalidades
 
 <table>
@@ -63,8 +75,17 @@ pede trocas e é avisado do que muda.
 </tr>
 </table>
 
-> **Quer só conhecer?** Na tela de entrada, toque em **Testar sem cadastro**: você recebe uma
-> organização de exemplo com dados prontos, apagada em 24 horas.
+<table>
+<tr>
+<td width="200" align="center"><img src=".github/assets/screens/login.png" alt="Tela de entrada" width="170" /></td>
+<td>
+
+**Quer só conhecer?** Na tela de entrada, toque em **Testar sem cadastro**: você recebe uma
+organização de exemplo com dados prontos, apagada em 24 horas. Sem e-mail, sem senha.
+
+</td>
+</tr>
+</table>
 
 ## Instalação
 
