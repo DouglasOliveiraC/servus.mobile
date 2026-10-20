@@ -5,13 +5,6 @@
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-
 		<OutputType>Exe</OutputType>
 		<RootNamespace>Servus.Mobile</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -19,25 +12,18 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
-		<!-- Enable XAML source generation for faster build times and improved performance.
-		     This generates C# code from XAML at compile time instead of runtime inflation.
-		     To disable, remove this line.
-		     For individual files, you can override by setting Inflator metadata:
-		       <MauiXaml Update="MyPage.xaml" Inflator="Default" /> (reverts to defaults: Runtime for Debug, XamlC for Release)
-		       <MauiXaml Update="MyPage.xaml" Inflator="Runtime" /> (force runtime inflation) -->
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
-		<!-- Display name -->
 		<ApplicationTitle>Servus</ApplicationTitle>
 
-		<!-- App Identifier -->
+		<!-- Android's identity for the app, together with the signing key: installed copies only
+		     accept an update carrying both unchanged. Also the package registered in Firebase. -->
 		<ApplicationId>br.com.newsight.servus</ApplicationId>
 
-		<!-- Versions -->
+		<!-- Overridden by the release workflow from the git tag and the run number. -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
@@ -46,28 +32,18 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 
-		<!-- Sem isso o HttpClient não propaga Activity/traceparent no MAUI (diferente do
-		     ASP.NET Core, onde vem habilitado por padrão) — necessário para a correlação
-		     de telemetria com o backend via OpenTelemetry.Instrumentation.Http. -->
+		<!-- Off by default in MAUI (unlike ASP.NET Core): without it HttpClient does not send
+		     traceparent, and client telemetry cannot be correlated with the API's. -->
 		<HttpActivityPropagationSupport>true</HttpActivityPropagationSupport>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#1F3A5F" />
 
-		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#1F3A5F" BaseSize="128,128" />
 
-		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
-		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
-
-		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -102,11 +78,10 @@
 	</ItemGroup>
 
 	<!--
-	  Grava os segredos lidos do ambiente DA MÁQUINA DE BUILD dentro do assembly. Sem este
-	  passo, MauiProgram lia Environment.GetEnvironmentVariable em RUNTIME: no emulador e no
-	  aparelho essa variável não existe, então o app instalado saía sem telemetria e sem
-	  licença, em silêncio (R4 no relatório 10). O arquivo é gerado em obj/ e não é commitado,
-	  então o segredo continua fora do repositório.
+	  Compiles the secrets read from the BUILD MACHINE's environment into the assembly. Reading
+	  them at runtime does not work: the variable does not exist on the phone, so the installed app
+	  silently ran without telemetry and without the Syncfusion license. The generated file lives
+	  in obj/ and is never committed, so the secrets stay out of the repository.
 	-->
 	<Target Name="GenerateBuildSecrets" BeforeTargets="BeforeCompile;CoreCompile">
 		<PropertyGroup>

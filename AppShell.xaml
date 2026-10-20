@@ -7,7 +7,7 @@
     xmlns:login="clr-namespace:Servus.Mobile.Features.Login"
     xmlns:home="clr-namespace:Servus.Mobile.Features.Home"
     xmlns:menu="clr-namespace:Servus.Mobile.Features.Menu"
-    Title="Servus.Mobile"
+    Title="Servus"
     FlyoutBehavior="Flyout"
     FlyoutWidth="300"
     FlyoutBackgroundColor="White"
